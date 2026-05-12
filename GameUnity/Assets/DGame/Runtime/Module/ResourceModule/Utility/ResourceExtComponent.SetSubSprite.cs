@@ -119,7 +119,7 @@ namespace DGame
 
         public void Reference(string location)
         {
-            if (!string.IsNullOrEmpty(m_location) && m_location.Equals(location))
+            if (!string.IsNullOrEmpty(m_location) && !m_location.Equals(location))
             {
                 ResourceExtComponent.Instance?.DeleteReference(m_location);
             }
