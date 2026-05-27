@@ -11,7 +11,8 @@ namespace GameLogic
         [SerializeField] private UIImageMaskExtend m_uiImageMaskExtend = new UIImageMaskExtend();
         [SerializeField] private UIImageRoundedCornersExtend m_uiImageRoundedCornersExtend = new UIImageRoundedCornersExtend();
         [SerializeField] private UIImageMirrorExtend m_uiImageMirrorExtend = new UIImageMirrorExtend();
-
+        private RectTransform m_target;
+        
         public UIImageMirrorExtend UIImageMirrorExtend => m_uiImageMirrorExtend;
 
         protected override void Awake()
@@ -65,16 +66,23 @@ namespace GameLogic
 
         public override bool IsRaycastLocationValid(Vector2 screenPoint, Camera eventCamera)
         {
+            if (m_target != null)
+            {
+                return !RectTransformUtility.RectangleContainsScreenPoint(m_target, screenPoint, eventCamera);
+            }
+            
             if (!m_uiImageMaskExtend.UseMaskImage)
             {
                 return base.IsRaycastLocationValid(screenPoint, eventCamera);
             }
-            else
-            {
-                Vector2 local;
-                RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out local);
-                return m_uiImageMaskExtend.Contains(local, m_uiImageMaskExtend.OuterVertices, m_uiImageMaskExtend.InnerVertices);
-            }
+                
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTransform, screenPoint, eventCamera, out var local);
+            return m_uiImageMaskExtend.Contains(local, m_uiImageMaskExtend.OuterVertices, m_uiImageMaskExtend.InnerVertices);
+        }
+        
+        public void SetTarget(RectTransform target)
+        {
+            m_target = target;
         }
 
         public void DrawPolygon(int vertCnt, List<float> percents, float rotation = -1)
