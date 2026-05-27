@@ -59,7 +59,7 @@ namespace Procedure
                 PreLoad(assetInfo.Address);
             }
 #if UNITY_WEBGL
-            AssetInfo[] webAssetInfos = _resourceModule.GetAssetInfos("WEBGL_PRELOAD");
+            AssetInfo[] webAssetInfos = m_resourceModule.GetAssetInfos("WEBGL_PRELOAD");
             foreach (var assetInfo in webAssetInfos)
             {
                 PreLoad(assetInfo.Address);
