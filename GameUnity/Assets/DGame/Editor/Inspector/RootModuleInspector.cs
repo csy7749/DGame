@@ -246,11 +246,37 @@ namespace DGame
 
                     float gameSpeed = EditorGUILayout.Slider("速度倍率", m_gameSpeed.floatValue, 0f, 8f);
 
-                    // 快速选择按钮
+                    // 快速选择按钮（分两行显示）
+                    int currentSelected = GetSelectedGameSpeed(gameSpeed);
+                    int half = m_gameSpeedForDisplay.Length / 2;
+
+                    string[] firstRowDisplay = new string[half];
+                    Array.Copy(m_gameSpeedForDisplay, 0, firstRowDisplay, 0, half);
+                    string[] secondRowDisplay = new string[m_gameSpeedForDisplay.Length - half];
+                    Array.Copy(m_gameSpeedForDisplay, half, secondRowDisplay, 0, secondRowDisplay.Length);
+
+                    int firstRowSelected = currentSelected >= 0 && currentSelected < half ? currentSelected : -1;
+                    int secondRowSelected = currentSelected >= half ? currentSelected - half : -1;
+
                     EditorGUILayout.BeginHorizontal();
                     GUILayout.Label("快速设置:", GUILayout.Width(60));
-                    int selectedGameSpeed = GUILayout.Toolbar(GetSelectedGameSpeed(gameSpeed), m_gameSpeedForDisplay);
+                    int newFirstRowSelected = GUILayout.Toolbar(firstRowSelected, firstRowDisplay);
                     EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.Space(60 + 4);
+                    int newSecondRowSelected = GUILayout.Toolbar(secondRowSelected, secondRowDisplay);
+                    EditorGUILayout.EndHorizontal();
+
+                    int selectedGameSpeed = -1;
+                    if (newFirstRowSelected != firstRowSelected && newFirstRowSelected >= 0)
+                    {
+                        selectedGameSpeed = newFirstRowSelected;
+                    }
+                    else if (newSecondRowSelected != secondRowSelected && newSecondRowSelected >= 0)
+                    {
+                        selectedGameSpeed = newSecondRowSelected + half;
+                    }
 
                     if (selectedGameSpeed >= 0)
                     {
