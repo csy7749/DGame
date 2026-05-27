@@ -11,7 +11,7 @@ namespace DGame.PSD2UGUI
     /// 字体路径改为 Font ObjectField。
     /// </summary>
     [CustomEditor(typeof(PSD2UGUISettings))]
-    public class PSD2UGUISettingsEditor : Editor
+    public class PSD2UGUISettingsEditor : UnityEditor.Editor
     {
         private static readonly HashSet<string> FolderArrayProps = new HashSet<string>
         {
