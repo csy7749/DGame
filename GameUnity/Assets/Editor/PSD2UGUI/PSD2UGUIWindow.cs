@@ -28,7 +28,7 @@ namespace DGame.PSD2UGUI
         private bool m_onlyCenter;
 
         private PSD2UGUIAttribute m_attr;
-        private Editor m_settingsEditor;
+        private UnityEditor.Editor m_settingsEditor;
         private Vector2 m_scroll;
         private int m_tabIndex;
         private static readonly string[] s_tabs = { "PSD转UI", "设置" };
@@ -44,7 +44,7 @@ namespace DGame.PSD2UGUI
         private void OnEnable()
         {
             var settings = PSD2UGUISettings.Instance;
-            m_settingsEditor = Editor.CreateEditor(settings);
+            m_settingsEditor = UnityEditor.Editor.CreateEditor(settings);
         }
 
         private void OnDisable()
