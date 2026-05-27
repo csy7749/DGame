@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 530877222502222867}
   - component: {fileID: 4827845759356798862}
   - component: {fileID: 7714556449886089873}
-  - component: {fileID: 489510527442684571}
   m_Layer: 0
   m_Name: nanzhujue
   m_TagString: Untagged
@@ -84,46 +83,3 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &489510527442684571
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5344732170815831166}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e49e4f9b8bf7e024796a183186bb7142, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  parent: {fileID: 0}
-  _position:
-    x:
-      _serializedValue: -1971111936
-    y:
-      _serializedValue: -6200173568
-    z:
-      _serializedValue: -12202054656
-  _euler:
-    x:
-      _serializedValue: 0
-    y:
-      _serializedValue: 0
-    z:
-      _serializedValue: 0
-  _scale:
-    x:
-      _serializedValue: 4294967296
-    y:
-      _serializedValue: 4294967296
-    z:
-      _serializedValue: 4294967296
-  mLocalRotation:
-    x:
-      _serializedValue: 0
-    y:
-      _serializedValue: 0
-    z:
-      _serializedValue: 0
-    w:
-      _serializedValue: 4294967296

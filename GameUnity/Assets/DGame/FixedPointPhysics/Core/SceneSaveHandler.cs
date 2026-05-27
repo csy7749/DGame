@@ -22,7 +22,7 @@ namespace DGame
             // Subscribe to the sceneSaving event to perform actions before a scene is saved.
             EditorSceneManager.sceneSaving += OnSceneSaving;
             // Subscribe to the editor update event, which is called with each editor tick (useful for ongoing checks or operations).
-            EditorApplication.update += OnUpdate;
+            // EditorApplication.update += OnUpdate;
         }
         
         /// <summary>
