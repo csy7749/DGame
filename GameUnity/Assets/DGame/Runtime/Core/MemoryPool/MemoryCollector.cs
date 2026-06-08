@@ -112,7 +112,7 @@ namespace DGame
                 m_collector.Enqueue(memory);
             }
 
-            ReleaseCount--;
+            ReleaseCount++;
             UsingCount--;
         }
 
