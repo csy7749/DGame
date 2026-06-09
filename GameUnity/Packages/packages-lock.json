@@ -31,17 +31,6 @@
       },
       "hash": "04c1ca72cde82318e11eb1281dc4c3d314a2e68c"
     },
-    "com.ivanmurzak.unity.mcp": {
-      "version": "0.66.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.modules.uielements": "1.0.0",
-        "com.unity.test-framework": "1.1.33",
-        "extensions.unity.playerprefsex": "2.1.3"
-      },
-      "url": "https://package.openupm.com"
-    },
     "com.tuyoogame.yooasset": {
       "version": "2.3.18",
       "depth": 0,
@@ -246,13 +235,6 @@
         "com.unity.modules.jsonserialize": "1.0.0"
       },
       "url": "https://packages.unity.com"
-    },
-    "extensions.unity.playerprefsex": {
-      "version": "2.1.3",
-      "depth": 1,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://package.openupm.com"
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",
