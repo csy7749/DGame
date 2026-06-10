@@ -50,6 +50,7 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 | 场景 | 必须查询主题 |
 |------|------------|
 | 文件落位 / 改哪个程序集 | project-map.md — 目录职责、落位规则 |
+| 客户端目录主线 / 程序集依赖 | client-dev.md — 客户端目录主线、程序集主干依赖、GameLogic/GameProto/GameBattle 归属、NetworkMgr 落位 |
 | 架构 / 启动 / 分层 | client-architecture-codex.md — 分层、启动链路、HotFix 与 Runtime 边界 |
 | UI 开发 | client-ui-development-codex.md — UIWindow/UIWidget、UIModule、循环列表、子页面 |
 | 资源加载 | client-resource-management-codex.md — GameModule.ResourceModule、加载与释放 |
@@ -58,8 +59,13 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 | 模块使用 | client-modules-codex.md — GameModule.XXX、模块获取与依赖 |
 | 事件系统 | client-event-system-codex.md — GameEventDriver、EEventGroup、UI 事件监听 |
 | 红点系统 | client-reddot-development-codex.md — RedDotModule、RedDotItem、RedDotPathDefine |
+| 客户端网络通信 | client-server-communication-codex.md — 请求/响应/推送、NetworkMgr、UI 到网络层交互 |
+| 协议定义 / 路由 | proto-message-define.md — GameServer/Tools 协议、客户端与服务端协议、路由定义、协议导出工具 |
+| 帧同步 / 定点数学 | frame-sync-fixedpoint-foundation-codex.md — 定点数学/物理、确定性随机、FixedPointPhysics、GameBattle 建模 |
+| 服务端架构 | server-architecture.md — 服务端分层、启动链路、Main/Entity/Hotfix 职责、Scene 组织、Handler 落位 |
 | Luban 配置 | luban-game-config-codex.md — 配置表生成流程、访问方式 |
 | 代码规范 | client-conventions-codex.md — 命名约定、节点前缀、异步、日志、Git 协作 |
+| 服务端规范 | server-conventions.md — 服务端命名、异步、日志、错误码、Scene 脚本落位、Handler/Helper/System 设计、Git 协作 |
 
 ---
 
@@ -92,6 +98,7 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 | 文档 | 内容 | 层级 |
 |-----|------|------|
 | project-map.md | 仓库目录职责 / 文件落位规则 | 核心 |
+| client-dev.md | 客户端目录主线 / 程序集主干依赖 / NetworkMgr 落位 | 核心 |
 | client-architecture-codex.md | 项目结构 / 分层 / 启动链路 / 程序集边界 | 核心 |
 | client-modules-codex.md | 模块访问规则（GameModule.XXX）| 核心 |
 | client-ui-development-codex.md | UI 开发（UIWindow/UIWidget/UIModule/子页面）| 核心 |
@@ -99,9 +106,14 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 | client-resource-management-codex.md | 资源加载 / 卸载 / 寻址 | 核心 |
 | client-hotfix-development-codex.md | 热更代码（HybridCLR / 程序集划分 / Procedure）| 核心 |
 | client-hotpatch-development-codex.md | 热更资源包（版本更新 / 下载器 / YooAsset）| 核心 |
+| client-server-communication-codex.md | 客户端网络通信（请求 / 响应 / 推送 / NetworkMgr）| 核心 |
 | luban-game-config-codex.md | 配置表（Luban / Excel / 生成链路）| 核心 |
 | client-conventions-codex.md | 代码规范 / 命名约定 / 节点前缀 / Git 协作 | 核心 |
 | client-reddot-development-codex.md | 红点系统（RedDotModule / RedDotPathDefine）| 进阶 |
+| frame-sync-fixedpoint-foundation-codex.md | 帧同步定点数学 / 定点物理 / 确定性随机 / GameBattle 建模 | 进阶 |
+| proto-message-define.md | 协议定义 / 路由 / 协议导出工具（GameServer/Tools）| 服务端 |
+| server-architecture.md | 服务端分层 / 启动链路 / Main/Entity/Hotfix / Scene / Handler | 服务端 |
+| server-conventions.md | 服务端规范 / 命名 / 错误码 / Handler/Helper/System 设计 | 服务端 |
 
 ---
 
