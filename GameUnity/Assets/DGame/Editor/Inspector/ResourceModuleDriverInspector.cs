@@ -10,6 +10,13 @@ namespace DGame
     [CustomEditor(typeof(ResourceModuleDriver))]
     internal sealed class ResourceModuleDriverInspector : DGameInspector
     {
+        private const string BASIC_PANEL_KEY = "ResourceModuleDriver.BasicPanelOpen";
+        private const string RESOURCE_POOL_PANEL_KEY = "ResourceModuleDriver.ResourcePoolPanelOpen";
+        private const string DOWNLOAD_PANEL_KEY = "ResourceModuleDriver.DownloadPanelOpen";
+        private const string ADVANCED_PANEL_KEY = "ResourceModuleDriver.AdvancedPanelOpen";
+        private const string RUNTIME_INFO_PANEL_KEY = "ResourceModuleDriver.RuntimeInfoPanelOpen";
+        private const string OVERVIEW_PANEL_KEY = "ResourceModuleDriver.OverviewPanelOpen";
+
         private static readonly string[] m_playModeNames = new string[]
         {
             "EditorSimulateMode (编辑器下的模拟模式)",
@@ -52,6 +59,7 @@ namespace DGame
         private bool m_showDownloadSettings = true;
         private bool m_showAdvancedSettings = true;
         private bool m_showRuntimeInfo = true;
+        private bool m_showOverview = true;
 
         // 颜色定义
         private Color m_headerColor = new Color(0.1f, 0.5f, 0.8f, 1f);
@@ -81,57 +89,42 @@ namespace DGame
             DrawStatistics(t);
 
             serializedObject.ApplyModifiedProperties();
+
+            if (GUI.changed)
+            {
+                SavePanelStates();
+            }
+
             Repaint();
         }
 
         private void DrawInspectorHeader()
         {
-            // 标题背景
-            // Rect headerRect = EditorGUILayout.GetControlRect(false, 50);
-            // EditorGUI.DrawRect(new Rect(headerRect.x, headerRect.y, position.width, 50),
-            //     new Color(0.1f, 0.1f, 0.1f, 0.8f));
-
             GUILayout.Space(5);
-
-            // 主标题
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
 
             var titleStyle = new GUIStyle(EditorStyles.largeLabel)
             {
-                fontSize = 16,
+                fontSize = 14,
                 fontStyle = FontStyle.Bold,
-                alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = Color.white }
+                alignment = TextAnchor.MiddleCenter
             };
 
-            EditorGUILayout.LabelField(new GUIContent("DGame资源模块配置", "Resource Module Configuration"),
-                titleStyle, GUILayout.Height(30));
+            var icon = EditorGUIUtility.IconContent("Prefab Icon").image;
+            EditorGUILayout.LabelField(new GUIContent(" DGame资源模块配置", icon, "Resource Module Configuration"),
+                titleStyle);
 
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
-
-            // 副标题
-            var subtitleStyle = new GUIStyle(EditorStyles.miniLabel)
+            var subtitleStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel)
             {
-                alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = new Color(0.8f, 0.8f, 0.8f, 1f) }
+                alignment = TextAnchor.MiddleCenter
             };
 
             EditorGUILayout.LabelField("配置 YooAsset 资源管理系统", subtitleStyle);
-            GUILayout.Space(5);
-
-            // 分隔线
-            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-            GUILayout.Space(10);
+            EditorGUILayout.Space(6);
         }
 
         private void DrawBasicSettings(ResourceModuleDriver t)
         {
-            m_showBasicSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showBasicSettings,
-                new GUIContent("基础设置", "资源运行模式和加密配置"));
-
-            if (m_showBasicSettings)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -190,17 +183,14 @@ namespace DGame
                     EditorGUILayout.HelpBox(GetPlayModeDescription(m_playModeIndex), MessageType.Info);
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "基础设置", ref m_showBasicSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawResourcePoolSettings(ResourceModuleDriver t)
         {
-            m_showResourcePoolSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showResourcePoolSettings,
-                new GUIContent("资源池设置", "资源对象池和内存管理配置"));
-
-            if (m_showResourcePoolSettings)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -331,17 +321,14 @@ namespace DGame
                     EditorGUILayout.HelpBox("合理配置资源池参数可以有效管理内存使用", MessageType.Info);
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "资源池设置", ref m_showResourcePoolSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawDownloadSettings(ResourceModuleDriver t)
         {
-            m_showDownloadSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showDownloadSettings,
-                new GUIContent("下载设置", "网络下载和重试配置"));
-
-            if (m_showDownloadSettings)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -402,17 +389,14 @@ namespace DGame
                     EditorGUILayout.HelpBox("下载设置影响网络资源加载的效率和稳定性", MessageType.Info);
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "下载设置", ref m_showDownloadSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawAdvancedSettings(ResourceModuleDriver t)
         {
-            m_showAdvancedSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showAdvancedSettings,
-                new GUIContent("高级设置", "性能调优相关配置"));
-
-            if (m_showAdvancedSettings)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -454,19 +438,16 @@ namespace DGame
                     EditorGUILayout.HelpBox(tips, MessageType.Info);
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "高级设置", ref m_showAdvancedSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawRuntimeInfo(ResourceModuleDriver t)
         {
             if (EditorApplication.isPlaying && IsPrefabInHierarchy(t.gameObject))
             {
-                m_showRuntimeInfo = EditorGUILayout.BeginFoldoutHeaderGroup(m_showRuntimeInfo,
-                    new GUIContent("运行时信息", "游戏运行时的资源状态"));
-
-                if (m_showRuntimeInfo)
+                UnityEditorUtil.LayoutFoldoutBox(() =>
                 {
                     EditorGUILayout.BeginVertical("HelpBox");
                     {
@@ -494,73 +475,69 @@ namespace DGame
                         EditorGUILayout.HelpBox("实时监控资源使用状态", MessageType.Info);
                     }
                     EditorGUILayout.EndVertical();
-                }
-                EditorGUILayout.EndFoldoutHeaderGroup();
-                GUILayout.Space(8);
+                }, "运行时信息", ref m_showRuntimeInfo, true);
+
+                EditorGUILayout.Space(5);
             }
         }
 
         private void DrawStatistics(ResourceModuleDriver t)
         {
-            EditorGUILayout.BeginVertical("Box");
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
-                EditorGUILayout.LabelField("配置概览", EditorStyles.boldLabel);
-
-                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    EditorGUILayout.LabelField("运行模式:", GUILayout.Width(80));
-                    string modeName = m_playModeIndex < m_playModeNames.Length
+                    DrawSummaryRow("运行模式", m_playModeIndex < m_playModeNames.Length
                         ? m_playModeNames[m_playModeIndex].Split(' ')[0]
-                        : "未知";
-                    EditorGUILayout.LabelField(modeName, EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
+                        : "未知");
 
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("资源包:", GUILayout.Width(80));
-                    EditorGUILayout.LabelField(m_packageName.stringValue, EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
+                    DrawSummaryRow("资源包", m_packageName.stringValue);
+                    DrawSummaryRow("边玩边下", m_updatableWhilePlaying.boolValue ? "启用" : "禁用");
+                    DrawSummaryRow("自动回收", m_useSystemUnloadUnusedAssets.boolValue ? "启用" : "禁用");
 
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("边玩边下:", GUILayout.Width(80));
-                    EditorGUILayout.LabelField(m_updatableWhilePlaying.boolValue ? "启用" : "禁用", EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("自动回收:", GUILayout.Width(80));
-                    EditorGUILayout.LabelField(m_useSystemUnloadUnusedAssets.boolValue ? "启用" : "禁用",
-                        EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                // 操作按钮
-                EditorGUILayout.Space(5);
-                EditorGUI.BeginDisabledGroup(EditorApplication.isPlayingOrWillChangePlaymode);
-                {
-                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.Space(5);
+                    EditorGUI.BeginDisabledGroup(EditorApplication.isPlayingOrWillChangePlaymode);
                     {
-                        if (GUILayout.Button("刷新配置", GUILayout.Height(25)))
+                        EditorGUILayout.BeginHorizontal();
                         {
-                            RefreshTypeNames();
-                            RefreshPlayModeNames();
-                        }
+                            if (GUILayout.Button("刷新配置", GUILayout.Height(24)))
+                            {
+                                RefreshTypeNames();
+                                RefreshPlayModeNames();
+                            }
 
-                        if (GUILayout.Button("保存配置", GUILayout.Height(25)))
-                        {
-                            serializedObject.ApplyModifiedProperties();
-                            Debug.Log("资源模块配置已保存");
+                            if (GUILayout.Button("保存配置", GUILayout.Height(24)))
+                            {
+                                serializedObject.ApplyModifiedProperties();
+                                Debug.Log("资源模块配置已保存");
+                            }
                         }
+                        EditorGUILayout.EndHorizontal();
                     }
                     EditorGUI.EndDisabledGroup();
-                    EditorGUILayout.EndHorizontal();
                 }
                 EditorGUILayout.EndVertical();
+            }, "配置概览", ref m_showOverview, true);
+        }
+
+        private void DrawSummaryRow(string label, string value)
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField(label, GUILayout.Width(90));
+                EditorGUILayout.LabelField(value, EditorStyles.miniLabel);
             }
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void SavePanelStates()
+        {
+            EditorPrefs.SetBool(BASIC_PANEL_KEY, m_showBasicSettings);
+            EditorPrefs.SetBool(RESOURCE_POOL_PANEL_KEY, m_showResourcePoolSettings);
+            EditorPrefs.SetBool(DOWNLOAD_PANEL_KEY, m_showDownloadSettings);
+            EditorPrefs.SetBool(ADVANCED_PANEL_KEY, m_showAdvancedSettings);
+            EditorPrefs.SetBool(RUNTIME_INFO_PANEL_KEY, m_showRuntimeInfo);
+            EditorPrefs.SetBool(OVERVIEW_PANEL_KEY, m_showOverview);
         }
 
         private string GetPlayModeDescription(int modeIndex)
@@ -594,6 +571,13 @@ namespace DGame
 
         private void OnEnable()
         {
+            m_showBasicSettings = EditorPrefs.GetBool(BASIC_PANEL_KEY, m_showBasicSettings);
+            m_showResourcePoolSettings = EditorPrefs.GetBool(RESOURCE_POOL_PANEL_KEY, m_showResourcePoolSettings);
+            m_showDownloadSettings = EditorPrefs.GetBool(DOWNLOAD_PANEL_KEY, m_showDownloadSettings);
+            m_showAdvancedSettings = EditorPrefs.GetBool(ADVANCED_PANEL_KEY, m_showAdvancedSettings);
+            m_showRuntimeInfo = EditorPrefs.GetBool(RUNTIME_INFO_PANEL_KEY, m_showRuntimeInfo);
+            m_showOverview = EditorPrefs.GetBool(OVERVIEW_PANEL_KEY, m_showOverview);
+
             m_playMode = serializedObject.FindProperty("playMode");
             m_encryptionType = serializedObject.FindProperty("encryptionType");
             m_updatableWhilePlaying = serializedObject.FindProperty("updatableWhilePlaying");
