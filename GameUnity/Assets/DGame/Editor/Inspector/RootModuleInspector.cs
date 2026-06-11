@@ -10,6 +10,15 @@ namespace DGame
     internal sealed class RootModuleInspector : DGameInspector
     {
         private const string NONE_OPTION_NAME = "<None>";
+        private const string GLOBAL_HELPER_PANEL_KEY = "RootModule.GlobalHelperPanelOpen";
+        private const string MEMORY_PANEL_KEY = "RootModule.MemoryPanelOpen";
+        private const string PERFORMANCE_PANEL_KEY = "RootModule.PerformancePanelOpen";
+        private const string SYSTEM_PANEL_KEY = "RootModule.SystemPanelOpen";
+        private const string OVERVIEW_PANEL_KEY = "RootModule.OverviewPanelOpen";
+        private const float GAME_SPEED_LABEL_WIDTH = 70f;
+        private const float GAME_SPEED_BUTTON_MIN_WIDTH = 48f;
+        private const float GAME_SPEED_ROW_GAP = 4f;
+
         private static readonly float[] m_gameSpeedArr = new float[] { 0f, 0.01f, 0.1f, 0.25f, 0.5f, 1f, 1.5f, 2f, 4f, 8f };
         private static readonly string[] m_gameSpeedForDisplay = new string[] { "0x", "0.01x", "0.1x", "0.25x", "0.5x", "1x", "1.5x", "2x", "4x", "8x" };
 
@@ -38,6 +47,7 @@ namespace DGame
         private bool m_showMemorySetting = true;
         private bool m_showPerformanceSetting = true;
         private bool m_showSystemSetting = true;
+        private bool m_showOverview = true;
 
         private string[] m_memoryStrictCheckTypeNames = null;
         private int m_memoryStrictCheckTypeIndex = 0;
@@ -64,6 +74,11 @@ namespace DGame
             EditorGUI.EndDisabledGroup();
 
             serializedObject.ApplyModifiedProperties();
+
+            if (GUI.changed)
+            {
+                SavePanelStates();
+            }
         }
 
         private void DrawEditorLanguageSettings(RootModule rootModule)
@@ -87,141 +102,85 @@ namespace DGame
 
         private void DrawMemoryPoolSettings(RootModule rootModule)
         {
-            m_showMemorySetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showMemorySetting,
-                new GUIContent("内存池设置"));
-
-            if (m_showMemorySetting)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    EditorGUILayout.BeginHorizontal();
                     int memoryStrictCheckTypeIndex = EditorGUILayout.Popup("内存池强制检查开启模式", m_memoryStrictCheckTypeIndex, m_memoryStrictCheckTypeNames);
                     if (memoryStrictCheckTypeIndex != m_memoryStrictCheckTypeIndex)
                     {
                         m_memoryStrictCheckTypeIndex = memoryStrictCheckTypeIndex;
                         m_memoryStrictCheckType.enumValueIndex = memoryStrictCheckTypeIndex <= 0 ? 0 : memoryStrictCheckTypeIndex;
                     }
-                    EditorGUILayout.EndHorizontal();
 
                     EditorGUILayout.Space(3);
 
-                    // 内存池检查状态
                     string helperStatus = GetMemorySettingCheckStatus((MemoryStrictCheckType)m_memoryStrictCheckType.enumValueIndex);
                     EditorGUILayout.HelpBox(helperStatus,
                         IsMemorySettingWarning() ? MessageType.Warning : MessageType.Info);
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "内存池设置", ref m_showMemorySetting, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawInspectorHeader()
         {
             GUILayout.Space(5);
 
-            // 主标题
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-
             var titleStyle = new GUIStyle(EditorStyles.largeLabel)
             {
-                fontSize = 16,
+                fontSize = 14,
                 fontStyle = FontStyle.Bold,
-                alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = Color.white }
+                alignment = TextAnchor.MiddleCenter
             };
 
-            EditorGUILayout.LabelField(new GUIContent("游戏根模块配置", "Root Module Configuration"),
-                titleStyle, GUILayout.Height(30));
+            var icon = EditorGUIUtility.IconContent("GameManager Icon").image;
+            EditorGUILayout.LabelField(new GUIContent(" 游戏根模块配置", icon, "Root Module Configuration"),
+                titleStyle);
 
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
-
-            // 状态指示
-            var statusStyle = new GUIStyle(EditorStyles.miniLabel)
+            var descStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel)
             {
-                alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = new Color(0.8f, 0.8f, 0.8f, 1f) }
+                alignment = TextAnchor.MiddleCenter
             };
 
-            EditorGUILayout.LabelField("配置游戏核心系统和辅助器", statusStyle);
-            GUILayout.Space(5);
-
-            // 分隔线
-            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-            GUILayout.Space(10);
+            EditorGUILayout.LabelField("配置游戏核心系统和辅助器", descStyle);
+            EditorGUILayout.Space(6);
         }
 
         private void DrawGlobalHelperSettings(RootModule rootModule)
         {
-            m_showGlobalHelperSetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showGlobalHelperSetting,
-                new GUIContent("全局辅助器设置", "配置各种工具辅助器"));
-
-            if (m_showGlobalHelperSetting)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    // 字符串辅助器
-                    EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField(new GUIContent("字符串辅助器", "字符串处理工具"), GUILayout.Width(120));
-                    int textHelperSelectedIndex = EditorGUILayout.Popup(m_stringUtilHelperTypeNameIndex, m_stringUtilHelperTypeNames);
-                    if (textHelperSelectedIndex != m_stringUtilHelperTypeNameIndex)
-                    {
-                        m_stringUtilHelperTypeNameIndex = textHelperSelectedIndex;
-                        m_stringUtilHelperTypeName.stringValue = textHelperSelectedIndex <= 0 ? null : m_stringUtilHelperTypeNames[textHelperSelectedIndex];
-                    }
-                    EditorGUILayout.EndHorizontal();
-
-                    // 日志辅助器
-                    EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField(new GUIContent("日志辅助器", "日志输出工具"), GUILayout.Width(120));
-                    int logHelperSelectedIndex = EditorGUILayout.Popup(m_logHelperTypeNameIndex, m_logHelperTypeNames);
-                    if (logHelperSelectedIndex != m_logHelperTypeNameIndex)
-                    {
-                        m_logHelperTypeNameIndex = logHelperSelectedIndex;
-                        m_logHelperTypeName.stringValue = logHelperSelectedIndex <= 0 ? null : m_logHelperTypeNames[logHelperSelectedIndex];
-                    }
-                    EditorGUILayout.EndHorizontal();
-
-                    // JSON辅助器
-                    EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField(new GUIContent("JSON辅助器", "JSON序列化工具"), GUILayout.Width(120));
-                    int jsonHelperSelectedIndex = EditorGUILayout.Popup(m_jsonHelperTypeNameIndex, m_jsonHelperTypeNames);
-                    if (jsonHelperSelectedIndex != m_jsonHelperTypeNameIndex)
-                    {
-                        m_jsonHelperTypeNameIndex = jsonHelperSelectedIndex;
-                        m_jsonHelperTypeName.stringValue = jsonHelperSelectedIndex <= 0 ? null : m_jsonHelperTypeNames[jsonHelperSelectedIndex];
-                    }
-                    EditorGUILayout.EndHorizontal();
+                    DrawHelperPopup(new GUIContent("字符串辅助器", "字符串处理工具"),
+                        ref m_stringUtilHelperTypeNameIndex, m_stringUtilHelperTypeNames, m_stringUtilHelperTypeName);
+                    DrawHelperPopup(new GUIContent("日志辅助器", "日志输出工具"),
+                        ref m_logHelperTypeNameIndex, m_logHelperTypeNames, m_logHelperTypeName);
+                    DrawHelperPopup(new GUIContent("JSON辅助器", "JSON序列化工具"),
+                        ref m_jsonHelperTypeNameIndex, m_jsonHelperTypeNames, m_jsonHelperTypeName);
 
                     EditorGUILayout.Space(3);
 
-                    // 辅助器状态
                     string helperStatus = GetHelperStatus();
                     EditorGUILayout.HelpBox(helperStatus,
                         IsAllHelpersConfigured() ? MessageType.Info : MessageType.Warning);
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "全局辅助器设置", ref m_showGlobalHelperSetting, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawPerformanceSettings(RootModule rootModule)
         {
-            m_showPerformanceSetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showPerformanceSetting,
-                new GUIContent("性能设置", "游戏性能和帧率配置"));
-
-            if (m_showPerformanceSetting)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    // 游戏帧率
-                    EditorGUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField(new GUIContent("游戏帧率", "目标帧率设置"), GUILayout.Width(100));
-                    int frameRate = EditorGUILayout.IntSlider(m_frameRate.intValue, 1, 120);
-                    EditorGUILayout.EndHorizontal();
+                    int frameRate = EditorGUILayout.IntSlider(new GUIContent("游戏帧率", "目标帧率设置"), m_frameRate.intValue, 1, 120);
 
                     if (frameRate != m_frameRate.intValue)
                     {
@@ -235,53 +194,13 @@ namespace DGame
                         }
                     }
 
-                    // 帧率建议
                     string frameRateAdvice = GetFrameRateAdvice(frameRate);
                     EditorGUILayout.HelpBox(frameRateAdvice, MessageType.Info);
 
                     EditorGUILayout.Space(5);
 
-                    // 游戏速度
-                    EditorGUILayout.LabelField("游戏速度", EditorStyles.boldLabel);
-
                     float gameSpeed = EditorGUILayout.Slider("速度倍率", m_gameSpeed.floatValue, 0f, 8f);
-
-                    // 快速选择按钮（分两行显示）
-                    int currentSelected = GetSelectedGameSpeed(gameSpeed);
-                    int half = m_gameSpeedForDisplay.Length / 2;
-
-                    string[] firstRowDisplay = new string[half];
-                    Array.Copy(m_gameSpeedForDisplay, 0, firstRowDisplay, 0, half);
-                    string[] secondRowDisplay = new string[m_gameSpeedForDisplay.Length - half];
-                    Array.Copy(m_gameSpeedForDisplay, half, secondRowDisplay, 0, secondRowDisplay.Length);
-
-                    int firstRowSelected = currentSelected >= 0 && currentSelected < half ? currentSelected : -1;
-                    int secondRowSelected = currentSelected >= half ? currentSelected - half : -1;
-
-                    EditorGUILayout.BeginHorizontal();
-                    GUILayout.Label("快速设置:", GUILayout.Width(60));
-                    int newFirstRowSelected = GUILayout.Toolbar(firstRowSelected, firstRowDisplay);
-                    EditorGUILayout.EndHorizontal();
-
-                    EditorGUILayout.BeginHorizontal();
-                    GUILayout.Space(60 + 4);
-                    int newSecondRowSelected = GUILayout.Toolbar(secondRowSelected, secondRowDisplay);
-                    EditorGUILayout.EndHorizontal();
-
-                    int selectedGameSpeed = -1;
-                    if (newFirstRowSelected != firstRowSelected && newFirstRowSelected >= 0)
-                    {
-                        selectedGameSpeed = newFirstRowSelected;
-                    }
-                    else if (newSecondRowSelected != secondRowSelected && newSecondRowSelected >= 0)
-                    {
-                        selectedGameSpeed = newSecondRowSelected + half;
-                    }
-
-                    if (selectedGameSpeed >= 0)
-                    {
-                        gameSpeed = GetGameSpeed(selectedGameSpeed);
-                    }
+                    gameSpeed = DrawGameSpeedQuickSettings(gameSpeed);
 
                     if (Mathf.Abs(gameSpeed - m_gameSpeed.floatValue) > 0.001f)
                     {
@@ -295,7 +214,6 @@ namespace DGame
                         }
                     }
 
-                    // 游戏速度说明
                     if (Mathf.Approximately(gameSpeed, 0f))
                     {
                         EditorGUILayout.HelpBox("游戏暂停", MessageType.Warning);
@@ -306,21 +224,17 @@ namespace DGame
                     }
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "性能设置", ref m_showPerformanceSetting, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawSystemSettings(RootModule rootModule)
         {
-            m_showSystemSetting = EditorGUILayout.BeginFoldoutHeaderGroup(m_showSystemSetting,
-                new GUIContent("系统设置", "运行时系统行为配置"));
-
-            if (m_showSystemSetting)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    // 后台运行
                     bool runInBackground = EditorGUILayout.ToggleLeft(
                         new GUIContent("可在后台运行", "游戏窗口失去焦点时继续运行"),
                         m_runInBackground.boolValue);
@@ -337,7 +251,6 @@ namespace DGame
                         }
                     }
 
-                    // 从不休眠
                     bool neverSleep = EditorGUILayout.ToggleLeft(
                         new GUIContent("从不休眠", "防止系统进入睡眠模式"),
                         m_neverSleep.boolValue);
@@ -356,78 +269,158 @@ namespace DGame
 
                     EditorGUILayout.Space(3);
 
-                    // 系统设置说明
                     string systemStatus = GetSystemStatus(runInBackground, neverSleep);
                     MessageType messageType = (runInBackground || neverSleep) ? MessageType.Info : MessageType.None;
                     EditorGUILayout.HelpBox(systemStatus, messageType);
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "系统设置", ref m_showSystemSetting, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawStatistics(RootModule rootModule)
         {
-            EditorGUILayout.BeginVertical("Box");
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
-                EditorGUILayout.LabelField("配置概览", EditorStyles.boldLabel);
-
-                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    EditorGUILayout.LabelField("辅助器配置:", GUILayout.Width(80));
-                    string helperStatus = IsAllHelpersConfigured() ? "完整" : "不完整";
-                    EditorGUILayout.LabelField(helperStatus, EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("当前帧率:", GUILayout.Width(80));
-                    EditorGUILayout.LabelField($"{m_frameRate.intValue} FPS", EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("游戏速度:", GUILayout.Width(80));
-                    EditorGUILayout.LabelField($"{m_gameSpeed.floatValue}x", EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("系统状态:", GUILayout.Width(80));
-                    string systemStatus = GetSystemStatusSummary();
-                    EditorGUILayout.LabelField(systemStatus, EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("内存池强制检查开启状态:", GUILayout.Width(150));
-                    string systemStatus = GetMemorySettingStatusSummary();
-                    EditorGUILayout.LabelField(systemStatus, EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                // 操作按钮
-                EditorGUILayout.Space(5);
-                EditorGUILayout.BeginHorizontal();
-                {
-                    if (GUILayout.Button("刷新类型", GUILayout.Height(25)))
+                    EditorGUILayout.BeginHorizontal();
                     {
-                        RefreshTypeNames();
+                        EditorGUILayout.LabelField("辅助器配置", GUILayout.Width(120));
+                        string helperStatus = IsAllHelpersConfigured() ? "完整" : "不完整";
+                        EditorGUILayout.LabelField(helperStatus, EditorStyles.miniLabel);
                     }
+                    EditorGUILayout.EndHorizontal();
 
-                    if (GUILayout.Button("保存配置", GUILayout.Height(25)))
+                    EditorGUILayout.BeginHorizontal();
                     {
-                        serializedObject.ApplyModifiedProperties();
-                        Debug.Log("根模块配置已保存");
+                        EditorGUILayout.LabelField("当前帧率", GUILayout.Width(120));
+                        EditorGUILayout.LabelField($"{m_frameRate.intValue} FPS", EditorStyles.miniLabel);
                     }
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        EditorGUILayout.LabelField("游戏速度", GUILayout.Width(120));
+                        EditorGUILayout.LabelField($"{m_gameSpeed.floatValue}x", EditorStyles.miniLabel);
+                    }
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        EditorGUILayout.LabelField("系统状态", GUILayout.Width(120));
+                        string systemStatus = GetSystemStatusSummary();
+                        EditorGUILayout.LabelField(systemStatus, EditorStyles.miniLabel);
+                    }
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        EditorGUILayout.LabelField("内存池检查", GUILayout.Width(120));
+                        string memoryStatus = GetMemorySettingStatusSummary();
+                        EditorGUILayout.LabelField(memoryStatus, EditorStyles.miniLabel);
+                    }
+                    EditorGUILayout.EndHorizontal();
+
+                    EditorGUILayout.Space(5);
+                    EditorGUILayout.BeginHorizontal();
+                    {
+                        if (GUILayout.Button("刷新类型", GUILayout.Height(24)))
+                        {
+                            RefreshTypeNames();
+                        }
+
+                        if (GUILayout.Button("保存配置", GUILayout.Height(24)))
+                        {
+                            serializedObject.ApplyModifiedProperties();
+                            Debug.Log("根模块配置已保存");
+                        }
+                    }
+                    EditorGUILayout.EndHorizontal();
                 }
-                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+            }, "配置概览", ref m_showOverview, true);
+        }
+
+        private void DrawHelperPopup(GUIContent label, ref int selectedIndex, string[] typeNames, SerializedProperty property)
+        {
+            if (typeNames == null || typeNames.Length <= 0 || property == null)
+            {
+                EditorGUILayout.HelpBox($"{label.text} 类型列表未初始化。", MessageType.Warning);
+                return;
             }
-            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(label, GUILayout.Width(90));
+            int newSelectedIndex = EditorGUILayout.Popup(selectedIndex, typeNames);
+            EditorGUILayout.EndHorizontal();
+
+            if (newSelectedIndex == selectedIndex)
+            {
+                return;
+            }
+
+            selectedIndex = newSelectedIndex;
+            property.stringValue = selectedIndex <= 0 ? null : typeNames[selectedIndex];
+        }
+
+        private float DrawGameSpeedQuickSettings(float gameSpeed)
+        {
+            int selectedGameSpeed = DrawGameSpeedToolbar(GetSelectedGameSpeed(gameSpeed));
+
+            if (selectedGameSpeed >= 0)
+            {
+                gameSpeed = GetGameSpeed(selectedGameSpeed);
+            }
+
+            return gameSpeed;
+        }
+
+        private int DrawGameSpeedToolbar(int currentSelected)
+        {
+            int countPerRow = GetGameSpeedButtonCountPerRow();
+            int selectedIndex = currentSelected;
+
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField(new GUIContent("快速设置", "选择常用游戏速度倍率"), GUILayout.Width(GAME_SPEED_LABEL_WIDTH));
+            for (int i = 0; i < m_gameSpeedForDisplay.Length; i++)
+            {
+                if (i > 0 && i % countPerRow == 0)
+                {
+                    EditorGUILayout.EndHorizontal();
+                    EditorGUILayout.BeginHorizontal();
+                    GUILayout.Space(GAME_SPEED_LABEL_WIDTH + GAME_SPEED_ROW_GAP);
+                }
+
+                selectedIndex = DrawGameSpeedToggle(selectedIndex, i);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            return selectedIndex;
+        }
+
+        private int GetGameSpeedButtonCountPerRow()
+        {
+            float availableWidth = EditorGUIUtility.currentViewWidth - GAME_SPEED_LABEL_WIDTH - 45f;
+            int countPerRow = Mathf.FloorToInt(availableWidth / GAME_SPEED_BUTTON_MIN_WIDTH);
+            return Mathf.Clamp(countPerRow, 1, m_gameSpeedForDisplay.Length);
+        }
+
+        private int DrawGameSpeedToggle(int currentSelected, int index)
+        {
+            bool selected = GUILayout.Toggle(currentSelected == index, m_gameSpeedForDisplay[index],
+                EditorStyles.miniButton, GUILayout.MinWidth(GAME_SPEED_BUTTON_MIN_WIDTH));
+            return selected ? index : currentSelected;
+        }
+
+        private void SavePanelStates()
+        {
+            EditorPrefs.SetBool(GLOBAL_HELPER_PANEL_KEY, m_showGlobalHelperSetting);
+            EditorPrefs.SetBool(MEMORY_PANEL_KEY, m_showMemorySetting);
+            EditorPrefs.SetBool(PERFORMANCE_PANEL_KEY, m_showPerformanceSetting);
+            EditorPrefs.SetBool(SYSTEM_PANEL_KEY, m_showSystemSetting);
+            EditorPrefs.SetBool(OVERVIEW_PANEL_KEY, m_showOverview);
         }
 
         private string GetHelperStatus()
@@ -442,7 +435,7 @@ namespace DGame
             return $"辅助器配置: {configuredCount}/{totalCount} 已配置" +
                    (configuredCount < totalCount ? "\n建议配置所有辅助器以获得完整功能" : "");
         }
-        
+
         private string GetMemorySettingCheckStatus(MemoryStrictCheckType type)
         {
             string tips1 = "";
@@ -573,6 +566,13 @@ namespace DGame
             {
                 return;
             }
+
+            m_showGlobalHelperSetting = EditorPrefs.GetBool(GLOBAL_HELPER_PANEL_KEY, m_showGlobalHelperSetting);
+            m_showMemorySetting = EditorPrefs.GetBool(MEMORY_PANEL_KEY, m_showMemorySetting);
+            m_showPerformanceSetting = EditorPrefs.GetBool(PERFORMANCE_PANEL_KEY, m_showPerformanceSetting);
+            m_showSystemSetting = EditorPrefs.GetBool(SYSTEM_PANEL_KEY, m_showSystemSetting);
+            m_showOverview = EditorPrefs.GetBool(OVERVIEW_PANEL_KEY, m_showOverview);
+
             m_stringUtilHelperTypeName = serializedObject?.FindProperty("stringUtilHelperTypeName");
             m_logHelperTypeName = serializedObject?.FindProperty("logHelperTypeName");
             m_jsonHelperTypeName = serializedObject?.FindProperty("jsonHelperTypeName");

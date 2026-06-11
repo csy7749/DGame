@@ -8,6 +8,13 @@ namespace DGame
     [CustomEditor(typeof(DebuggerDriver))]
     internal sealed class DebuggerDriverInspector : Editor
     {
+        private const string BASIC_PANEL_KEY = "DebuggerDriver.BasicPanelOpen";
+        private const string WINDOW_PANEL_KEY = "DebuggerDriver.WindowPanelOpen";
+        private const string MODULE_PANEL_KEY = "DebuggerDriver.ModulePanelOpen";
+        private const string CONSOLE_WINDOW_PANEL_KEY = "DebuggerDriver.ConsoleWindowPanelOpen";
+        private const string ADVANCED_PANEL_KEY = "DebuggerDriver.AdvancedPanelOpen";
+        private const string OVERVIEW_PANEL_KEY = "DebuggerDriver.OverviewPanelOpen";
+
         private SerializedProperty m_reporterScrollerSkin;
         private SerializedProperty m_activeWindowType;
         private SerializedProperty m_showFullWindow;
@@ -18,7 +25,9 @@ namespace DGame
         private bool m_showBasicSettings = true;
         private bool m_showWindowSettings = true;
         private bool m_showModuleSettings = true;
+        private bool m_showConsoleWindowSettings = true;
         private bool m_showAdvancedSettings = true;
+        private bool m_showOverview = true;
 
         // 颜色定义
         private Color m_headerColor = new Color(0.1f, 0.5f, 0.8f, 1f);
@@ -49,56 +58,40 @@ namespace DGame
             DrawStatistics(debuggerDriver);
 
             serializedObject.ApplyModifiedProperties();
+
+            if (GUI.changed)
+            {
+                SavePanelStates();
+            }
         }
 
         private void DrawInspectorHeader()
         {
-            // 标题背景
-            // Rect headerRect = EditorGUILayout.GetControlRect(false, 60);
-            // EditorGUI.DrawRect(new Rect(headerRect.x, headerRect.y, position.width, 60),
-            //     new Color(0.1f, 0.1f, 0.1f, 0.8f));
-
             GUILayout.Space(5);
-
-            // 主标题
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
 
             var titleStyle = new GUIStyle(EditorStyles.largeLabel)
             {
-                fontSize = 16,
+                fontSize = 14,
                 fontStyle = FontStyle.Bold,
-                alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = Color.white }
+                alignment = TextAnchor.MiddleCenter
             };
 
-            EditorGUILayout.LabelField(new GUIContent("调试器配置", "Debugger System Configuration"),
-                titleStyle, GUILayout.Height(30));
+            var icon = EditorGUIUtility.IconContent("console.infoicon").image;
+            EditorGUILayout.LabelField(new GUIContent(" 调试器配置", icon, "Debugger System Configuration"),
+                titleStyle);
 
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
-
-            // 副标题
-            var subtitleStyle = new GUIStyle(EditorStyles.miniLabel)
+            var subtitleStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel)
             {
-                alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = new Color(0.8f, 0.8f, 0.8f, 1f) }
+                alignment = TextAnchor.MiddleCenter
             };
 
             EditorGUILayout.LabelField("配置运行时调试和性能分析系统", subtitleStyle);
-            GUILayout.Space(5);
-
-            // 分隔线
-            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-            GUILayout.Space(10);
+            EditorGUILayout.Space(6);
         }
 
         private void DrawBasicSettings(DebuggerDriver debuggerDriver)
         {
-            m_showBasicSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showBasicSettings,
-                new GUIContent("基础设置", "调试器基本行为配置"));
-
-            if (m_showBasicSettings)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -139,17 +132,14 @@ namespace DGame
                     }
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "基础设置", ref m_showBasicSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawWindowSettings(DebuggerDriver debuggerDriver)
         {
-            m_showWindowSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showWindowSettings,
-                new GUIContent("窗口设置", "调试窗口位置和样式配置"));
-
-            if (m_showWindowSettings)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -225,24 +215,20 @@ namespace DGame
                     EditorGUILayout.EndHorizontal();
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "窗口设置", ref m_showWindowSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawModuleSettings(DebuggerDriver debuggerDriver)
         {
-            m_showModuleSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showModuleSettings,
-                new GUIContent("模块设置", "调试器各功能模块配置"));
-
-            if (m_showModuleSettings)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
                     // 控制台设置
                     EditorGUILayout.LabelField("控制台模块", EditorStyles.boldLabel);
-                    EditorGUILayout.PropertyField(m_consoleWindow,
-                        new GUIContent("控制台窗口", "日志输出和异常显示配置"));
+                    DrawConsoleWindowSettings();
 
                     EditorGUILayout.Space(5);
 
@@ -277,17 +263,46 @@ namespace DGame
                     // EditorGUILayout.EndHorizontal();
                 }
                 EditorGUILayout.EndVertical();
+            }, "模块设置", ref m_showModuleSettings, true);
+
+            EditorGUILayout.Space(5);
+        }
+
+        private void DrawConsoleWindowSettings()
+        {
+            UnityEditorUtil.LayoutFoldoutBox(() =>
+            {
+                EditorGUILayout.BeginVertical("HelpBox");
+                {
+                    DrawPropertyChildren(m_consoleWindow);
+                }
+                EditorGUILayout.EndVertical();
+            }, "控制台窗口", ref m_showConsoleWindowSettings, true);
+        }
+
+        private void DrawPropertyChildren(SerializedProperty property)
+        {
+            if (property == null)
+            {
+                return;
             }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+
+            SerializedProperty iterator = property.Copy();
+            SerializedProperty endProperty = iterator.GetEndProperty();
+            bool enterChildren = true;
+
+            EditorGUI.indentLevel++;
+            while (iterator.NextVisible(enterChildren) && !SerializedProperty.EqualContents(iterator, endProperty))
+            {
+                EditorGUILayout.PropertyField(iterator, true);
+                enterChildren = false;
+            }
+            EditorGUI.indentLevel--;
         }
 
         private void DrawAdvancedSettings(DebuggerDriver debuggerDriver)
         {
-            m_showAdvancedSettings = EditorGUILayout.BeginFoldoutHeaderGroup(m_showAdvancedSettings,
-                new GUIContent("高级设置", "性能监控和内存分析配置"));
-
-            if (m_showAdvancedSettings)
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
                 EditorGUILayout.BeginVertical("HelpBox");
                 {
@@ -327,83 +342,73 @@ namespace DGame
                     // EditorGUILayout.EndHorizontal();
                 }
                 EditorGUILayout.EndVertical();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            GUILayout.Space(8);
+            }, "高级设置", ref m_showAdvancedSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawStatistics(DebuggerDriver debuggerDriver)
         {
-            EditorGUILayout.BeginVertical("Box");
+            UnityEditorUtil.LayoutFoldoutBox(() =>
             {
-                EditorGUILayout.LabelField("配置概览", EditorStyles.boldLabel);
-
-                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    EditorGUILayout.LabelField("开启模式:", GUILayout.Width(80));
                     string modeName = m_activeWindowTypeNames[m_activeWindowType.enumValueIndex];
-                    EditorGUILayout.LabelField(modeName, EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
+                    DrawSummaryRow("开启模式", modeName);
 
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("窗口模式:", GUILayout.Width(80));
                     string windowMode = m_showFullWindow.boolValue ? "完整窗口" : "悬浮图标";
-                    EditorGUILayout.LabelField(windowMode, EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
+                    DrawSummaryRow("窗口模式", windowMode);
+                    DrawSummaryRow("窗口缩放", $"{debuggerDriver.WindowScale:F1}x");
+                    DrawSummaryRow("图标位置", $"{debuggerDriver.IconRect.x:F0},{debuggerDriver.IconRect.y:F0}");
+                    DrawSummaryRow("窗口位置", $"{debuggerDriver.WindowRect.x:F0},{debuggerDriver.WindowRect.y:F0}");
 
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("窗口缩放:", GUILayout.Width(80));
-                    EditorGUILayout.LabelField($"{debuggerDriver.WindowScale:F1}x", EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("图标位置:", GUILayout.Width(80));
-                    EditorGUILayout.LabelField($"{debuggerDriver.IconRect.x:F0},{debuggerDriver.IconRect.y:F0}",
-                        EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("窗口位置:", GUILayout.Width(80));
-                    EditorGUILayout.LabelField($"{debuggerDriver.WindowRect.x:F0},{debuggerDriver.WindowRect.y:F0}",
-                        EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                // 操作按钮
-                EditorGUILayout.Space(5);
-                EditorGUILayout.BeginHorizontal();
-                {
-                    if (GUILayout.Button("测试调试器", GUILayout.Height(25)))
+                    EditorGUILayout.Space(5);
+                    EditorGUILayout.BeginHorizontal();
                     {
-                        if (Application.isPlaying)
+                        if (GUILayout.Button("测试调试器", GUILayout.Height(24)))
                         {
-                            debuggerDriver.ActiveWindow = true;
-                            Debug.Log("调试器已激活");
+                            if (Application.isPlaying)
+                            {
+                                debuggerDriver.ActiveWindow = true;
+                                Debug.Log("调试器已激活");
+                            }
+                            else
+                            {
+                                Debug.Log("请在运行模式下测试调试器");
+                            }
                         }
-                        else
+
+                        if (GUILayout.Button("保存配置", GUILayout.Height(24)))
                         {
-                            Debug.Log("请在运行模式下测试调试器");
+                            serializedObject.ApplyModifiedProperties();
+                            PlayerPrefs.Save();
+                            Debug.Log("调试器配置已保存");
                         }
                     }
-
-                    if (GUILayout.Button("保存配置", GUILayout.Height(25)))
-                    {
-                        serializedObject.ApplyModifiedProperties();
-                        PlayerPrefs.Save();
-                        Debug.Log("调试器配置已保存");
-                    }
+                    EditorGUILayout.EndHorizontal();
                 }
-                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+            }, "配置概览", ref m_showOverview, true);
+        }
+
+        private void DrawSummaryRow(string label, string value)
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField(label, GUILayout.Width(90));
+                EditorGUILayout.LabelField(value, EditorStyles.miniLabel);
             }
-            EditorGUILayout.EndVertical();
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void SavePanelStates()
+        {
+            EditorPrefs.SetBool(BASIC_PANEL_KEY, m_showBasicSettings);
+            EditorPrefs.SetBool(WINDOW_PANEL_KEY, m_showWindowSettings);
+            EditorPrefs.SetBool(MODULE_PANEL_KEY, m_showModuleSettings);
+            EditorPrefs.SetBool(CONSOLE_WINDOW_PANEL_KEY, m_showConsoleWindowSettings);
+            EditorPrefs.SetBool(ADVANCED_PANEL_KEY, m_showAdvancedSettings);
+            EditorPrefs.SetBool(OVERVIEW_PANEL_KEY, m_showOverview);
         }
 
         private string GetActiveWindowTypeDescription(int index)
@@ -433,6 +438,13 @@ namespace DGame
 
         private void OnEnable()
         {
+            m_showBasicSettings = EditorPrefs.GetBool(BASIC_PANEL_KEY, m_showBasicSettings);
+            m_showWindowSettings = EditorPrefs.GetBool(WINDOW_PANEL_KEY, m_showWindowSettings);
+            m_showModuleSettings = EditorPrefs.GetBool(MODULE_PANEL_KEY, m_showModuleSettings);
+            m_showConsoleWindowSettings = EditorPrefs.GetBool(CONSOLE_WINDOW_PANEL_KEY, m_showConsoleWindowSettings);
+            m_showAdvancedSettings = EditorPrefs.GetBool(ADVANCED_PANEL_KEY, m_showAdvancedSettings);
+            m_showOverview = EditorPrefs.GetBool(OVERVIEW_PANEL_KEY, m_showOverview);
+
             m_reporterScrollerSkin = serializedObject.FindProperty("reporterScrollerSkin");
             m_activeWindowType = serializedObject.FindProperty("activeWindowType");
             m_showFullWindow = serializedObject.FindProperty("m_showFullWindow");
