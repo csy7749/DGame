@@ -460,8 +460,9 @@ namespace DGame
 
         public override void OnRelease()
         {
-            m_destroyCancellationTokenSource?.Dispose();
+            var cts = m_destroyCancellationTokenSource;
             m_destroyCancellationTokenSource = null;
+            cts?.Dispose();
             DestroyAllGameObject();
             UnityEngine.Object.Destroy(m_parent);
             m_parent = null;
