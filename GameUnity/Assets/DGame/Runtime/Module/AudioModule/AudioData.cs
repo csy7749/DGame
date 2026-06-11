@@ -15,7 +15,7 @@ namespace DGame
         {
             if (!InPool)
             {
-                AssetHandle.Dispose();
+                AssetHandle?.Dispose();
             }
             InPool = false;
             AssetHandle = null;
