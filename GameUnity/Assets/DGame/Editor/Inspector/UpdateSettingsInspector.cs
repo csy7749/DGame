@@ -14,6 +14,16 @@ namespace DGame
     [CustomEditor(typeof(UpdateSettings), true)]
     public class UpdateSettingsInspector : UnityEditor.Editor
     {
+        private const string BASIC_PANEL_KEY = "UpdateSettings.BasicPanelOpen";
+        private const string ASSEMBLY_PANEL_KEY = "UpdateSettings.AssemblyPanelOpen";
+        private const string HOT_UPDATE_ASSEMBLIES_PANEL_KEY = "UpdateSettings.HotUpdateAssembliesPanelOpen";
+        private const string AOT_META_ASSEMBLIES_PANEL_KEY = "UpdateSettings.AotMetaAssembliesPanelOpen";
+        private const string UPDATE_PANEL_KEY = "UpdateSettings.UpdatePanelOpen";
+        private const string RESOURCE_PANEL_KEY = "UpdateSettings.ResourcePanelOpen";
+        private const string ADVANCED_PANEL_KEY = "UpdateSettings.AdvancedPanelOpen";
+        private const string UPDATE_PROCEDURE_PANEL_KEY = "UpdateSettings.UpdateProcedurePanelOpen";
+        private const string STATISTICS_PANEL_KEY = "UpdateSettings.StatisticsPanelOpen";
+
         private SerializedProperty m_projectName;
         private SerializedProperty m_hotUpdateAssemblies;
         private SerializedProperty m_aotMetaAssemblies;
@@ -43,6 +53,15 @@ namespace DGame
 
         // UI状态
         private Vector2 m_scrollPosition;
+        private bool m_showBasicSettings = true;
+        private bool m_showAssemblySettings = true;
+        private bool m_showHotUpdateAssemblies = true;
+        private bool m_showAotMetaAssemblies = true;
+        private bool m_showUpdateSettings = true;
+        private bool m_showResourceSettings = true;
+        private bool m_showAdvancedSettings = true;
+        private bool m_showUpdateProcedureSettings = true;
+        private bool m_showStatistics = true;
 
         // 颜色定义
         private Color m_warningColor = new Color(1f, 0.6f, 0.2f, 1f);
@@ -58,6 +77,16 @@ namespace DGame
 
         private void OnEnable()
         {
+            m_showBasicSettings = EditorPrefs.GetBool(BASIC_PANEL_KEY, m_showBasicSettings);
+            m_showAssemblySettings = EditorPrefs.GetBool(ASSEMBLY_PANEL_KEY, m_showAssemblySettings);
+            m_showHotUpdateAssemblies = EditorPrefs.GetBool(HOT_UPDATE_ASSEMBLIES_PANEL_KEY, m_showHotUpdateAssemblies);
+            m_showAotMetaAssemblies = EditorPrefs.GetBool(AOT_META_ASSEMBLIES_PANEL_KEY, m_showAotMetaAssemblies);
+            m_showUpdateSettings = EditorPrefs.GetBool(UPDATE_PANEL_KEY, m_showUpdateSettings);
+            m_showResourceSettings = EditorPrefs.GetBool(RESOURCE_PANEL_KEY, m_showResourceSettings);
+            m_showAdvancedSettings = EditorPrefs.GetBool(ADVANCED_PANEL_KEY, m_showAdvancedSettings);
+            m_showUpdateProcedureSettings = EditorPrefs.GetBool(UPDATE_PROCEDURE_PANEL_KEY, m_showUpdateProcedureSettings);
+            m_showStatistics = EditorPrefs.GetBool(STATISTICS_PANEL_KEY, m_showStatistics);
+
             ForceUpdateAssemblies2();
             m_projectName = serializedObject.FindProperty("projectName");
             m_hotUpdateAssemblies = serializedObject.FindProperty("HotUpdateAssemblies");
@@ -124,457 +153,524 @@ namespace DGame
             {
                 HandleSettingsChange(updateSettings);
             }
+
+            if (GUI.changed)
+            {
+                SavePanelStates();
+            }
         }
 
         private void DrawInspectorHeader()
         {
             GUILayout.Space(5);
-            // 主标题
-            EditorGUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
 
             var titleStyle = new GUIStyle(EditorStyles.largeLabel)
             {
-                fontSize = 16,
+                fontSize = 14,
                 fontStyle = FontStyle.Bold,
-                alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = Color.white }
+                alignment = TextAnchor.MiddleCenter
             };
 
-            EditorGUILayout.LabelField(new GUIContent("DGame热更新配置系统", "Hot Update Configuration System"),
-                titleStyle, GUILayout.Height(30));
+            var icon = EditorGUIUtility.IconContent("BuildSettings.Editor.Small").image;
+            EditorGUILayout.LabelField(new GUIContent(" DGame热更新配置系统", icon, "Hot Update Configuration System"),
+                titleStyle);
 
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
-
-            // 副标题
-            var subtitleStyle = new GUIStyle(EditorStyles.miniLabel)
+            var subtitleStyle = new GUIStyle(EditorStyles.centeredGreyMiniLabel)
             {
-                alignment = TextAnchor.MiddleCenter,
-                normal = { textColor = new Color(0.8f, 0.8f, 0.8f, 1f) }
+                alignment = TextAnchor.MiddleCenter
             };
 
             EditorGUILayout.LabelField("配置 HybridCLR 热更新参数", subtitleStyle);
-            GUILayout.Space(5);
-
-            // 分隔线
-            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider);
-            GUILayout.Space(10);
+            EditorGUILayout.Space(6);
         }
 
         private void DrawBasicSettings(UpdateSettings updateSettings)
         {
-            EditorGUILayout.BeginVertical("HelpBox");
+            DrawLayoutFoldoutBox(() =>
             {
-                EditorGUILayout.PropertyField(m_projectName, new GUIContent("项目名称", "项目标识名称"));
-                EditorGUILayout.Space(5);
-                // 主业务逻辑DLL选择
-                m_logicMainDllNameIndex =
-                    updateSettings.HotUpdateAssemblies.IndexOf(m_logicMainDllName.stringValue);
-
-                if (m_logicMainDllNameIndex < 0 && updateSettings.HotUpdateAssemblies.Count > 0)
+                EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    m_logicMainDllNameIndex = 0;
-                    m_logicMainDllName.stringValue = updateSettings.HotUpdateAssemblies[0];
-                }
+                    EditorGUILayout.PropertyField(m_projectName, new GUIContent("项目名称", "项目标识名称"));
+                    EditorGUILayout.Space(5);
+                    // 主业务逻辑DLL选择
+                    m_logicMainDllNameIndex =
+                        updateSettings.HotUpdateAssemblies.IndexOf(m_logicMainDllName.stringValue);
 
-                if (updateSettings.HotUpdateAssemblies.Count > 0)
-                {
-                    m_logicMainDllNameIndex = EditorGUILayout.Popup(
-                        new GUIContent("主业务逻辑DLL", "游戏主要逻辑所在的DLL"),
-                        m_logicMainDllNameIndex, updateSettings.HotUpdateAssemblies.ToArray());
-
-                    if (m_logicMainDllName.stringValue !=
-                        updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex])
+                    if (m_logicMainDllNameIndex < 0 && updateSettings.HotUpdateAssemblies.Count > 0)
                     {
-                        m_logicMainDllName.stringValue =
-                            updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex];
+                        m_logicMainDllNameIndex = 0;
+                        m_logicMainDllName.stringValue = updateSettings.HotUpdateAssemblies[0];
                     }
 
-                    // 显示当前选择的DLL
-                    EditorGUILayout.HelpBox(
-                        $"当前主逻辑: {updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex]}",
-                        MessageType.Info);
+                    if (updateSettings.HotUpdateAssemblies.Count > 0)
+                    {
+                        m_logicMainDllNameIndex = EditorGUILayout.Popup(
+                            new GUIContent("主业务逻辑DLL", "游戏主要逻辑所在的DLL"),
+                            m_logicMainDllNameIndex, updateSettings.HotUpdateAssemblies.ToArray());
+
+                        if (m_logicMainDllName.stringValue !=
+                            updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex])
+                        {
+                            m_logicMainDllName.stringValue =
+                                updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex];
+                        }
+
+                        // 显示当前选择的DLL
+                        EditorGUILayout.HelpBox(
+                            $"当前主逻辑: {updateSettings.HotUpdateAssemblies[m_logicMainDllNameIndex]}",
+                            MessageType.Info);
+                    }
+                    else
+                    {
+                        EditorGUILayout.HelpBox("请先配置热更程序集", MessageType.Warning);
+                    }
                 }
-                else
-                {
-                    EditorGUILayout.HelpBox("请先配置热更程序集", MessageType.Warning);
-                }
-            }
-            EditorGUILayout.EndVertical();
-            GUILayout.Space(8);
+                EditorGUILayout.EndVertical();
+            }, "基础设置", ref m_showBasicSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawAssemblySettings(UpdateSettings updateSettings)
         {
-            EditorGUILayout.BeginVertical("HelpBox");
+            DrawLayoutFoldoutBox(() =>
             {
-                // 热更程序集
-                EditorGUILayout.LabelField("热更程序集", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(m_hotUpdateAssemblies,
-                    new GUIContent("热更DLL列表", "需要热更新的程序集文件"));
+                EditorGUILayout.BeginVertical("HelpBox");
+                {
+                    // 热更程序集
+                    EditorGUILayout.LabelField("热更程序集", EditorStyles.boldLabel);
+                    DrawArrayPropertyFoldout(m_hotUpdateAssemblies,
+                        "热更DLL列表", "需要热更新的程序集文件", ref m_showHotUpdateAssemblies);
 
-                // AOT程序集
-                EditorGUILayout.LabelField("AOT程序集", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(m_aotMetaAssemblies,
-                    new GUIContent("AOT元数据DLL", "AOT泛型补充元数据程序集"));
+                    // AOT程序集
+                    EditorGUILayout.LabelField("AOT程序集", EditorStyles.boldLabel);
+                    DrawArrayPropertyFoldout(m_aotMetaAssemblies,
+                        "AOT元数据DLL", "AOT泛型补充元数据程序集", ref m_showAotMetaAssemblies);
 
-                EditorGUILayout.Space(5);
+                    EditorGUILayout.Space(5);
 
-                // DLL资产设置
-                EditorGUILayout.LabelField("DLL资产设置", EditorStyles.boldLabel);
-                EditorGUILayout.PropertyField(m_assemblyTextAssetExtension,
-                    new GUIContent("DLL打包后缀", "DLL转换为TextAsset的后缀名"));
-                EditorGUILayout.PropertyField(m_assemblyTextAssetPath,
-                    new GUIContent("DLL资产路径", "DLL TextAsset资源的存放路径"));
+                    // DLL资产设置
+                    EditorGUILayout.LabelField("DLL资产设置", EditorStyles.boldLabel);
+                    EditorGUILayout.PropertyField(m_assemblyTextAssetExtension,
+                        new GUIContent("DLL打包后缀", "DLL转换为TextAsset的后缀名"));
+                    EditorGUILayout.PropertyField(m_assemblyTextAssetPath,
+                        new GUIContent("DLL资产路径", "DLL TextAsset资源的存放路径"));
 
-                EditorGUILayout.Space(3);
-                EditorGUILayout.HelpBox("热更程序集: 包含需要热更新的业务逻辑\nAOT程序集: 为泛型提供元数据支持",
-                    MessageType.Info);
-            }
-            EditorGUILayout.EndVertical();
-            GUILayout.Space(8);
+                    EditorGUILayout.Space(3);
+                    EditorGUILayout.HelpBox("热更程序集: 包含需要热更新的业务逻辑\nAOT程序集: 为泛型提供元数据支持",
+                        MessageType.Info);
+                }
+                EditorGUILayout.EndVertical();
+            }, "程序集设置", ref m_showAssemblySettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawUpdateSettings(UpdateSettings updateSettings)
         {
-            EditorGUILayout.BeginVertical("HelpBox");
+            DrawLayoutFoldoutBox(() =>
             {
-                EditorGUILayout.PropertyField(m_updateStyle,
-                    new GUIContent("强制更新类型", "资源更新策略"));
-                EditorGUILayout.PropertyField(m_updateNotice,
-                    new GUIContent("更新提示", "是否显示更新提示对话框"));
+                EditorGUILayout.BeginVertical("HelpBox");
+                {
+                    EditorGUILayout.PropertyField(m_updateStyle,
+                        new GUIContent("强制更新类型", "资源更新策略"));
+                    EditorGUILayout.PropertyField(m_updateNotice,
+                        new GUIContent("更新提示", "是否显示更新提示对话框"));
 
-                EditorGUILayout.Space(3);
+                    EditorGUILayout.Space(3);
 
-                // 更新策略说明
-                string updateStyleDescription = GetUpdateStyleDescription((UpdateStyle)m_updateStyle.enumValueIndex);
-                string noticeDescription = GetUpdateStyleDescription((UpdateNotice)m_updateNotice.enumValueIndex);
+                    // 更新策略说明
+                    string updateStyleDescription = GetUpdateStyleDescription((UpdateStyle)m_updateStyle.enumValueIndex);
+                    string noticeDescription = GetUpdateStyleDescription((UpdateNotice)m_updateNotice.enumValueIndex);
 
-                EditorGUILayout.HelpBox($"更新策略: {updateStyleDescription}\n提示设置: {noticeDescription}",
-                    MessageType.Info);
-            }
-            EditorGUILayout.EndVertical();
-            GUILayout.Space(8);
+                    EditorGUILayout.HelpBox($"更新策略: {updateStyleDescription}\n提示设置: {noticeDescription}",
+                        MessageType.Info);
+                }
+                EditorGUILayout.EndVertical();
+            }, "更新设置", ref m_showUpdateSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawResourceSettings(UpdateSettings updateSettings)
         {
-            EditorGUILayout.BeginVertical("HelpBox");
+            DrawLayoutFoldoutBox(() =>
             {
-                EditorGUILayout.PropertyField(m_resDownloadPath,
-                    new GUIContent("主资源服务器", "资源下载主服务器地址"));
-                EditorGUILayout.PropertyField(m_fallbackResDownloadPath,
-                    new GUIContent("备用资源服务器", "主服务器不可用时的备用地址"));
+                EditorGUILayout.BeginVertical("HelpBox");
+                {
+                    EditorGUILayout.PropertyField(m_resDownloadPath,
+                        new GUIContent("主资源服务器", "资源下载主服务器地址"));
+                    EditorGUILayout.PropertyField(m_fallbackResDownloadPath,
+                        new GUIContent("备用资源服务器", "主服务器不可用时的备用地址"));
 
-                EditorGUILayout.Space(5);
+                    EditorGUILayout.Space(5);
 
-                EditorGUILayout.PropertyField(m_loadResWayWebGL,
-                    new GUIContent("WebGL加载方式", "WebGL平台资源加载方式"));
+                    EditorGUILayout.PropertyField(m_loadResWayWebGL,
+                        new GUIContent("WebGL加载方式", "WebGL平台资源加载方式"));
 
-                EditorGUILayout.Space(3);
+                    EditorGUILayout.Space(3);
 
-                // 服务器状态检查
-                bool hasPrimaryServer = !string.IsNullOrEmpty(m_resDownloadPath.stringValue);
-                bool hasFallbackServer = !string.IsNullOrEmpty(m_fallbackResDownloadPath.stringValue);
+                    // 服务器状态检查
+                    bool hasPrimaryServer = !string.IsNullOrEmpty(m_resDownloadPath.stringValue);
+                    bool hasFallbackServer = !string.IsNullOrEmpty(m_fallbackResDownloadPath.stringValue);
 
-                string serverStatus = hasPrimaryServer ? (hasFallbackServer ? "主备服务器已配置" : "仅配置了主服务器") : "未配置资源服务器";
+                    string serverStatus = hasPrimaryServer ? (hasFallbackServer ? "主备服务器已配置" : "仅配置了主服务器") : "未配置资源服务器";
 
-                EditorGUILayout.HelpBox(serverStatus,
-                    hasPrimaryServer ? MessageType.Info : MessageType.Warning);
-            }
-            EditorGUILayout.EndVertical();
-            GUILayout.Space(8);
+                    EditorGUILayout.HelpBox(serverStatus,
+                        hasPrimaryServer ? MessageType.Info : MessageType.Warning);
+                }
+                EditorGUILayout.EndVertical();
+            }, "资源设置", ref m_showResourceSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawAdvancedSettings(UpdateSettings updateSettings)
         {
-            EditorGUILayout.BeginVertical("HelpBox");
+            DrawLayoutFoldoutBox(() =>
             {
-                GUILayout.Label(new GUIContent("打包设置", "构建和部署相关设置"));
-                GUILayout.Space(5);
-                // 自动复制设置
-                bool isAutoAssetCopyToBuildAddress = EditorGUILayout.ToggleLeft(
-                    new GUIContent("自动复制内嵌资源到存放路径", "构建时自动复制StreamingAssets资源文件"),
-                    m_isAutoAssetCopyToBuildAddress.boolValue);
-
-                if (isAutoAssetCopyToBuildAddress != m_isAutoAssetCopyToBuildAddress.boolValue)
+                EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    m_isAutoAssetCopyToBuildAddress.boolValue = isAutoAssetCopyToBuildAddress;
-                }
+                    GUILayout.Label(new GUIContent("打包设置", "构建和部署相关设置"));
+                    GUILayout.Space(5);
+                    // 自动复制设置
+                    bool isAutoAssetCopyToBuildAddress = EditorGUILayout.ToggleLeft(
+                        new GUIContent("自动复制内嵌资源到存放路径", "构建时自动复制StreamingAssets资源文件"),
+                        m_isAutoAssetCopyToBuildAddress.boolValue);
 
-                bool replaceAssetPathWithAddress = EditorGUILayout.ToggleLeft(
-                    new GUIContent("是否使用可寻址资源代替资源路径", "说明：开启此项可以节省运行时清单占用的内存！"),
-                    m_replaceAssetPathWithAddress.boolValue);
-
-                if (replaceAssetPathWithAddress != m_replaceAssetPathWithAddress.boolValue)
-                {
-                    m_replaceAssetPathWithAddress.boolValue = replaceAssetPathWithAddress;
-                }
-
-                bool forceGenerateAtlas = EditorGUILayout.ToggleLeft(
-                    new GUIContent("是否在打AB包前强制刷新图集"),
-                    m_forceGenerateAtlas.boolValue);
-
-                if (forceGenerateAtlas != m_forceGenerateAtlas.boolValue)
-                {
-                    m_forceGenerateAtlas.boolValue = forceGenerateAtlas;
-                }
-
-                EditorGUILayout.Space(3);
-
-                EditorGUILayout.PropertyField(m_packageVersionMode,
-                    new GUIContent("AB包版本模式", "自动使用时间戳或手动指定 YooAsset PackageVersion"));
-
-                if ((PackageVersionMode)m_packageVersionMode.enumValueIndex == PackageVersionMode.Manual)
-                {
-                    EditorGUILayout.PropertyField(m_manualBuildVersion,
-                        new GUIContent("手动AB包版本", "例如 1.1、1.2、1.2.3"));
-                }
-
-                EditorGUILayout.Space(3);
-
-                // 构建地址
-                EditorGUILayout.PropertyField(m_buildAddress,
-                    new GUIContent("内嵌资源存放路径", "StreamingAssets资源文件复制目标地址"));
-
-                EditorGUILayout.Space(3);
-
-                string tips = string.Empty;
-
-                if (m_isAutoAssetCopyToBuildAddress.boolValue)
-                {
-                    tips = "构建时将自动复制StreamingAssets资源到存放路径";
-                }
-                else
-                {
-                    tips = "需要手动处理StreamingAssets资源文件部署";
-                }
-
-                if (m_replaceAssetPathWithAddress.boolValue)
-                {
-                    tips += "\n可寻址资源代替资源路径：启用 (说明：开启此项可以节省运行时清单占用的内存！)";
-                }
-                else
-                {
-                    tips += "\n可寻址资源代替资源路径：禁用";
-                }
-
-                if (m_forceGenerateAtlas.boolValue)
-                {
-                    tips += "\n打AB包前强制刷新所有图集：启用";
-                }
-                else
-                {
-                    tips += "\n打AB包前强制刷新所有图集：禁用";
-                }
-
-                if ((PackageVersionMode)m_packageVersionMode.enumValueIndex == PackageVersionMode.Manual)
-                {
-                    string manualBuildVersion = m_manualBuildVersion.stringValue?.Trim();
-                    if (string.IsNullOrEmpty(manualBuildVersion))
+                    if (isAutoAssetCopyToBuildAddress != m_isAutoAssetCopyToBuildAddress.boolValue)
                     {
-                        tips += "\nAB包版本模式：手动输入，但当前为空，打包时会回退到自动时间戳";
+                        m_isAutoAssetCopyToBuildAddress.boolValue = isAutoAssetCopyToBuildAddress;
+                    }
+
+                    bool replaceAssetPathWithAddress = EditorGUILayout.ToggleLeft(
+                        new GUIContent("是否使用可寻址资源代替资源路径", "说明：开启此项可以节省运行时清单占用的内存！"),
+                        m_replaceAssetPathWithAddress.boolValue);
+
+                    if (replaceAssetPathWithAddress != m_replaceAssetPathWithAddress.boolValue)
+                    {
+                        m_replaceAssetPathWithAddress.boolValue = replaceAssetPathWithAddress;
+                    }
+
+                    bool forceGenerateAtlas = EditorGUILayout.ToggleLeft(
+                        new GUIContent("是否在打AB包前强制刷新图集"),
+                        m_forceGenerateAtlas.boolValue);
+
+                    if (forceGenerateAtlas != m_forceGenerateAtlas.boolValue)
+                    {
+                        m_forceGenerateAtlas.boolValue = forceGenerateAtlas;
+                    }
+
+                    EditorGUILayout.Space(3);
+
+                    EditorGUILayout.PropertyField(m_packageVersionMode,
+                        new GUIContent("AB包版本模式", "自动使用时间戳或手动指定 YooAsset PackageVersion"));
+
+                    if ((PackageVersionMode)m_packageVersionMode.enumValueIndex == PackageVersionMode.Manual)
+                    {
+                        EditorGUILayout.PropertyField(m_manualBuildVersion,
+                            new GUIContent("手动AB包版本", "例如 1.1、1.2、1.2.3"));
+                    }
+
+                    EditorGUILayout.Space(3);
+
+                    // 构建地址
+                    EditorGUILayout.PropertyField(m_buildAddress,
+                        new GUIContent("内嵌资源存放路径", "StreamingAssets资源文件复制目标地址"));
+
+                    EditorGUILayout.Space(3);
+
+                    string tips = string.Empty;
+
+                    if (m_isAutoAssetCopyToBuildAddress.boolValue)
+                    {
+                        tips = "构建时将自动复制StreamingAssets资源到存放路径";
                     }
                     else
                     {
-                        tips += $"\nAB包版本模式：手动输入，当前版本 = {manualBuildVersion}";
+                        tips = "需要手动处理StreamingAssets资源文件部署";
                     }
-                }
-                else
-                {
-                    tips += $"\nAB包版本模式：自动时间戳，本次预期版本 = {updateSettings.GetBuildPackageVersion()}";
-                }
 
-                EditorGUILayout.HelpBox(tips, MessageType.Info);
-            }
-            EditorGUILayout.EndVertical();
-            GUILayout.Space(8);
+                    if (m_replaceAssetPathWithAddress.boolValue)
+                    {
+                        tips += "\n可寻址资源代替资源路径：启用 (说明：开启此项可以节省运行时清单占用的内存！)";
+                    }
+                    else
+                    {
+                        tips += "\n可寻址资源代替资源路径：禁用";
+                    }
+
+                    if (m_forceGenerateAtlas.boolValue)
+                    {
+                        tips += "\n打AB包前强制刷新所有图集：启用";
+                    }
+                    else
+                    {
+                        tips += "\n打AB包前强制刷新所有图集：禁用";
+                    }
+
+                    if ((PackageVersionMode)m_packageVersionMode.enumValueIndex == PackageVersionMode.Manual)
+                    {
+                        string manualBuildVersion = m_manualBuildVersion.stringValue?.Trim();
+                        if (string.IsNullOrEmpty(manualBuildVersion))
+                        {
+                            tips += "\nAB包版本模式：手动输入，但当前为空，打包时会回退到自动时间戳";
+                        }
+                        else
+                        {
+                            tips += $"\nAB包版本模式：手动输入，当前版本 = {manualBuildVersion}";
+                        }
+                    }
+                    else
+                    {
+                        tips += $"\nAB包版本模式：自动时间戳，本次预期版本 = {updateSettings.GetBuildPackageVersion()}";
+                    }
+
+                    EditorGUILayout.HelpBox(tips, MessageType.Info);
+                }
+                EditorGUILayout.EndVertical();
+            }, "打包设置", ref m_showAdvancedSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawUpdateProcedureSettings(UpdateSettings updateSettings)
         {
-            EditorGUILayout.BeginVertical("HelpBox");
+            DrawLayoutFoldoutBox(() =>
             {
-                GUILayout.Label(new GUIContent("热更流程文本设置"));
-                GUILayout.Space(5);
-
-                // 资源包名
-                EditorGUILayout.LabelField("资源包配置", EditorStyles.boldLabel);
-                m_packageNames = GetBuildPackageNames().ToArray();
-                m_packageNameIndex = Array.IndexOf(m_packageNames, m_packageName.stringValue);
-                var setting = AssetBundleCollectorSettingData.Setting;
-                if (m_packageNameIndex < 0)
+                EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    m_packageNameIndex = 0;
-                }
-                m_packageNameIndex = EditorGUILayout.Popup("资源包名", m_packageNameIndex, m_packageNames);
-                if (m_packageName.stringValue != m_packageNames[m_packageNameIndex])
-                {
-                    m_packageName.stringValue = m_packageNames[m_packageNameIndex];
+                    GUILayout.Label(new GUIContent("热更流程文本设置"));
+                    GUILayout.Space(5);
 
-                    var package = setting.GetPackage(m_packageName.stringValue);
-
-                    if (package != null)
+                    // 资源包名
+                    EditorGUILayout.LabelField("资源包配置", EditorStyles.boldLabel);
+                    m_packageNames = GetBuildPackageNames().ToArray();
+                    m_packageNameIndex = Array.IndexOf(m_packageNames, m_packageName.stringValue);
+                    var setting = AssetBundleCollectorSettingData.Setting;
+                    if (m_packageNameIndex < 0)
                     {
-                        m_enableAddressable.boolValue = package.EnableAddressable;
+                        m_packageNameIndex = 0;
                     }
-                }
-
-                bool enableAddressable = EditorGUILayout.ToggleLeft(
-                    new GUIContent("AB资源是否支持可寻址"), m_enableAddressable.boolValue);
-
-                if (enableAddressable != m_enableAddressable.boolValue)
-                {
-                    m_enableAddressable.boolValue = enableAddressable;
-                    var package = setting.GetPackage(m_packageName.stringValue);
-                    if (package != null)
+                    m_packageNameIndex = EditorGUILayout.Popup("资源包名", m_packageNameIndex, m_packageNames);
+                    if (m_packageName.stringValue != m_packageNames[m_packageNameIndex])
                     {
-                        package.EnableAddressable = m_enableAddressable.boolValue;
+                        m_packageName.stringValue = m_packageNames[m_packageNameIndex];
+
+                        var package = setting.GetPackage(m_packageName.stringValue);
+
+                        if (package != null)
+                        {
+                            m_enableAddressable.boolValue = package.EnableAddressable;
+                        }
                     }
-                }
 
-                EditorGUILayout.Space(3);
+                    bool enableAddressable = EditorGUILayout.ToggleLeft(
+                        new GUIContent("AB资源是否支持可寻址"), m_enableAddressable.boolValue);
 
-                // 构建地址
-                EditorGUILayout.PropertyField(m_updateUIDefineConfigPath,
-                    new GUIContent("热更新流程文本配置路径"));
-
-                EditorGUILayout.Space(3);
-
-                string tips = string.Empty;
-
-                if (m_enableAddressable.boolValue)
-                {
-                    tips += $"{m_packageName.stringValue}资源包是否支持可寻址：启用";
-                }
-                else
-                {
-                    tips += $"{m_packageName.stringValue}资源包是否支持可寻址：禁用";
-                }
-
-                bool isEmptyPath = false;
-                bool isExit = false;
-                if (!string.IsNullOrEmpty(m_updateUIDefineConfigPath.stringValue))
-                {
-                    string path = Application.dataPath +  "/Resources/" + m_updateUIDefineConfigPath.stringValue + ".json";
-                    isExit = System.IO.File.Exists(path);
-                    if (!isExit)
+                    if (enableAddressable != m_enableAddressable.boolValue)
                     {
-                        tips += $"\n热更新流程文本配置路径: 没有找到相关的配置文件'Resources/{m_updateUIDefineConfigPath.stringValue}.json'";
+                        m_enableAddressable.boolValue = enableAddressable;
+                        var package = setting.GetPackage(m_packageName.stringValue);
+                        if (package != null)
+                        {
+                            package.EnableAddressable = m_enableAddressable.boolValue;
+                        }
+                    }
+
+                    EditorGUILayout.Space(3);
+
+                    // 构建地址
+                    EditorGUILayout.PropertyField(m_updateUIDefineConfigPath,
+                        new GUIContent("热更新流程文本配置路径"));
+
+                    EditorGUILayout.Space(3);
+
+                    string tips = string.Empty;
+
+                    if (m_enableAddressable.boolValue)
+                    {
+                        tips += $"{m_packageName.stringValue}资源包是否支持可寻址：启用";
                     }
                     else
                     {
-                        tips += $"\n热更新流程文本配置路径: Resources/{m_updateUIDefineConfigPath.stringValue}.json";
+                        tips += $"{m_packageName.stringValue}资源包是否支持可寻址：禁用";
                     }
-                }
-                else
-                {
-                    tips += $"\n热更新流程文本配置路径: 未配置";
-                    isEmptyPath = true;
-                }
 
-                MessageType type = isEmptyPath || !isExit || !m_enableAddressable.boolValue ? MessageType.Warning : MessageType.Info;
-                EditorGUILayout.HelpBox(tips, type);
-            }
-            EditorGUILayout.EndVertical();
-            GUILayout.Space(8);
+                    bool isEmptyPath = false;
+                    bool isExit = false;
+                    if (!string.IsNullOrEmpty(m_updateUIDefineConfigPath.stringValue))
+                    {
+                        string path = Application.dataPath +  "/Resources/" + m_updateUIDefineConfigPath.stringValue + ".json";
+                        isExit = System.IO.File.Exists(path);
+                        if (!isExit)
+                        {
+                            tips += $"\n热更新流程文本配置路径: 没有找到相关的配置文件'Resources/{m_updateUIDefineConfigPath.stringValue}.json'";
+                        }
+                        else
+                        {
+                            tips += $"\n热更新流程文本配置路径: Resources/{m_updateUIDefineConfigPath.stringValue}.json";
+                        }
+                    }
+                    else
+                    {
+                        tips += $"\n热更新流程文本配置路径: 未配置";
+                        isEmptyPath = true;
+                    }
+
+                    MessageType type = isEmptyPath || !isExit || !m_enableAddressable.boolValue ? MessageType.Warning : MessageType.Info;
+                    EditorGUILayout.HelpBox(tips, type);
+                }
+                EditorGUILayout.EndVertical();
+            }, "热更流程设置", ref m_showUpdateProcedureSettings, true);
+
+            EditorGUILayout.Space(5);
         }
 
         private void DrawStatistics(UpdateSettings updateSettings)
         {
-            EditorGUILayout.BeginVertical("Box");
+            DrawLayoutFoldoutBox(() =>
             {
-                EditorGUILayout.LabelField("配置统计", EditorStyles.boldLabel);
-
-                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.BeginVertical("HelpBox");
                 {
-                    EditorGUILayout.LabelField("热更程序集:", GUILayout.Width(100));
-                    EditorGUILayout.LabelField(updateSettings.HotUpdateAssemblies.Count.ToString(),
-                        EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("AOT程序集:", GUILayout.Width(100));
-                    EditorGUILayout.LabelField(updateSettings.AOTMetaAssemblies.Count.ToString(),
-                        EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("主逻辑DLL:", GUILayout.Width(100));
+                    DrawSummaryRow("热更程序集", updateSettings.HotUpdateAssemblies.Count.ToString());
+                    DrawSummaryRow("AOT程序集", updateSettings.AOTMetaAssemblies.Count.ToString());
                     string mainDll = string.IsNullOrEmpty(m_logicMainDllName.stringValue)
                         ? "未设置"
                         : m_logicMainDllName.stringValue;
-                    EditorGUILayout.LabelField(mainDll, EditorStyles.miniLabel);
-                }
-                EditorGUILayout.EndHorizontal();
-
-                EditorGUILayout.BeginHorizontal();
-                {
-                    EditorGUILayout.LabelField("资源服务器:", GUILayout.Width(100));
+                    DrawSummaryRow("主逻辑DLL", mainDll);
                     string serverStatus = string.IsNullOrEmpty(m_resDownloadPath.stringValue) ? "未配置" : "已配置";
-                    EditorGUILayout.LabelField(serverStatus, EditorStyles.miniLabel);
+                    DrawSummaryRow("资源服务器", serverStatus);
                 }
-                EditorGUILayout.EndHorizontal();
+                EditorGUILayout.EndVertical();
+            }, "配置统计", ref m_showStatistics, true);
+
+            EditorGUILayout.Space(5);
+        }
+
+        private void DrawSummaryRow(string label, string value)
+        {
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField(label, GUILayout.Width(100));
+                EditorGUILayout.LabelField(value, EditorStyles.miniLabel);
             }
-            EditorGUILayout.EndVertical();
-            GUILayout.Space(8);
+            EditorGUILayout.EndHorizontal();
+        }
+
+        private void DrawArrayPropertyFoldout(SerializedProperty property, string label, string tooltip, ref bool isOpen)
+        {
+            if (property == null)
+            {
+                return;
+            }
+
+            GUIContent labelContent = new GUIContent($"{label} ({property.arraySize})", tooltip);
+            DrawLayoutFoldoutBox(() =>
+            {
+                EditorGUILayout.BeginVertical("HelpBox");
+                {
+                    EditorGUILayout.PropertyField(property.FindPropertyRelative("Array.size"), new GUIContent("数量"));
+
+                    EditorGUI.indentLevel++;
+                    for (int i = 0; i < property.arraySize; i++)
+                    {
+                        EditorGUILayout.PropertyField(property.GetArrayElementAtIndex(i), new GUIContent($"Element {i}"));
+                    }
+                    EditorGUI.indentLevel--;
+                }
+                EditorGUILayout.EndVertical();
+            }, labelContent, ref isOpen, true);
+        }
+
+        private void DrawLayoutFoldoutBox(Action action, string label, ref bool isOpen, bool isBox = false)
+        {
+            DrawLayoutFoldoutBox(action, new GUIContent(label), ref isOpen, isBox);
+        }
+
+        private void DrawLayoutFoldoutBox(Action action, GUIContent label, ref bool isOpen, bool isBox = false)
+        {
+            bool open = isOpen;
+
+            UnityEditorUtil.LayoutVertical(() =>
+            {
+                bool previousChanged = GUI.changed;
+                EditorGUI.BeginChangeCheck();
+                open = GUILayout.Toggle(open, label, GUI.skin.GetStyle("foldout"), GUILayout.ExpandWidth(true), GUILayout.Height(18));
+                bool foldoutChanged = EditorGUI.EndChangeCheck();
+
+                if (foldoutChanged)
+                {
+                    GUI.changed = previousChanged;
+                }
+
+                if (open)
+                {
+                    action?.Invoke();
+                }
+            }, isBox);
+
+            if (open != isOpen)
+            {
+                isOpen = open;
+                SavePanelStates();
+            }
         }
 
         private void DrawActionButtons(UpdateSettings updateSettings)
         {
-            GUILayout.Space(10);
+            EditorGUILayout.Space(5);
 
-            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.BeginVertical("HelpBox");
             {
-                GUILayout.FlexibleSpace();
-
-                // 同步到HybridCLR按钮
-                var originalColor = GUI.color;
-                GUI.color = m_warningColor;
-
-                if (GUILayout.Button(new GUIContent("同步到HybridCLR", "强制同步程序集配置到HybridCLR"),
-                        GUILayout.Width(140), GUILayout.Height(30)))
+                EditorGUILayout.BeginHorizontal();
                 {
-                    ForceUpdateAssemblies();
-                    Debug.Log("程序集配置已同步到HybridCLR");
+                    GUILayout.FlexibleSpace();
+
+                    // 同步到HybridCLR按钮
+                    var originalColor = GUI.color;
+                    GUI.color = m_warningColor;
+
+                    if (GUILayout.Button(new GUIContent("同步到HybridCLR", "强制同步程序集配置到HybridCLR"),
+                            GUILayout.Width(140), GUILayout.Height(28)))
+                    {
+                        ForceUpdateAssemblies();
+                        Debug.Log("程序集配置已同步到HybridCLR");
+                    }
+
+                    GUI.color = originalColor;
+
+                    GUILayout.Space(10);
+
+                    // 从HybridCLR同步按钮
+                    if (GUILayout.Button(new GUIContent("从HybridCLR同步", "从HybridCLR设置同步程序集"),
+                            GUILayout.Width(140), GUILayout.Height(28)))
+                    {
+                        ForceUpdateAssemblies2();
+                        Debug.Log("已从HybridCLR同步程序集配置");
+                    }
+
+                    GUILayout.Space(10);
+
+                    // 保存配置按钮
+                    GUI.color = m_successColor;
+
+                    if (GUILayout.Button(new GUIContent("保存配置", "保存当前所有设置"),
+                            GUILayout.Width(100), GUILayout.Height(28)))
+                    {
+                        UpdateSettingsInspector.ForceUpdateAssemblies();
+                        // AssetDatabase.SaveAssets();
+                        Debug.Log("热更新配置已保存");
+                    }
+
+                    GUI.color = originalColor;
+
+                    GUILayout.FlexibleSpace();
                 }
-
-                GUI.color = originalColor;
-
-                GUILayout.Space(10);
-
-                // 从HybridCLR同步按钮
-                if (GUILayout.Button(new GUIContent("从HybridCLR同步", "从HybridCLR设置同步程序集"),
-                        GUILayout.Width(140), GUILayout.Height(30)))
-                {
-                    ForceUpdateAssemblies2();
-                    Debug.Log("已从HybridCLR同步程序集配置");
-                }
-
-                GUILayout.Space(10);
-
-                // 保存配置按钮
-                GUI.color = m_successColor;
-
-                if (GUILayout.Button(new GUIContent("保存配置", "保存当前所有设置"),
-                        GUILayout.Width(100), GUILayout.Height(30)))
-                {
-                    UpdateSettingsInspector.ForceUpdateAssemblies();
-                    // AssetDatabase.SaveAssets();
-                    Debug.Log("热更新配置已保存");
-                }
-
-                GUI.color = originalColor;
-
-                GUILayout.FlexibleSpace();
+                EditorGUILayout.EndHorizontal();
             }
-            EditorGUILayout.EndHorizontal();
-            GUILayout.Space(5);
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space(5);
         }
 
         private List<string> GetBuildPackageNames()
@@ -606,6 +702,19 @@ namespace DGame
                 case UpdateNotice.NoNotice: return "静默更新，不显示提示";
                 default: return "未知类型";
             }
+        }
+
+        private void SavePanelStates()
+        {
+            EditorPrefs.SetBool(BASIC_PANEL_KEY, m_showBasicSettings);
+            EditorPrefs.SetBool(ASSEMBLY_PANEL_KEY, m_showAssemblySettings);
+            EditorPrefs.SetBool(HOT_UPDATE_ASSEMBLIES_PANEL_KEY, m_showHotUpdateAssemblies);
+            EditorPrefs.SetBool(AOT_META_ASSEMBLIES_PANEL_KEY, m_showAotMetaAssemblies);
+            EditorPrefs.SetBool(UPDATE_PANEL_KEY, m_showUpdateSettings);
+            EditorPrefs.SetBool(RESOURCE_PANEL_KEY, m_showResourceSettings);
+            EditorPrefs.SetBool(ADVANCED_PANEL_KEY, m_showAdvancedSettings);
+            EditorPrefs.SetBool(UPDATE_PROCEDURE_PANEL_KEY, m_showUpdateProcedureSettings);
+            EditorPrefs.SetBool(STATISTICS_PANEL_KEY, m_showStatistics);
         }
 
         public static void HandleSettingsChange(UpdateSettings updateSettings)
