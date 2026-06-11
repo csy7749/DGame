@@ -14,9 +14,13 @@ namespace DGame
 
             public override void OnRelease()
             {
-                Cts?.Cancel();
-                Cts?.Dispose();
+                var cts = Cts;
                 Cts = null;
+                if (cts != null)
+                {
+                    cts.Cancel();
+                    cts.Dispose();
+                }
                 Location = string.Empty;
             }
         }

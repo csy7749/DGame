@@ -13,7 +13,7 @@ namespace DGame
             /// <summary>
             /// 资源句柄
             /// </summary>
-            private AssetHandle m_assetHandle = null;
+            private HandleBase m_assetHandle = null;
             private ResourceModule m_resourceModule;
 
             public static AssetObject Create(string name, object target,
@@ -31,6 +31,10 @@ namespace DGame
 
                 AssetObject assetObject = MemoryPool.Spawn<AssetObject>();
                 assetObject.Initialize(name, target);
+                if (assetHandle is not HandleBase handleBase)
+                {
+                    throw new DGameException($"Unsupported handle type: {assetHandle.GetType()}.");
+                }
                 assetObject.m_assetHandle = assetHandle as AssetHandle;
                 assetObject.m_resourceModule = resourceModule;
                 return assetObject;
@@ -47,9 +51,10 @@ namespace DGame
                 if (!isDestroy)
                 {
                     // 释放资源句柄
-                    if (m_assetHandle != null && m_assetHandle.IsValid)
+                    var handle = m_assetHandle;
+                    if (handle != null && handle.IsValid)
                     {
-                        m_assetHandle.Dispose();
+                        handle.Dispose();
                     }
                     m_assetHandle = null;
                 }
