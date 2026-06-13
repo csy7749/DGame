@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: PSD2UGUISettings
   m_EditorClassIdentifier: 
   resolution: {x: 750, y: 1334}
+  textComponentType: 0
   textComponentTypeName: GameLogic.UIText
+  textMeshProComponentTypeName: TMPro.TextMeshProUGUI
   imageComponentTypeName: GameLogic.UIImage
   buttonComponentTypeName: GameLogic.UIButton
   rawImageComponentTypeName: 
@@ -26,3 +28,6 @@ MonoBehaviour:
   - Assets/BundleAssets/UIRaw/Raw
   defaultFontPath: Assets/BundleAssets/Fonts/SmileySans.ttf
   fontPaths: []
+  defaultTmpFontAssetPath: Assets/Plugins/TextMesh Pro/Resources/Fonts & Materials/LiberationSans
+    SDF.asset
+  tmpFontAssetPaths: []
