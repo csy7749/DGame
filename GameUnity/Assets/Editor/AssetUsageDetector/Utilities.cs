@@ -48,7 +48,11 @@ namespace AssetUsageDetectorNamespace
 		private static readonly HashSet<string> folderContentsSet = new HashSet<string>();
 
 #if UNITY_2018_3_OR_NEWER
+#if UNITY_6000_0_OR_NEWER
+		private static EntityId previousPingedPrefabInstanceId;
+#else
 		private static int previousPingedPrefabInstanceId;
+#endif
 		private static double previousPingedPrefabPingTime;
 #endif
 
@@ -235,14 +239,19 @@ namespace AssetUsageDetectorNamespace
 					var openPrefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
 
 					// Try to open the prefab stage of pinged prefabs if they are double clicked
-					if( previousPingedPrefabInstanceId == objTR.GetInstanceID() && EditorApplication.timeSinceStartup - previousPingedPrefabPingTime <= 0.3f &&
+#if UNITY_6000_0_OR_NEWER
+					EntityId prefabEntityId = objTR.GetEntityId();
+#else
+					int prefabEntityId = objTR.GetInstanceID();
+#endif
+					if( previousPingedPrefabInstanceId == prefabEntityId && EditorApplication.timeSinceStartup - previousPingedPrefabPingTime <= 0.3f &&
 						( openPrefabStage == null || !openPrefabStage.stageHandle.IsValid() || assetPath != openPrefabStage.prefabAssetPath ) )
 					{
 						AssetDatabase.OpenAsset( objTR.gameObject );
 						openPrefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
 					}
 
-					previousPingedPrefabInstanceId = objTR.GetInstanceID();
+					previousPingedPrefabInstanceId = prefabEntityId;
 					previousPingedPrefabPingTime = EditorApplication.timeSinceStartup;
 
 					if( openPrefabStage != null && openPrefabStage.stageHandle.IsValid() && assetPath == openPrefabStage.prefabAssetPath )

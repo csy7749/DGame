@@ -5,8 +5,6 @@ using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-#pragma warning disable CS0618 // 禁用过时警告
-
 namespace DGame
 {
     internal sealed class AssetTreeView : TreeView
@@ -216,5 +214,3 @@ namespace DGame
         }
     }
 }
-
-#pragma warning disable CS0618 // 禁用过时警告
