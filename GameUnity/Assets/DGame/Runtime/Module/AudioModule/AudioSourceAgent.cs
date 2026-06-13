@@ -40,7 +40,11 @@ namespace DGame
         private const float FADEOUT_DURATION = 0.2f;
         private const float FADEIN_DURATION = 0.2f;
 
+#if UNITY_6000_0_OR_NEWER
+        private EntityId m_instanceID;
+#else
         private int m_instanceID;
+#endif
         private AudioSource m_audioSource;
         private AudioData m_audioData;
         private IAudioModule m_audioModule;
@@ -59,7 +63,11 @@ namespace DGame
         /// <summary>
         /// 实例化ID
         /// </summary>
+#if UNITY_6000_0_OR_NEWER
+        private EntityId InstanceID => m_instanceID;
+#else
         private int InstanceID => m_instanceID;
+#endif
 
         /// <summary>
         /// 资源操作句柄
@@ -167,7 +175,11 @@ namespace DGame
             m_audioSource.rolloffMode = audioGroupCategory.AudioGroupConfig.audioRolloffMode;
             m_audioSource.minDistance = audioGroupCategory.AudioGroupConfig.minDistance;
             m_audioSource.maxDistance = audioGroupCategory.AudioGroupConfig.maxDistance;
+#if UNITY_6000_0_OR_NEWER
+            m_instanceID = m_audioSource.GetEntityId();
+#else
             m_instanceID = m_audioSource.GetInstanceID();
+#endif
         }
 
         public void Load(string path, bool async, bool inPool = false)
