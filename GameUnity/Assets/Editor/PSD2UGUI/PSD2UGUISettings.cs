@@ -6,6 +6,14 @@ using UnityEngine;
 
 namespace DGame.PSD2UGUI
 {
+    public enum PSD2UGUITextComponentType
+    {
+        Text,
+#if TextMeshPro
+        TextMeshPro,
+#endif
+    }
+
     /// <summary>
     /// 字体名称 → 字体资源路径 的映射条目
     /// </summary>
@@ -27,10 +35,19 @@ namespace DGame.PSD2UGUI
         [Header("UI 分辨率")]
         public Vector2 resolution = new Vector2(750, 1334);
 
-        [Header("组件类名(支持带命名空间, 例如 GameLogic.UIText; 留空则使用 Unity 自带的组件)")]
+        [Header("文本组件")]
+        [Tooltip("PSD 文本图层生成的组件类型")]
+        public PSD2UGUITextComponentType textComponentType = PSD2UGUITextComponentType.Text;
+
         [Tooltip("文本组件类名, 必须派生自 UnityEngine.UI.Text")]
         public string textComponentTypeName = "GameLogic.UIText";
 
+#if TextMeshPro
+        [Tooltip("TextMeshPro 组件类名, 必须派生自 TMPro.TMP_Text")]
+        public string textMeshProComponentTypeName = "TMPro.TextMeshProUGUI";
+#endif
+
+        [Header("组件类名(支持带命名空间, 例如 GameLogic.UIText; 留空则使用 Unity 自带的组件)")]
         [Tooltip("图片组件类名, 必须派生自 UnityEngine.UI.Image")]
         public string imageComponentTypeName = "GameLogic.UIImage";
 
@@ -57,7 +74,16 @@ namespace DGame.PSD2UGUI
         public string defaultFontPath = "Assets/BundleAssets/Fonts/SmileySans.ttf";
         public List<FontPathEntry> fontPaths = new List<FontPathEntry>();
 
+#if TextMeshPro
+        [Header("TextMeshPro 字体设置")]
+        public string defaultTmpFontAssetPath = "Assets/Plugins/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
+        public List<FontPathEntry> tmpFontAssetPaths = new List<FontPathEntry>();
+#endif
+
         private Dictionary<string, string> m_fontPathCache;
+#if TextMeshPro
+        private Dictionary<string, string> m_tmpFontPathCache;
+#endif
 
         public string GetFontPath(string fontName)
         {
@@ -79,9 +105,34 @@ namespace DGame.PSD2UGUI
             return m_fontPathCache.TryGetValue(fontName, out string p) ? p : defaultFontPath;
         }
 
+#if TextMeshPro
+        public string GetTmpFontAssetPath(string fontName)
+        {
+            if (string.IsNullOrEmpty(fontName))
+            {
+                return defaultTmpFontAssetPath;
+            }
+            if (m_tmpFontPathCache == null)
+            {
+                m_tmpFontPathCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var entry in tmpFontAssetPaths)
+                {
+                    if (entry != null && !string.IsNullOrEmpty(entry.fontName))
+                    {
+                        m_tmpFontPathCache[entry.fontName] = entry.assetPath;
+                    }
+                }
+            }
+            return m_tmpFontPathCache.TryGetValue(fontName, out string p) ? p : defaultTmpFontAssetPath;
+        }
+#endif
+
         public void ClearCache()
         {
             m_fontPathCache = null;
+#if TextMeshPro
+            m_tmpFontPathCache = null;
+#endif
         }
 
         private static PSD2UGUISettings s_instance;

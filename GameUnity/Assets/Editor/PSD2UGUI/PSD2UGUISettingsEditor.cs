@@ -3,16 +3,25 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+#if TextMeshPro
+using TMPro;
+#endif
+
 namespace DGame.PSD2UGUI
 {
     /// <summary>
     /// PSD2UGUISettings 的自定义 Inspector：
     /// 文件夹字段改为 DefaultAsset ObjectField（只接受 Project 中的文件夹）；
-    /// 字体路径改为 Font ObjectField。
+    /// 字体路径改为 Unity Font / TMP_FontAsset ObjectField。
     /// </summary>
     [CustomEditor(typeof(PSD2UGUISettings))]
     public class PSD2UGUISettingsEditor : UnityEditor.Editor
     {
+#if TextMeshPro
+        private int m_textSettingsViewIndex;
+        private static readonly string[] s_textSettingsTabs = { "Unity Text 设置", "TextMeshPro 设置" };
+#endif
+
         private static readonly HashSet<string> FolderArrayProps = new HashSet<string>
         {
             "spriteSearchFolders",
@@ -24,7 +33,12 @@ namespace DGame.PSD2UGUI
         /// </summary>
         private static readonly Dictionary<string, string> LabelMap = new Dictionary<string, string>
         {
+            { "resolution", "UI 分辨率" },
+            { "textComponentType", "文本组件类型" },
             { "textComponentTypeName", "文本组件名" },
+#if TextMeshPro
+            { "textMeshProComponentTypeName", "TextMeshPro 组件名" },
+#endif
             { "imageComponentTypeName", "图片组件名" },
             { "buttonComponentTypeName", "按钮组件名" },
             { "rawImageComponentTypeName", "RawImage 组件名" },
@@ -35,15 +49,31 @@ namespace DGame.PSD2UGUI
             { "textureSearchFolders", "Texture 查找路径" },
             { "defaultFontPath", "默认字体" },
             { "fontPaths", "字体映射" },
+#if TextMeshPro
+            { "defaultTmpFontAssetPath", "默认 TMP 字体" },
+            { "tmpFontAssetPaths", "TMP 字体映射" },
+#endif
         };
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
+            EditorGUILayout.Space(4);
+#if TextMeshPro
+            DrawTextSettingsSwitch();
+#endif
             var iter = serializedObject.GetIterator();
             iter.NextVisible(true); // m_Script
             while (iter.NextVisible(false))
             {
+                if (iter.name == "textComponentType")
+                {
+                    continue;
+                }
+                if (!ShouldDrawProperty(iter.name))
+                {
+                    continue;
+                }
                 if (FolderArrayProps.Contains(iter.name))
                 {
                     DrawFolderArray(iter);
@@ -54,11 +84,23 @@ namespace DGame.PSD2UGUI
                 }
                 else if (iter.name == "fontPaths")
                 {
-                    DrawFontPathList(iter);
+                    DrawFontPathList<Font>(iter, "PSD 字体名 → Unity Font");
+                }
+                else if (iter.name == "defaultTmpFontAssetPath")
+                {
+#if TextMeshPro
+                    DrawAssetPathField<TMP_FontAsset>(iter, GetLabel(iter));
+#endif
+                }
+                else if (iter.name == "tmpFontAssetPaths")
+                {
+#if TextMeshPro
+                    DrawFontPathList<TMP_FontAsset>(iter, "PSD 字体名 → TMP_FontAsset");
+#endif
                 }
                 else if (iter.name == "resolution")
                 {
-                    EditorGUILayout.PropertyField(iter, GUIContent.none, true);
+                    EditorGUILayout.PropertyField(iter, GetLabel(iter), true);
                 }
                 else
                 {
@@ -66,6 +108,38 @@ namespace DGame.PSD2UGUI
                 }
             }
             serializedObject.ApplyModifiedProperties();
+        }
+
+#if TextMeshPro
+        private void DrawTextSettingsSwitch()
+        {
+            EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+            EditorGUILayout.LabelField("文本配置显示", EditorStyles.boldLabel);
+            m_textSettingsViewIndex = GUILayout.Toolbar(m_textSettingsViewIndex, s_textSettingsTabs, GUILayout.Height(24));
+            EditorGUILayout.HelpBox("这里只切换设置页显示，不影响主界面生成使用的文本组件类型。", MessageType.None);
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Space(4);
+        }
+#endif
+
+        private bool ShouldDrawProperty(string propertyName)
+        {
+#if TextMeshPro
+            bool showTextSettings = m_textSettingsViewIndex == 0;
+            if (propertyName == "textComponentTypeName" ||
+                propertyName == "defaultFontPath" ||
+                propertyName == "fontPaths")
+            {
+                return showTextSettings;
+            }
+            if (propertyName == "textMeshProComponentTypeName" ||
+                propertyName == "defaultTmpFontAssetPath" ||
+                propertyName == "tmpFontAssetPaths")
+            {
+                return !showTextSettings;
+            }
+#endif
+            return true;
         }
 
         private static GUIContent GetLabel(SerializedProperty prop)
@@ -142,9 +216,10 @@ namespace DGame.PSD2UGUI
             }
         }
 
-        private void DrawFontPathList(SerializedProperty prop)
+        private void DrawFontPathList<T>(SerializedProperty prop, string subtitle) where T : Object
         {
-            EditorGUILayout.LabelField(GetLabel(prop) + " (PSD 字体名 → Unity Font)", EditorStyles.boldLabel);
+            var label = GetLabel(prop);
+            EditorGUILayout.LabelField($"{label.text} ({subtitle})", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
             int removeIdx = -1;
@@ -159,9 +234,9 @@ namespace DGame.PSD2UGUI
 
                 var current = string.IsNullOrEmpty(pathProp.stringValue)
                     ? null
-                    : AssetDatabase.LoadAssetAtPath<Font>(pathProp.stringValue);
+                    : AssetDatabase.LoadAssetAtPath<T>(pathProp.stringValue);
                 EditorGUI.BeginChangeCheck();
-                var newFont = (Font)EditorGUILayout.ObjectField(current, typeof(Font), false);
+                var newFont = (T)EditorGUILayout.ObjectField(current, typeof(T), false);
                 if (EditorGUI.EndChangeCheck())
                 {
                     pathProp.stringValue = newFont == null ? "" : AssetDatabase.GetAssetPath(newFont);
