@@ -6,6 +6,9 @@ using UnityEngine;
 #if TextMeshPro
 using TMPro;
 #endif
+#if UNITEXT
+using LightSide;
+#endif
 
 namespace DGame.PSD2UGUI
 {
@@ -17,9 +20,28 @@ namespace DGame.PSD2UGUI
     [CustomEditor(typeof(PSD2UGUISettings))]
     public class PSD2UGUISettingsEditor : UnityEditor.Editor
     {
-#if TextMeshPro
+#if TextMeshPro || UNITEXT
         private int m_textSettingsViewIndex;
-        private static readonly string[] s_textSettingsTabs = { "Unity Text 设置", "TextMeshPro 设置" };
+        private static readonly string[] s_textSettingsTabs =
+        {
+            "Unity Text 设置",
+#if TextMeshPro
+            "TextMeshPro 设置",
+#endif
+#if UNITEXT
+            "UniText 设置",
+#endif
+        };
+#endif
+#if TextMeshPro
+        private const int TextMeshProSettingsIndex = 1;
+#endif
+#if UNITEXT
+#if TextMeshPro
+        private const int UniTextSettingsIndex = 2;
+#else
+        private const int UniTextSettingsIndex = 1;
+#endif
 #endif
 
         private static readonly HashSet<string> FolderArrayProps = new HashSet<string>
@@ -39,6 +61,9 @@ namespace DGame.PSD2UGUI
 #if TextMeshPro
             { "textMeshProComponentTypeName", "TextMeshPro 组件名" },
 #endif
+#if UNITEXT
+            { "uniTextComponentTypeName", "UniText 组件名" },
+#endif
             { "imageComponentTypeName", "图片组件名" },
             { "buttonComponentTypeName", "按钮组件名" },
             { "rawImageComponentTypeName", "RawImage 组件名" },
@@ -53,13 +78,17 @@ namespace DGame.PSD2UGUI
             { "defaultTmpFontAssetPath", "默认 TMP 字体" },
             { "tmpFontAssetPaths", "TMP 字体映射" },
 #endif
+#if UNITEXT
+            { "defaultUniTextFontAssetPath", "默认 UniText 字体" },
+            { "uniTextFontAssetPaths", "UniText 字体映射" },
+#endif
         };
 
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
             EditorGUILayout.Space(4);
-#if TextMeshPro
+#if TextMeshPro || UNITEXT
             DrawTextSettingsSwitch();
 #endif
             var iter = serializedObject.GetIterator();
@@ -98,6 +127,18 @@ namespace DGame.PSD2UGUI
                     DrawFontPathList<TMP_FontAsset>(iter, "PSD 字体名 → TMP_FontAsset");
 #endif
                 }
+                else if (iter.name == "defaultUniTextFontAssetPath")
+                {
+#if UNITEXT
+                    DrawAssetPathField<UniTextFont>(iter, GetLabel(iter));
+#endif
+                }
+                else if (iter.name == "uniTextFontAssetPaths")
+                {
+#if UNITEXT
+                    DrawFontPathList<UniTextFont>(iter, "PSD 字体名 → UniTextFont");
+#endif
+                }
                 else if (iter.name == "resolution")
                 {
                     EditorGUILayout.PropertyField(iter, GetLabel(iter), true);
@@ -110,11 +151,12 @@ namespace DGame.PSD2UGUI
             serializedObject.ApplyModifiedProperties();
         }
 
-#if TextMeshPro
+#if TextMeshPro || UNITEXT
         private void DrawTextSettingsSwitch()
         {
             EditorGUILayout.BeginVertical(EditorStyles.helpBox);
             EditorGUILayout.LabelField("文本配置显示", EditorStyles.boldLabel);
+            m_textSettingsViewIndex = Mathf.Clamp(m_textSettingsViewIndex, 0, s_textSettingsTabs.Length - 1);
             m_textSettingsViewIndex = GUILayout.Toolbar(m_textSettingsViewIndex, s_textSettingsTabs, GUILayout.Height(24));
             EditorGUILayout.HelpBox("这里只切换设置页显示，不影响主界面生成使用的文本组件类型。", MessageType.None);
             EditorGUILayout.EndVertical();
@@ -124,7 +166,7 @@ namespace DGame.PSD2UGUI
 
         private bool ShouldDrawProperty(string propertyName)
         {
-#if TextMeshPro
+#if TextMeshPro || UNITEXT
             bool showTextSettings = m_textSettingsViewIndex == 0;
             if (propertyName == "textComponentTypeName" ||
                 propertyName == "defaultFontPath" ||
@@ -132,11 +174,21 @@ namespace DGame.PSD2UGUI
             {
                 return showTextSettings;
             }
+#endif
+#if TextMeshPro
             if (propertyName == "textMeshProComponentTypeName" ||
                 propertyName == "defaultTmpFontAssetPath" ||
                 propertyName == "tmpFontAssetPaths")
             {
-                return !showTextSettings;
+                return m_textSettingsViewIndex == TextMeshProSettingsIndex;
+            }
+#endif
+#if UNITEXT
+            if (propertyName == "uniTextComponentTypeName" ||
+                propertyName == "defaultUniTextFontAssetPath" ||
+                propertyName == "uniTextFontAssetPaths")
+            {
+                return m_textSettingsViewIndex == UniTextSettingsIndex;
             }
 #endif
             return true;

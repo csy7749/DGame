@@ -16,6 +16,7 @@ MonoBehaviour:
   textComponentType: 0
   textComponentTypeName: GameLogic.UIText
   textMeshProComponentTypeName: TMPro.TextMeshProUGUI
+  uniTextComponentTypeName: LightSide.UniText
   imageComponentTypeName: GameLogic.UIImage
   buttonComponentTypeName: GameLogic.UIButton
   rawImageComponentTypeName: 
@@ -31,3 +32,5 @@ MonoBehaviour:
   defaultTmpFontAssetPath: Assets/Plugins/TextMesh Pro/Resources/Fonts & Materials/LiberationSans
     SDF.asset
   tmpFontAssetPaths: []
+  defaultUniTextFontAssetPath:
+  uniTextFontAssetPaths: []
