@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using UnityEngine.Internal;
 using Cysharp.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -416,7 +415,7 @@ namespace DGame
             {
                 if (!comp.TryGetComponent<T>(out var ret))
                 {
-                    ret = comp.AddComponent<T>();
+                    ret = comp.gameObject.AddComponent<T>();
                 }
                 return ret;
             }
