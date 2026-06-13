@@ -12,6 +12,9 @@ namespace DGame.PSD2UGUI
 #if TextMeshPro
         TextMeshPro,
 #endif
+#if UNITEXT
+        UniText,
+#endif
     }
 
     /// <summary>
@@ -46,6 +49,10 @@ namespace DGame.PSD2UGUI
         [Tooltip("TextMeshPro 组件类名, 必须派生自 TMPro.TMP_Text")]
         public string textMeshProComponentTypeName = "TMPro.TextMeshProUGUI";
 #endif
+#if UNITEXT
+        [Tooltip("UniText 组件类名, 必须派生自 LightSide.UniTextBase")]
+        public string uniTextComponentTypeName = "LightSide.UniText";
+#endif
 
         [Header("组件类名(支持带命名空间, 例如 GameLogic.UIText; 留空则使用 Unity 自带的组件)")]
         [Tooltip("图片组件类名, 必须派生自 UnityEngine.UI.Image")]
@@ -79,10 +86,18 @@ namespace DGame.PSD2UGUI
         public string defaultTmpFontAssetPath = "Assets/Plugins/TextMesh Pro/Resources/Fonts & Materials/LiberationSans SDF.asset";
         public List<FontPathEntry> tmpFontAssetPaths = new List<FontPathEntry>();
 #endif
+#if UNITEXT
+        [Header("UniText 字体设置")]
+        public string defaultUniTextFontAssetPath = "";
+        public List<FontPathEntry> uniTextFontAssetPaths = new List<FontPathEntry>();
+#endif
 
         private Dictionary<string, string> m_fontPathCache;
 #if TextMeshPro
         private Dictionary<string, string> m_tmpFontPathCache;
+#endif
+#if UNITEXT
+        private Dictionary<string, string> m_uniTextFontPathCache;
 #endif
 
         public string GetFontPath(string fontName)
@@ -127,11 +142,36 @@ namespace DGame.PSD2UGUI
         }
 #endif
 
+#if UNITEXT
+        public string GetUniTextFontAssetPath(string fontName)
+        {
+            if (string.IsNullOrEmpty(fontName))
+            {
+                return defaultUniTextFontAssetPath;
+            }
+            if (m_uniTextFontPathCache == null)
+            {
+                m_uniTextFontPathCache = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var entry in uniTextFontAssetPaths)
+                {
+                    if (entry != null && !string.IsNullOrEmpty(entry.fontName))
+                    {
+                        m_uniTextFontPathCache[entry.fontName] = entry.assetPath;
+                    }
+                }
+            }
+            return m_uniTextFontPathCache.TryGetValue(fontName, out string p) ? p : defaultUniTextFontAssetPath;
+        }
+#endif
+
         public void ClearCache()
         {
             m_fontPathCache = null;
 #if TextMeshPro
             m_tmpFontPathCache = null;
+#endif
+#if UNITEXT
+            m_uniTextFontPathCache = null;
 #endif
         }
 

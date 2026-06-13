@@ -15,6 +15,9 @@ using Font = UnityEngine.Font;
 #if TextMeshPro
 using TMPro;
 #endif
+#if UNITEXT
+using LightSide;
+#endif
 
 namespace DGame.PSD2UGUI
 {
@@ -37,9 +40,16 @@ namespace DGame.PSD2UGUI
         private int m_tabIndex;
         private static readonly string[] s_tabs = { "PSD转UI", "设置" };
         private const string TextMeshProDefine = "TextMeshPro";
+        private static readonly string[] s_textComponentTabs =
+        {
+            "Unity Text",
 #if TextMeshPro
-        private static readonly string[] s_textComponentTabs = { "Unity Text", "TextMeshPro" };
+            "TextMeshPro",
 #endif
+#if UNITEXT
+            "UniText",
+#endif
+        };
         private static readonly Color s_headerColor = new Color(0.4f, 0.6f, 0.8f);
 
         [MenuItem("DGame Tools/UI/PSD转UI &h")]
@@ -215,10 +225,13 @@ namespace DGame.PSD2UGUI
             EditorGUILayout.LabelField("文本组件", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
-#if TextMeshPro
-            int newType = GUILayout.Toolbar((int)settings.textComponentType, s_textComponentTabs, GUILayout.Height(24));
-#else
-            int newType = 0;
+            int currentType = (int)settings.textComponentType;
+            if (currentType < 0 || currentType >= s_textComponentTabs.Length)
+            {
+                currentType = 0;
+            }
+            int newType = GUILayout.Toolbar(currentType, s_textComponentTabs, GUILayout.Height(24));
+#if !TextMeshPro
             EditorGUILayout.HelpBox($"当前未定义 TextMeshPro 编译符号，生成时将使用 {GetDisplayComponentName(settings.textComponentTypeName, typeof(Text))}。如果需要支持 TextMeshPro，点击下方添加按钮。", MessageType.Warning);
             DrawAddTextMeshProDefineButton();
 #endif
@@ -231,15 +244,26 @@ namespace DGame.PSD2UGUI
                 settings.ClearCache();
             }
 
-#if TextMeshPro
-            string tip = settings.textComponentType == PSD2UGUITextComponentType.TextMeshPro
-                ? $"使用 {GetDisplayComponentName(settings.textMeshProComponentTypeName, typeof(TextMeshProUGUI))}，字体走 TMP_FontAsset 映射。"
-                : $"使用 {GetDisplayComponentName(settings.textComponentTypeName, typeof(Text))}，字体走 Unity Font 映射。";
-#else
-            string tip = $"使用 {GetDisplayComponentName(settings.textComponentTypeName, typeof(Text))}，字体走 Unity Font 映射。";
-#endif
+            string tip = GetTextComponentTip(settings);
             EditorGUILayout.HelpBox(tip, MessageType.None);
             EditorGUILayout.EndVertical();
+        }
+
+        private static string GetTextComponentTip(PSD2UGUISettings settings)
+        {
+#if TextMeshPro
+            if (settings.textComponentType == PSD2UGUITextComponentType.TextMeshPro)
+            {
+                return $"使用 {GetDisplayComponentName(settings.textMeshProComponentTypeName, typeof(TextMeshProUGUI))}，字体走 TMP_FontAsset 映射。";
+            }
+#endif
+#if UNITEXT
+            if (settings.textComponentType == PSD2UGUITextComponentType.UniText)
+            {
+                return $"使用 {GetDisplayComponentName(settings.uniTextComponentTypeName, typeof(UniText))}，字体走 UniTextFont 映射。";
+            }
+#endif
+            return $"使用 {GetDisplayComponentName(settings.textComponentTypeName, typeof(Text))}，字体走 Unity Font 映射。";
         }
 
         private static string GetDisplayComponentName(string typeName, Type fallback)
@@ -496,6 +520,13 @@ namespace DGame.PSD2UGUI
                 return;
             }
 #endif
+#if UNITEXT
+            if (settings.textComponentType == PSD2UGUITextComponentType.UniText)
+            {
+                SetUniTextData(go, settings);
+                return;
+            }
+#endif
 
             SetUnityTextData(go, settings);
         }
@@ -504,6 +535,9 @@ namespace DGame.PSD2UGUI
         {
 #if TextMeshPro
             RemoveComponents<TMP_Text>(go);
+#endif
+#if UNITEXT
+            RemoveComponents<UniTextBase>(go);
 #endif
             var textType = ComponentTypeResolver.Resolve(settings.textComponentTypeName, typeof(Text));
             var text = GetOrAddComponentByType(go, textType) as Text;
@@ -554,6 +588,9 @@ namespace DGame.PSD2UGUI
         private void SetTextMeshProData(GameObject go, PSD2UGUISettings settings)
         {
             RemoveComponents<Text>(go);
+#if UNITEXT
+            RemoveComponents<UniTextBase>(go);
+#endif
 
             var tmpType = ComponentTypeResolver.Resolve(settings.textMeshProComponentTypeName, typeof(TextMeshProUGUI));
             var text = GetOrAddComponentByType(go, tmpType) as TMP_Text;
@@ -704,6 +741,143 @@ namespace DGame.PSD2UGUI
             {
                 material.SetFloat(propertyName, value);
             }
+        }
+#endif
+
+#if UNITEXT
+        private void SetUniTextData(GameObject go, PSD2UGUISettings settings)
+        {
+            RemoveComponents<Text>(go);
+#if TextMeshPro
+            RemoveComponents<TMP_Text>(go);
+#endif
+
+            var uniTextType = ComponentTypeResolver.Resolve(settings.uniTextComponentTypeName, typeof(UniText));
+            var text = GetOrAddComponentByType(go, uniTextType) as UniTextBase;
+            if (text == null)
+            {
+                Debug.LogError($"[PSD2UGUI] UniText 组件类型 {settings.uniTextComponentTypeName} 不是 UniTextBase 派生类");
+                return;
+            }
+
+            string fontAssetPath = settings.GetUniTextFontAssetPath(m_attr.fontName);
+            if (!string.IsNullOrEmpty(fontAssetPath))
+            {
+                var fontAsset = AssetDatabase.LoadAssetAtPath<UniTextFont>(fontAssetPath);
+                if (fontAsset != null)
+                {
+                    text.Font = fontAsset;
+                }
+            }
+
+            text.FontSize = m_attr.fontSize;
+            text.color = m_attr.color;
+            text.raycastTarget = false;
+            ApplyUniTextFontStyle(text);
+
+            if (!m_notText)
+            {
+                text.WordWrap = false;
+                text.HorizontalAlignment = ConvertToUniTextHorizontalAlignment(m_attr.alignType);
+                text.VerticalAlignment = VerticalAlignment.Middle;
+                text.Text = m_attr.textStr;
+            }
+
+            ApplyUniTextGradient(text);
+            ApplyUniTextOutline(text, m_attr.outline, m_attr.outlineColor, m_attr.outlineSize);
+            ApplyUniTextShadow(text, m_attr.shadow, m_attr.shadowColor, m_attr.shadowDis);
+        }
+
+        private static HorizontalAlignment ConvertToUniTextHorizontalAlignment(FontAlignType alignType)
+        {
+            switch (alignType)
+            {
+                case FontAlignType.Left:
+                    return HorizontalAlignment.Left;
+                case FontAlignType.Right:
+                    return HorizontalAlignment.Right;
+                default:
+                    return HorizontalAlignment.Center;
+            }
+        }
+
+        private void ApplyUniTextFontStyle(UniTextBase text)
+        {
+            text.ClearWholeText<BoldModifier>();
+            text.ClearWholeText<ItalicModifier>();
+
+            switch (m_attr.fontStyle)
+            {
+                case FontStyle.Bold:
+                    text.SetWholeText<BoldModifier>();
+                    break;
+                case FontStyle.Italic:
+                    text.SetWholeText<ItalicModifier>();
+                    break;
+                case FontStyle.BoldAndItalic:
+                    text.SetWholeText<BoldModifier>();
+                    text.SetWholeText<ItalicModifier>();
+                    break;
+            }
+        }
+
+        private void ApplyUniTextGradient(UniTextBase text)
+        {
+            text.ClearWholeText<GradientModifier>();
+            if (m_attr.gradient == null || m_attr.gradient.Count == 0)
+            {
+                return;
+            }
+
+            Color a = m_attr.gradient[0];
+            Color b = m_attr.gradient[Mathf.Min(1, m_attr.gradient.Count - 1)];
+            var gradient = new Gradient();
+            gradient.SetKeys(
+                new[]
+                {
+                    new GradientColorKey(a, 0f),
+                    new GradientColorKey(b, 1f),
+                },
+                new[]
+                {
+                    new GradientAlphaKey(a.a, 0f),
+                    new GradientAlphaKey(b.a, 1f),
+                });
+
+            var provider = new InlineGradientProvider();
+            const string GradientName = "psd2ugui";
+            provider.Add(new UniTextGradients.NamedGradient { name = GradientName, gradient = gradient });
+            var modifier = new GradientModifier { Provider = provider };
+            text.SetWholeText(typeof(GradientModifier), $"{GradientName},linear,{m_attr.gradientAngle}", () => modifier);
+        }
+
+        private void ApplyUniTextOutline(UniTextBase text, bool enabled, Color color, int size)
+        {
+            text.ClearWholeText<OutlineModifier>();
+            if (!enabled)
+            {
+                return;
+            }
+
+            var modifier = new OutlineModifier { FixedPixelSize = true };
+            text.SetWholeText(typeof(OutlineModifier), $"{ToUniTextColor(color)},{Mathf.Max(0, size)}", () => modifier);
+        }
+
+        private void ApplyUniTextShadow(UniTextBase text, bool enabled, Color color, Vector2 dis)
+        {
+            text.ClearWholeText<ShadowModifier>();
+            if (!enabled)
+            {
+                return;
+            }
+
+            var modifier = new ShadowModifier { FixedPixelSize = true };
+            text.SetWholeText(typeof(ShadowModifier), $"0,{ToUniTextColor(color)},{dis.x},{dis.y},0", () => modifier);
+        }
+
+        private static string ToUniTextColor(Color color)
+        {
+            return $"#{ColorUtility.ToHtmlStringRGBA(color)}";
         }
 #endif
 
