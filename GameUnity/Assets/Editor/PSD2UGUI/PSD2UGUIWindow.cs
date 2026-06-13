@@ -1,4 +1,6 @@
 #if UNITY_EDITOR
+#pragma warning disable CS0618
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -452,9 +454,18 @@ namespace DGame.PSD2UGUI
         #endregion
 
         #region UI 创建/更新
+        private static Canvas FindCanvas()
+        {
+#if UNITY_6000_0_OR_NEWER
+            return FindFirstObjectByType<Canvas>();
+#else
+            return FindObjectOfType<Canvas>();
+#endif
+        }
+
         private GameObject GetOrCreateCanvasGameObject()
         {
-            Canvas canvas = FindObjectOfType<Canvas>();
+            Canvas canvas = FindCanvas();
             if (canvas != null && canvas.gameObject.activeInHierarchy) return canvas.gameObject;
             var go = new GameObject("Canvas") { layer = LayerMask.NameToLayer("UI") };
             canvas = go.AddComponent<Canvas>();
@@ -495,7 +506,7 @@ namespace DGame.PSD2UGUI
             Vector2 pos = m_attr.pos;
             if (!m_attr.isLocalPos)
             {
-                var canvasTra = FindObjectOfType<Canvas>().transform;
+                var canvasTra = FindCanvas().transform;
                 var worldPos = canvasTra.TransformPoint(m_attr.pos);
                 var parentRect = go.transform.parent.GetComponent<RectTransform>();
                 pos = parentRect.InverseTransformPoint(worldPos);
@@ -618,7 +629,11 @@ namespace DGame.PSD2UGUI
             if (!m_notText)
             {
                 text.overflowMode = TextOverflowModes.Overflow;
+#if UNITY_6000_0_OR_NEWER
+                text.textWrappingMode = TextWrappingModes.NoWrap;
+#else
                 text.enableWordWrapping = false;
+#endif
                 text.alignment = ConvertToTmpAlignment(m_attr.alignType);
                 text.text = m_attr.textStr;
             }

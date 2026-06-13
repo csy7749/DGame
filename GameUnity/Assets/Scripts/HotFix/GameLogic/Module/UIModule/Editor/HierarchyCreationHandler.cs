@@ -15,7 +15,11 @@ namespace GameLogic
         private static int UIWINDOW_WIDTH = 750;
         private static int UIWINDOW_HEIGHT = 1334;
 
+#if UNITY_6000_0_OR_NEWER
+        private static EntityId m_lastProcessedInstanceId;
+#else
         private static int m_lastProcessedInstanceId;
+#endif
 
         [InitializeOnLoadMethod]
         private static void OnHierarchyCreateUIComponent()
@@ -41,7 +45,11 @@ namespace GameLogic
             }
 
             // 避免重复处理同一个对象
+#if UNITY_6000_0_OR_NEWER
+            EntityId instanceId = selectedObj.GetEntityId();
+#else
             int instanceId = selectedObj.GetInstanceID();
+#endif
 
             if (instanceId == m_lastProcessedInstanceId)
             {
