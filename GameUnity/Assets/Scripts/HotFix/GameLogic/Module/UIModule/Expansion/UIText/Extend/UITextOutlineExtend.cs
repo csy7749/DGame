@@ -29,7 +29,7 @@ namespace GameLogic
 
         public static Material GetOrCreateMaterial(string shaderName, Texture fontTexture)
         {
-            string cacheKey = fontTexture != null ? $"{shaderName}_{fontTexture.GetInstanceID()}" : shaderName;
+            string cacheKey = GetCacheKey(shaderName, fontTexture);
 
             if (s_materialCache.TryGetValue(cacheKey, out var entry))
             {
@@ -75,7 +75,7 @@ namespace GameLogic
 
         public static void ReleaseMaterial(string shaderName, Texture fontTexture)
         {
-            string cacheKey = fontTexture != null ? $"{shaderName}_{fontTexture.GetInstanceID()}" : shaderName;
+            string cacheKey = GetCacheKey(shaderName, fontTexture);
 
             if (s_materialCache.TryGetValue(cacheKey, out var entry))
             {
@@ -101,6 +101,20 @@ namespace GameLogic
                 }
             }
             s_materialCache.Clear();
+        }
+
+        private static string GetCacheKey(string shaderName, Texture fontTexture)
+        {
+            if (fontTexture == null)
+            {
+                return shaderName;
+            }
+
+#if UNITY_6000_0_OR_NEWER
+            return $"{shaderName}_{fontTexture.GetEntityId()}";
+#else
+            return $"{shaderName}_{fontTexture.GetInstanceID()}";
+#endif
         }
     }
 

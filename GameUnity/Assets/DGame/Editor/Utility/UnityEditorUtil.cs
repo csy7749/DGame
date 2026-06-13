@@ -157,6 +157,19 @@ namespace DGame
 
         #region 脚本替换工具
 
+#if UNITY_6000_0_OR_NEWER
+        private static Dictionary<Type, EntityId> m_classIdCache = new Dictionary<Type, EntityId>();
+
+        public static EntityId GetClassIDCached(System.Type type)
+        {
+            if (!m_classIdCache.TryGetValue(type, out EntityId classId))
+            {
+                classId = GetClassID(type);
+                m_classIdCache[type] = classId;
+            }
+            return classId;
+        }
+#else
         private static Dictionary<Type, int> m_classIdCache = new Dictionary<Type, int>();
 
         public static int GetClassIDCached(System.Type type)
@@ -168,13 +181,18 @@ namespace DGame
             }
             return classId;
         }
+#endif
 
         /// <summary>
         /// 获取 type 类型脚本的 classID
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
+#if UNITY_6000_0_OR_NEWER
+        private static EntityId GetClassID(System.Type type)
+#else
         private static int GetClassID(System.Type type)
+#endif
         {
             if (!typeof(MonoBehaviour).IsAssignableFrom(type))
             {
@@ -188,7 +206,11 @@ namespace DGame
                 go = EditorUtility.CreateGameObjectWithHideFlags("Temp", HideFlags.HideAndDontSave);
                 Component uiSprite = go.AddComponent(type);
                 SerializedObject ob = new SerializedObject(uiSprite);
+#if UNITY_6000_0_OR_NEWER
+                EntityId classID = ob.FindProperty("m_Script").objectReferenceEntityIdValue;
+#else
                 int classID = ob.FindProperty("m_Script").objectReferenceInstanceIDValue;
+#endif
                 return classID;
             }
             finally
@@ -205,7 +227,11 @@ namespace DGame
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
+#if UNITY_6000_0_OR_NEWER
+        public static EntityId GetClassID<T>() where T : MonoBehaviour
+#else
         public static int GetClassID<T>() where T : MonoBehaviour
+#endif
         {
             return GetClassIDCached(typeof(T));
         }
@@ -218,10 +244,14 @@ namespace DGame
         /// <returns></returns>
         public static SerializedObject ReplaceClass(MonoBehaviour mb, System.Type type)
         {
-            int id = GetClassIDCached(type);
+            var id = GetClassIDCached(type);
             SerializedObject ob = new SerializedObject(mb);
             ob.Update();
+#if UNITY_6000_0_OR_NEWER
+            ob.FindProperty("m_Script").objectReferenceEntityIdValue = id;
+#else
             ob.FindProperty("m_Script").objectReferenceInstanceIDValue = id;
+#endif
             ob.ApplyModifiedProperties();
             ob.Update();
             return ob;
@@ -234,10 +264,14 @@ namespace DGame
         /// <returns></returns>
         public static SerializedObject ReplaceClass<T>(MonoBehaviour mb) where T : MonoBehaviour
         {
-            int id = GetClassID<T>();
+            var id = GetClassID<T>();
             SerializedObject ob = new SerializedObject(mb);
             ob.Update();
+#if UNITY_6000_0_OR_NEWER
+            ob.FindProperty("m_Script").objectReferenceEntityIdValue = id;
+#else
             ob.FindProperty("m_Script").objectReferenceInstanceIDValue = id;
+#endif
             ob.ApplyModifiedProperties();
             ob.Update();
             return ob;
@@ -438,12 +472,12 @@ namespace DGame
 
         #region AssetDatabase.GetAssetPath
 
-        public static string GetAssetPath(int instanceID)
-            =>
 #if UNITY_6000_0_OR_NEWER
-                AssetDatabase.GetAssetPath((EntityId)instanceID);
+        public static string GetAssetPath(EntityId entityId)
+            => AssetDatabase.GetAssetPath(entityId);
 #else
-                AssetDatabase.GetAssetPath(instanceID);
+        public static string GetAssetPath(int instanceID)
+            => AssetDatabase.GetAssetPath(instanceID);
 #endif
 
         #endregion

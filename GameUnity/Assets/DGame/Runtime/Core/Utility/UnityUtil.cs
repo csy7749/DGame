@@ -9,6 +9,8 @@ using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngineInternal;
 
+#pragma warning disable CS0618
+
 namespace DGame
 {
     public static partial class Utility

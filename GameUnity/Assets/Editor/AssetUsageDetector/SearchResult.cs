@@ -46,7 +46,11 @@ namespace AssetUsageDetectorNamespace
 		[Serializable]
 		public class SerializableNode
 		{
+#if UNITY_6000_0_OR_NEWER
+			public Object unityObject;
+#else
 			public int instanceId;
+#endif
 			public bool isUnityObject;
 			public string description;
 
@@ -881,7 +885,11 @@ namespace AssetUsageDetectorNamespace
 		private readonly int uid;
 
 		internal object nodeObject;
+#if UNITY_6000_0_OR_NEWER
+		private EntityId? instanceId; // entityId of the nodeObject if it is a Unity object, null otherwise
+#else
 		private int? instanceId; // instanceId of the nodeObject if it is a Unity object, null otherwise
+#endif
 		private string description; // String to print on this node
 
 		private readonly List<Link> links;
@@ -975,7 +983,11 @@ namespace AssetUsageDetectorNamespace
 			Object unityObject = nodeObject as Object;
 			if( unityObject != null )
 			{
+#if UNITY_6000_0_OR_NEWER
+				instanceId = unityObject.GetEntityId();
+#else
 				instanceId = unityObject.GetInstanceID();
+#endif
 				description = unityObject.name + " (" + unityObject.GetType() + ")";
 			}
 			else if( nodeObject != null )
@@ -1080,7 +1092,7 @@ namespace AssetUsageDetectorNamespace
 				{
 					bool isContains =
 #if UNITY_6000_0_OR_NEWER
-						AssetDatabase.Contains((EntityId)instanceId.Value);
+						AssetDatabase.Contains(instanceId.Value);
 #else
 						AssetDatabase.Contains(instanceId.Value);
 #endif
@@ -1141,7 +1153,11 @@ namespace AssetUsageDetectorNamespace
 
 			SearchResult.SerializableNode serializedNode = new SearchResult.SerializableNode()
 			{
+#if UNITY_6000_0_OR_NEWER
+				unityObject = UnityObject,
+#else
 				instanceId = instanceId ?? 0,
+#endif
 				isUnityObject = instanceId.HasValue,
 				description = description
 			};
@@ -1168,10 +1184,17 @@ namespace AssetUsageDetectorNamespace
 		// Deserialize this node and its links from the serialized data
 		public void Deserialize( SearchResult.SerializableNode serializedNode, List<ReferenceNode> allNodes )
 		{
+#if UNITY_6000_0_OR_NEWER
+			if( serializedNode.isUnityObject && serializedNode.unityObject != null )
+				instanceId = serializedNode.unityObject.GetEntityId();
+			else
+				instanceId = null;
+#else
 			if( serializedNode.isUnityObject )
 				instanceId = serializedNode.instanceId;
 			else
 				instanceId = null;
+#endif
 
 			description = serializedNode.description;
 
@@ -1192,7 +1215,11 @@ namespace AssetUsageDetectorNamespace
 	{
 		public GUIContent label;
 		public ReferenceNodeGUI[] links;
+#if UNITY_6000_0_OR_NEWER
+		public EntityId? instanceId;
+#else
 		public int? instanceId;
+#endif
 
 		private int depth;
 

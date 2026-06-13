@@ -54,15 +54,20 @@ namespace GameLogic
         /// 双击 RedDotTreeConfig 资源时打开编辑器窗口
         /// </summary>
         [UnityEditor.Callbacks.OnOpenAsset(1)]
+#if UNITY_6000_0_OR_NEWER
+        public static bool OnOpenAsset(EntityId entityId, int line)
+        {
+            return OnOpenAsset(EditorUtility.EntityIdToObject(entityId) as RedDotTreeConfig);
+        }
+#else
         public static bool OnOpenAsset(int instanceID, int line)
         {
-            var asset =
-#if UNITY_6000_0_OR_NEWER
-                EditorUtility.EntityIdToObject(instanceID) as RedDotTreeConfig;
-#else
-                EditorUtility.InstanceIDToObject(instanceID) as RedDotTreeConfig;
+            return OnOpenAsset(EditorUtility.InstanceIDToObject(instanceID) as RedDotTreeConfig);
+        }
 #endif
 
+        private static bool OnOpenAsset(RedDotTreeConfig asset)
+        {
             if (asset == null)
                 return false;
 

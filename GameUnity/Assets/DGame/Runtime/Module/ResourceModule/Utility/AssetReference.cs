@@ -6,13 +6,21 @@ namespace DGame
     [System.Serializable]
     public struct AssetRefInfo
     {
+#if UNITY_6000_0_OR_NEWER
+        public readonly EntityId instanceID;
+#else
         public readonly int instanceID;
+#endif
         public readonly Object refAsset;
 
         public AssetRefInfo(Object asset)
         {
             refAsset = asset;
+#if UNITY_6000_0_OR_NEWER
+            instanceID = refAsset.GetEntityId();
+#else
             instanceID = refAsset.GetInstanceID();
+#endif
         }
     }
 
