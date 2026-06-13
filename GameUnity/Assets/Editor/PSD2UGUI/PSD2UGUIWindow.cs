@@ -36,6 +36,7 @@ namespace DGame.PSD2UGUI
         private Vector2 m_scroll;
         private int m_tabIndex;
         private static readonly string[] s_tabs = { "PSD转UI", "设置" };
+        private const string TextMeshProDefine = "TextMeshPro";
 #if TextMeshPro
         private static readonly string[] s_textComponentTabs = { "Unity Text", "TextMeshPro" };
 #endif
@@ -218,7 +219,8 @@ namespace DGame.PSD2UGUI
             int newType = GUILayout.Toolbar((int)settings.textComponentType, s_textComponentTabs, GUILayout.Height(24));
 #else
             int newType = 0;
-            EditorGUILayout.HelpBox("当前未定义 TextMeshPro 编译符号，生成时将使用 Unity Text。", MessageType.Warning);
+            EditorGUILayout.HelpBox($"当前未定义 TextMeshPro 编译符号，生成时将使用 {GetDisplayComponentName(settings.textComponentTypeName, typeof(Text))}。如果需要支持 TextMeshPro，点击下方添加按钮。", MessageType.Warning);
+            DrawAddTextMeshProDefineButton();
 #endif
             if (EditorGUI.EndChangeCheck())
             {
@@ -231,14 +233,88 @@ namespace DGame.PSD2UGUI
 
 #if TextMeshPro
             string tip = settings.textComponentType == PSD2UGUITextComponentType.TextMeshPro
-                ? $"使用 {settings.textMeshProComponentTypeName}，字体走 TMP_FontAsset 映射。"
-                : $"使用 {settings.textComponentTypeName}，字体走 Unity Font 映射。";
+                ? $"使用 {GetDisplayComponentName(settings.textMeshProComponentTypeName, typeof(TextMeshProUGUI))}，字体走 TMP_FontAsset 映射。"
+                : $"使用 {GetDisplayComponentName(settings.textComponentTypeName, typeof(Text))}，字体走 Unity Font 映射。";
 #else
-            string tip = $"使用 {settings.textComponentTypeName}，字体走 Unity Font 映射。";
+            string tip = $"使用 {GetDisplayComponentName(settings.textComponentTypeName, typeof(Text))}，字体走 Unity Font 映射。";
 #endif
             EditorGUILayout.HelpBox(tip, MessageType.None);
             EditorGUILayout.EndVertical();
         }
+
+        private static string GetDisplayComponentName(string typeName, Type fallback)
+        {
+            return string.IsNullOrEmpty(typeName) ? fallback.FullName : typeName;
+        }
+
+#if !TextMeshPro
+        private static void DrawAddTextMeshProDefineButton()
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("自动添加 TextMeshPro 宏定义", GUILayout.Width(190)))
+            {
+                AddTextMeshProDefine();
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.HelpBox("添加后 Unity 会触发脚本重编译，完成后可切换到 TextMeshPro 生成。", MessageType.None);
+        }
+
+        private static void AddTextMeshProDefine()
+        {
+            if (!IsTextMeshProAvailable())
+            {
+                EditorUtility.DisplayDialog(
+                    "无法添加宏定义",
+                    "当前项目未检测到 TextMeshPro 程序集。请先通过 Package Manager 安装 com.unity.textmeshpro。",
+                    "确定");
+                return;
+            }
+
+            BuildTargetGroup group = EditorUserBuildSettings.selectedBuildTargetGroup;
+            if (group == BuildTargetGroup.Unknown)
+            {
+                EditorUtility.DisplayDialog("无法添加宏定义", "当前 BuildTargetGroup 无效，请先在 Build Settings 中选择目标平台。", "确定");
+                return;
+            }
+
+            string defines = PlayerSettings.GetScriptingDefineSymbolsForGroup(group);
+            if (HasDefine(defines, TextMeshProDefine))
+            {
+                EditorUtility.DisplayDialog("宏定义已存在", $"当前平台已包含 {TextMeshProDefine}。如果界面仍提示未定义，请等待 Unity 重编译完成。", "确定");
+                return;
+            }
+
+            string newDefines = string.IsNullOrEmpty(defines) ? TextMeshProDefine : $"{defines};{TextMeshProDefine}";
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(group, newDefines);
+            AssetDatabase.SaveAssets();
+            Debug.Log($"[PSD2UGUI] 已为 {group} 添加 Scripting Define Symbol: {TextMeshProDefine}");
+        }
+
+        private static bool IsTextMeshProAvailable()
+        {
+            return Type.GetType("TMPro.TMP_Text, Unity.TextMeshPro") != null ||
+                   Type.GetType("TMPro.TextMeshProUGUI, Unity.TextMeshPro") != null;
+        }
+
+        private static bool HasDefine(string defines, string symbol)
+        {
+            if (string.IsNullOrEmpty(defines))
+            {
+                return false;
+            }
+
+            string[] splitDefines = defines.Split(';');
+            for (int i = 0; i < splitDefines.Length; i++)
+            {
+                if (string.Equals(splitDefines[i].Trim(), symbol, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+#endif
 
         private void ParsePSD()
         {
