@@ -19,11 +19,12 @@ namespace GameLogic
         /// <returns>保存数据实例</returns>
         public T GetSaveData<T>() where T : BaseClientSaveData, new()
         {
-            string key = GetStorageKey<T>();
+            ClientSaveDataAttribute attr = GetSaveDataAttribute<T>();
+            string key = GetStorageKey(attr);
             if (!m_saveDataDict.TryGetValue(key, out var saveData))
             {
                 saveData = new T();
-                saveData.Init(key);
+                saveData.Init(key, attr.StorageMode);
                 m_saveDataDict[key] = saveData;
             }
 
@@ -41,7 +42,7 @@ namespace GameLogic
             }
         }
 
-        private string GetStorageKey<T>() where T : BaseClientSaveData, new()
+        private ClientSaveDataAttribute GetSaveDataAttribute<T>() where T : BaseClientSaveData, new()
         {
             var type = typeof(T);
             if (!m_cacheAttributeDict.TryGetValue(type, out var attr))
@@ -54,6 +55,11 @@ namespace GameLogic
                 m_cacheAttributeDict[type] = attr;
             }
 
+            return attr;
+        }
+
+        private string GetStorageKey(ClientSaveDataAttribute attr)
+        {
             if (attr.PerRoleID && DataCenterSys.Instance.TryGetCurRoleID(out var roleID))
             {
                 return $"saveData_{attr.SaveKey}_{roleID}";
