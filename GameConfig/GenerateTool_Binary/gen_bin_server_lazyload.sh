@@ -15,10 +15,11 @@ dotnet "${LUBAN_DLL}" \
     -d json \
     --conf "${CONF_ROOT}/luban.conf" \
     --customTemplateDir "${CONF_ROOT}/CustomTemplate/Server/CustomTemplate_Server_LazyLoad" \
+    -x tableImporter.name=default \
     -x code.lineEnding=crlf \
     -x outputCodeDir="${SERVER_CODE_OUTPATH}" \
-    -x bin.outputDataDir="${BINARY_DATA_OUTPATH}" \
-    -x json.outputDataDir="${JSON_DATA_OUTPATH}" \
+    -x bin.outputDataDir="${SERVER_BINARY_DATA_OUTPATH}" \
+    -x json.outputDataDir="${SERVER_JSON_DATA_OUTPATH}" \
     -x outputSaver.bin.cleanUpOutputDir=1 \
     -x outputSaver.json.cleanUpOutputDir=1 \
     -x outputSaver.cs-bin.cleanUpOutputDir=1
