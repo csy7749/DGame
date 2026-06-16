@@ -18,7 +18,8 @@
 - Luban：Excel/JSON/YAML -> C# 代码 + 数据产物
 - 当前客户端二进制生成参数：`-c cs-bin -d bin`
 - 当前客户端 Json 生成参数：`-c cs-simple-json -d json2`
-- 客户端二进制生成脚本：`GameConfig/GenerateTool_Binary/gen_bin_client.bat`
+- **默认导表脚本（无特殊说明优先此项）：`GameConfig/GenerateTool_Binary/gen_bin_client_lazyload.bat`**（二进制 + LazyLoad）
+- 客户端二进制生成脚本（非 LazyLoad）：`GameConfig/GenerateTool_Binary/gen_bin_client.bat`
 - 客户端 Json 生成脚本：`GameConfig/GenerateTool_Json/gen_json_client.bat`
 - 顶层模块/命名空间：`GameProto`
 - 表管理器名称：`Tables`
@@ -170,11 +171,11 @@ Bean 可在普通表中直接作为字段类型使用，例如：
 
 ## 生成链路
 
-### 客户端二进制链路
+### 客户端二进制链路（默认走 LazyLoad）
 
 1. 读取 `GameConfig/luban.conf`
 2. 加载 `Defines`、`__tables__.xlsx`、`__beans__.xlsx`、`__enums__.xlsx`
-3. 通过 `gen_bin_client.bat` 调用 Luban，使用 `-c cs-bin -d bin`
+3. **默认执行 `gen_bin_client_lazyload.bat`** 调用 Luban，使用 `-c cs-bin -d bin`，并指定 `--customTemplateDir CustomTemplate/Client/CustomTemplate_Client_LazyLoad`；如需非 LazyLoad 才改用 `gen_bin_client.bat`
 4. 复制 `ConfigSystem.cs`、`ExternalTypeUtil.cs` 到 `GameUnity/Assets/Scripts/HotFix/GameProto/`
 5. 生成配置代码到 `GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/`
 6. 生成二进制数据到 `GameUnity/Assets/BundleAssets/Configs/Binary/`
@@ -310,9 +311,9 @@ var gameConfig = TbGameConfig.Instance.Data;
 6. 如需按组访问，加 `group_by:xxx`。
 7. 如是全局唯一配置，可考虑 `mode=one`。
 8. 执行对应生成脚本：
-   - 二进制流程：`GenerateTool_Binary`
-   - Json 流程：`GenerateTool_Json`
-   - 无特殊说明时优先二进制和 `lazyload`
+   - **默认（无特殊说明）：`GameConfig/GenerateTool_Binary/gen_bin_client_lazyload.bat`**（二进制 + LazyLoad）
+   - 非 LazyLoad 二进制：`GameConfig/GenerateTool_Binary/gen_bin_client.bat`
+   - Json 流程：`GameConfig/GenerateTool_Json/`
 9. 确认输出目录正确：
    - 代码：`GameUnity/Assets/Scripts/HotFix/GameProto/LubanConfig/`
    - 数据：`GameUnity/Assets/BundleAssets/Configs/Binary/`
