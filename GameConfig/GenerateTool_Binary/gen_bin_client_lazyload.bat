@@ -10,11 +10,13 @@ dotnet %LUBAN_DLL% ^
     -t client ^
     -c cs-bin ^
     -d bin ^
+    -d json ^
     --conf %CONF_ROOT%\luban.conf ^
     --customTemplateDir %CONF_ROOT%\CustomTemplate\Client\CustomTemplate_Client_LazyLoad ^
     -x code.lineEnding=crlf ^
     -x outputCodeDir=%CLIENT_CODE_OUTPATH% ^
-    -x outputDataDir=%DATA_OUTPATH% ^
+    -x bin.outputDataDir=%CLIENT_BIN_DATA_OUTPATH% ^
+    -x json.outputDataDir=%CLIENT_JSON_DATA_OUTPATH% ^
     -x outputSaver.bin.cleanUpOutputDir=1 ^
     -x outputSaver.json.cleanUpOutputDir=1 ^
     -x outputSaver.cs-bin.cleanUpOutputDir=1
