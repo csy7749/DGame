@@ -17,7 +17,7 @@ namespace DGame
             }
         }
 
-        private readonly List<EventRecord> m_eventRecords = new List<EventRecord>();
+        private readonly List<EventRecord> m_eventRecords;
         private readonly bool m_isInitialized = false;
 
         public GameEventDriver()
