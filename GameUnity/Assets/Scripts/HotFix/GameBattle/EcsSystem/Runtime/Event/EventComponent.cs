@@ -55,7 +55,7 @@ namespace GameBattle.EcsSystem
         /// <returns>用于取消订阅的 token。</returns>
         public EventSubscriptionToken Subscribe<T>(object owner, Action<T> handler) where T : struct, IEvent
         {
-            if (IsDisposed || handler == null)
+            if (IsDisposed || handler == null || IsInvalidEntityOwner(owner))
             {
                 return default;
             }
@@ -69,6 +69,7 @@ namespace GameBattle.EcsSystem
             for (var i = 0; i < subscribers.Count; i++)
             {
                 var subscriber = subscribers[i];
+
                 if (!subscriber.Removed && MatchesOwnerAndHandler(subscriber, owner, handlerDelegate))
                 {
                     return new EventSubscriptionToken(this, type, subscriber.Id);
@@ -104,7 +105,8 @@ namespace GameBattle.EcsSystem
         /// <param name="scope">订阅生命周期容器。</param>
         /// <param name="handler">事件回调。</param>
         /// <returns>用于取消订阅的 token。</returns>
-        public EventSubscriptionToken SubscribeScoped<T>(object owner, EventSubscriptionScopeComponent scope, Action<T> handler)
+        public EventSubscriptionToken SubscribeScoped<T>(object owner, EventSubscriptionScopeComponent scope,
+            Action<T> handler)
             where T : struct, IEvent
         {
             var token = Subscribe(owner, handler);
@@ -139,6 +141,7 @@ namespace GameBattle.EcsSystem
             }
 
             var type = typeof(T);
+
             if (!m_eventBuckets.TryGetValue(type, out var bucket))
             {
                 return false;
@@ -147,9 +150,11 @@ namespace GameBattle.EcsSystem
             var subscribers = bucket.Subscribers;
             var handlerDelegate = (Delegate)handler;
             var removed = false;
+
             for (var i = subscribers.Count - 1; i >= 0; i--)
             {
                 var subscriber = subscribers[i];
+
                 if (subscriber.Removed || subscriber.Handler != handlerDelegate)
                 {
                     continue;
@@ -177,6 +182,7 @@ namespace GameBattle.EcsSystem
             }
 
             var type = typeof(T);
+
             if (!m_eventBuckets.TryGetValue(type, out var bucket))
             {
                 return false;
@@ -185,9 +191,11 @@ namespace GameBattle.EcsSystem
             var subscribers = bucket.Subscribers;
             var handlerDelegate = (Delegate)handler;
             var removed = false;
+
             for (var i = subscribers.Count - 1; i >= 0; i--)
             {
                 var subscriber = subscribers[i];
+
                 if (subscriber.Removed || !MatchesOwnerAndHandler(subscriber, owner, handlerDelegate))
                 {
                     continue;
@@ -219,7 +227,8 @@ namespace GameBattle.EcsSystem
                 for (var i = subscribers.Count - 1; i >= 0; i--)
                 {
                     var subscriber = subscribers[i];
-                    if (!ReferenceEquals(subscriber.Owner, owner))
+
+                    if (!MatchesOwner(subscriber, owner))
                     {
                         continue;
                     }
@@ -246,6 +255,7 @@ namespace GameBattle.EcsSystem
             }
 
             var type = typeof(T);
+
             if (!m_eventBuckets.TryGetValue(type, out var bucket))
             {
                 return;
@@ -253,14 +263,23 @@ namespace GameBattle.EcsSystem
 
             var subscribers = bucket.Subscribers;
             bucket.PublishDepth++;
+
             try
             {
                 // 捕获原始数量，派发过程中新增的订阅不参与本次派发。
                 var count = subscribers.Count;
+
                 for (var i = 0; i < count && !IsDisposed; i++)
                 {
                     var subscriber = subscribers[i];
-                    if (subscriber.Removed || subscriber.Handler is not Action<T> callback)
+
+                    if (!IsSubscriberActive(subscriber))
+                    {
+                        RemoveAt(bucket, i);
+                        continue;
+                    }
+
+                    if (subscriber.Handler is not Action<T> callback)
                     {
                         continue;
                     }
@@ -271,6 +290,7 @@ namespace GameBattle.EcsSystem
             finally
             {
                 bucket.PublishDepth--;
+
                 // 派发过程中移除的订阅，只在最外层派发结束后统一压缩列表。
                 if (bucket.PublishDepth == 0 && bucket.NeedCleanup)
                 {
@@ -324,6 +344,7 @@ namespace GameBattle.EcsSystem
             {
                 // 0 表示无效 token id，溢出回绕时跳过 0。
                 m_nextSubscriptionId++;
+
                 if (m_nextSubscriptionId == 0)
                 {
                     m_nextSubscriptionId++;
@@ -377,6 +398,7 @@ namespace GameBattle.EcsSystem
             }
 
             var subscribers = bucket.Subscribers;
+
             for (var i = 0; i < subscribers.Count; i++)
             {
                 if (subscribers[i].Id != subscriptionId)
@@ -396,6 +418,14 @@ namespace GameBattle.EcsSystem
         #region Match
 
         /// <summary>
+        /// 判断订阅 owner 是否为已经无效的实体。
+        /// </summary>
+        /// <param name="owner">订阅所属对象。</param>
+        /// <returns>owner 是已销毁或未初始化实体时返回 true。</returns>
+        private static bool IsInvalidEntityOwner(object owner)
+            => owner is Entity { IsDisposed: true } || owner is Entity { RuntimeId: 0 };
+
+        /// <summary>
         /// 判断订阅记录是否匹配指定 owner 和回调委托。
         /// </summary>
         /// <param name="subscriber">订阅记录。</param>
@@ -403,7 +433,57 @@ namespace GameBattle.EcsSystem
         /// <param name="handler">回调委托。</param>
         /// <returns>匹配时返回 true。</returns>
         private static bool MatchesOwnerAndHandler(EventSubscriber subscriber, object owner, Delegate handler)
-            => ReferenceEquals(subscriber.Owner, owner) && subscriber.Handler == handler;
+            => MatchesOwner(subscriber, owner) && subscriber.Handler == handler;
+
+        /// <summary>
+        /// 判断订阅记录是否匹配指定 owner。
+        /// <remarks>Entity owner 需要同时匹配订阅时的 RuntimeId，避免实体回池复用后被误认为同一个订阅 owner。</remarks>
+        /// </summary>
+        /// <param name="subscriber">订阅记录。</param>
+        /// <param name="owner">订阅所属对象。</param>
+        /// <returns>匹配时返回 true。</returns>
+        private static bool MatchesOwner(EventSubscriber subscriber, object owner)
+        {
+            if (!ReferenceEquals(subscriber.Owner, owner))
+            {
+                return false;
+            }
+
+            if (!subscriber.OwnerIsEntity)
+            {
+                return true;
+            }
+
+            return owner is Entity entity
+                   && entity.RuntimeId != 0
+                   && entity.RuntimeId == subscriber.OwnerRuntimeId
+                   && entity.World == subscriber.OwnerWorld;
+        }
+
+        /// <summary>
+        /// 判断订阅记录当前是否仍然有效。
+        /// <remarks>Entity owner 被销毁或回池复用后，旧订阅会在下一次派发时自动失效。</remarks>
+        /// </summary>
+        /// <param name="subscriber">订阅记录。</param>
+        /// <returns>订阅仍有效时返回 true。</returns>
+        private static bool IsSubscriberActive(EventSubscriber subscriber)
+        {
+            if (subscriber.Removed)
+            {
+                return false;
+            }
+
+            if (!subscriber.OwnerIsEntity)
+            {
+                return true;
+            }
+
+            return subscriber.Owner is Entity entity
+                   && !entity.IsDisposed
+                   && entity.RuntimeId != 0
+                   && entity.RuntimeId == subscriber.OwnerRuntimeId
+                   && entity.World == subscriber.OwnerWorld;
+        }
 
         #endregion
 
@@ -417,6 +497,7 @@ namespace GameBattle.EcsSystem
         private void RemoveAt(EventBucket bucket, int index)
         {
             var subscribers = bucket.Subscribers;
+
             if (bucket.PublishDepth > 0)
             {
                 // Publish 正在遍历时不改变列表结构，只标记为待删除。
@@ -491,6 +572,21 @@ namespace GameBattle.EcsSystem
             public readonly object Owner;
 
             /// <summary>
+            /// 订阅 owner 是否为实体。
+            /// </summary>
+            public readonly bool OwnerIsEntity;
+
+            /// <summary>
+            /// Entity owner 订阅时所属世界。
+            /// </summary>
+            public readonly World OwnerWorld;
+
+            /// <summary>
+            /// Entity owner 订阅时的运行时 id。
+            /// </summary>
+            public readonly long OwnerRuntimeId;
+
+            /// <summary>
             /// 实际注册的回调委托。
             /// </summary>
             public readonly Delegate Handler;
@@ -510,6 +606,20 @@ namespace GameBattle.EcsSystem
             {
                 Id = id;
                 Owner = owner;
+
+                if (owner is Entity entity)
+                {
+                    OwnerIsEntity = true;
+                    OwnerWorld = entity.World;
+                    OwnerRuntimeId = entity.RuntimeId;
+                }
+                else
+                {
+                    OwnerIsEntity = false;
+                    OwnerWorld = null;
+                    OwnerRuntimeId = 0;
+                }
+
                 Handler = handler;
                 Removed = false;
             }

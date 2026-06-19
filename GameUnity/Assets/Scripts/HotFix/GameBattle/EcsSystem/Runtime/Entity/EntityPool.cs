@@ -55,7 +55,7 @@ namespace GameBattle.EcsSystem
         public T Rent<T>() where T : Entity, new()
         {
             var type = typeof(T);
-            if (IsNonPooled(type))
+            if (!CanPool(type))
             {
                 return new T();
             }
@@ -78,7 +78,7 @@ namespace GameBattle.EcsSystem
         public Entity Rent(Type type)
         {
             ValidateEntityType(type);
-            if (IsNonPooled(type))
+            if (!CanPool(type))
             {
                 return GetOrCreateFactory(type)();
             }
@@ -103,14 +103,14 @@ namespace GameBattle.EcsSystem
         /// <param name="entity">待回收实体。</param>
         public void Return(Entity entity)
         {
-            if (entity == null || m_maxCountPerType == 0 || entity is INonPooledEntity)
+            if (entity == null || !CanPool(entity.GetType()))
             {
                 return;
             }
 
             if (entity.IsInPool)
             {
-                throw new InvalidOperationException($"Entity already returned to pool: {entity.GetType().FullName}");
+                Log.Error($"Entity already returned to pool: {entity.GetType().FullName}");
             }
 
             var type = entity.GetType();
@@ -136,7 +136,7 @@ namespace GameBattle.EcsSystem
         public void Prewarm<T>(int count) where T : Entity, new()
         {
             var type = typeof(T);
-            if (count <= 0 || m_maxCountPerType == 0 || IsNonPooled(type))
+            if (count <= 0 || !CanPool(type))
             {
                 return;
             }
@@ -159,7 +159,7 @@ namespace GameBattle.EcsSystem
         public void Prewarm(Type type, int count)
         {
             ValidateEntityType(type);
-            if (count <= 0 || m_maxCountPerType == 0 || IsNonPooled(type))
+            if (count <= 0 || !CanPool(type))
             {
                 return;
             }
@@ -187,7 +187,7 @@ namespace GameBattle.EcsSystem
         public int Count<T>() where T : Entity
         {
             var type = typeof(T);
-            return IsNonPooled(type) || !m_entities.TryGetValue(type, out var stack) ? 0 : stack.Count;
+            return !CanPool(type) || !m_entities.TryGetValue(type, out var stack) ? 0 : stack.Count;
         }
 
         /// <summary>
@@ -198,7 +198,7 @@ namespace GameBattle.EcsSystem
         public int Count(Type type)
         {
             ValidateEntityType(type);
-            if (IsNonPooled(type))
+            if (!CanPool(type))
             {
                 return 0;
             }
@@ -273,11 +273,12 @@ namespace GameBattle.EcsSystem
         #region Pool Policy
 
         /// <summary>
-        /// 判断指定实体类型是否声明为不参与对象池复用。
+        /// 判断指定实体类型是否可以参与对象池复用。
         /// </summary>
         /// <param name="type">实体运行时类型。</param>
-        /// <returns>不参与池化时返回 true。</returns>
-        private static bool IsNonPooled(Type type) => typeof(INonPooledEntity).IsAssignableFrom(type);
+        /// <returns>可以参与池化时返回 true。</returns>
+        private bool CanPool(Type type)
+            => m_maxCountPerType > 0 && !typeof(INonPooledEntity).IsAssignableFrom(type);
 
         #endregion
 
@@ -291,12 +292,12 @@ namespace GameBattle.EcsSystem
         {
             if (type == null)
             {
-                throw new ArgumentNullException(nameof(type));
+                Log.Exception(new ArgumentNullException(nameof(type)));
             }
 
             if (!typeof(Entity).IsAssignableFrom(type))
             {
-                throw new NotSupportedException($"Type must inherit from Entity: {type.FullName}");
+                Log.Error($"Type must inherit from Entity: {type?.FullName}");
             }
         }
 

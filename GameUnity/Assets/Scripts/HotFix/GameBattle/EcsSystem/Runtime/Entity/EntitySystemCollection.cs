@@ -83,7 +83,7 @@ namespace GameBattle.EcsSystem
 
             if (!registered)
             {
-                throw new ArgumentException($"Unsupported entity system: {system.GetType().FullName}", nameof(system));
+                Log.Warning($"Unsupported entity system: {system.GetType().FullName}-{nameof(system)}");
             }
         }
 

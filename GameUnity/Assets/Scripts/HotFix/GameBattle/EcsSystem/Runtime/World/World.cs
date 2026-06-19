@@ -7,7 +7,7 @@ namespace GameBattle.EcsSystem
     /// <summary>
     /// GameBattle 轻量 ECS 世界入口，负责实体创建、系统调度、事件根组件和对象池生命周期。
     /// </summary>
-    public sealed class World : Entity
+    public sealed class World : Entity, INonPooledEntity
     {
         #region Fields
 
@@ -369,7 +369,7 @@ namespace GameBattle.EcsSystem
         /// <param name="entity">待回收实体。</param>
         internal void ReturnEntity(Entity entity)
         {
-            if (entity == null || ReferenceEquals(entity, this) || !entity.IsDisposed || entity is INonPooledEntity)
+            if (entity == null || !entity.IsDisposed || entity is INonPooledEntity)
             {
                 return;
             }

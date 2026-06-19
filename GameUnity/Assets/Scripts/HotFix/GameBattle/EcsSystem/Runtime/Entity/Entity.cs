@@ -278,7 +278,7 @@ namespace GameBattle.EcsSystem
         {
             if (world == null)
             {
-                throw new ArgumentNullException(nameof(world));
+                Log.Error($"Invalid world: {nameof(world)}");
             }
 
             return world;
@@ -292,12 +292,12 @@ namespace GameBattle.EcsSystem
         {
             if (type == null)
             {
-                throw new ArgumentNullException(nameof(type));
+                Log.Exception(new ArgumentNullException(nameof(type)));
             }
 
             if (!typeof(Entity).IsAssignableFrom(type))
             {
-                throw new NotSupportedException($"Type must inherit from Entity: {type.FullName}");
+                Log.Error($"NotSupportedException Type must inherit from Entity: {type?.FullName}");
             }
         }
 
@@ -314,7 +314,7 @@ namespace GameBattle.EcsSystem
         /// <param name="runtimeId">运行时唯一 id。</param>
         internal void Initialize(World world, Entity parent, long id, long runtimeId)
         {
-            World = world ?? throw new ArgumentNullException(nameof(world));
+            World = ValidateWorld(world);
             Parent = parent;
             Id = id;
             RuntimeId = runtimeId;
@@ -340,7 +340,7 @@ namespace GameBattle.EcsSystem
         {
             if (IsInPool)
             {
-                throw new InvalidOperationException($"Entity already returned to pool: {GetType().FullName}");
+                Log.Warning($"Entity already returned to pool: {GetType().FullName}");
             }
 
             IsInPool = true;
@@ -769,10 +769,7 @@ namespace GameBattle.EcsSystem
             OnReturnToPool();
             ResetState();
 
-            if (world != null && !ReferenceEquals(this, world))
-            {
-                world.ReturnEntity(this);
-            }
+            world?.ReturnEntity(this);
         }
 
         #endregion
@@ -792,7 +789,7 @@ namespace GameBattle.EcsSystem
 
             if (m_components.ContainsKey(type))
             {
-                throw new InvalidOperationException($"Entity already has component: {type.FullName}");
+                Log.Error($"Entity already has component: {type.FullName}");
             }
 
             var component = World.CreateEntityInternal<T>(this, id);
@@ -814,7 +811,7 @@ namespace GameBattle.EcsSystem
 
             if (m_components.ContainsKey(type))
             {
-                throw new InvalidOperationException($"Entity already has component: {type.FullName}");
+                Log.Error($"Entity already has component: {type.FullName}");
             }
 
             var component = World.CreateEntityInternal(type, this, id);
@@ -896,7 +893,7 @@ namespace GameBattle.EcsSystem
         {
             if (IsDisposed || m_isDisposing || World == null)
             {
-                throw new ObjectDisposedException(GetType().FullName);
+                Log.Warning($"ObjectDisposedException: {GetType().FullName}");
             }
         }
 
