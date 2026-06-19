@@ -21,7 +21,7 @@ namespace GameBattle
     /// 负责保存 <see cref="UnitStateSnapshot"/> 与版本号。
     /// </remarks>
     /// </summary>
-    public sealed class UnitStateSyncComponent : Entity
+    public sealed class UnitStateSyncComponent : Fantasy.Entitas.Entity
     {
         /// <summary>
         /// 当前单位状态快照。

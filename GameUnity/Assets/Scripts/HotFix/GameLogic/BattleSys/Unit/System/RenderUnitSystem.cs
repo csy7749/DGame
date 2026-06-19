@@ -59,7 +59,7 @@ namespace GameLogic
 
         /// <summary>
         /// 判断两个渲染单位引用是否指向同一个运行时实例。
-        /// 该比较基于 <see cref="Entity.RuntimeId"/>，只适用于实例级身份判断，
+        /// 该比较基于 <see cref="Fantasy.Entitas.Entity.RuntimeId"/>，只适用于实例级身份判断，
         /// 不用于回放、追帧或跨层渲染关联中的单位主键比较。
         /// </summary>
         /// <param name="self">当前渲染单位。</param>

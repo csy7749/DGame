@@ -2,6 +2,7 @@
 using Fantasy.Entitas;
 using Fantasy.Entitas.Interface;
 using GameBattle;
+using Entity = Fantasy.Entitas.Entity;
 
 namespace GameLogic
 {

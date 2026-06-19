@@ -8,7 +8,7 @@ namespace GameBattle
     /// 逻辑单位生命周期组件。
     /// <remarks>负责维护当前战斗中逻辑单位的活跃列表、待销毁列表与安全遍历快照。</remarks>
     /// </summary>
-    public sealed class LogicUnitLifecycleComponent : Entity
+    public sealed class LogicUnitLifecycleComponent : Fantasy.Entitas.Entity
     {
         /// <summary>
         /// 当前活跃逻辑单位列表

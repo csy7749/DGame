@@ -7,7 +7,7 @@ namespace GameBattle
     /// <summary>
     /// 订阅作用域组件。
     /// </summary>
-    public sealed class SubscriptionScopeComponent : Entity
+    public sealed class SubscriptionScopeComponent : Fantasy.Entitas.Entity
     {
         private readonly List<Action> m_clearActions = new();
         private bool m_disposed;

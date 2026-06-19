@@ -8,7 +8,7 @@ namespace GameBattle
     /// 逻辑单位注册表组件。
     /// <remarks>负责维护当前战斗内逻辑单位的索引、查询与遍历能力，不承载业务生命周期逻辑。</remarks>
     /// </summary>
-    public sealed class LogicUnitRegistryComponent : Entity
+    public sealed class LogicUnitRegistryComponent : Fantasy.Entitas.Entity
     {
         private readonly Dictionary<ulong, LogicUnit> m_unitsByUnitId = new(); // 以逻辑 UnitID 建立的单位主索引
         private readonly Dictionary<long, LogicUnit> m_unitsByEntityId = new(); // 以实体 Id 建立的运行时实例索引

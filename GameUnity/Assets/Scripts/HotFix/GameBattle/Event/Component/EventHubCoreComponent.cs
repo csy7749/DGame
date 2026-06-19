@@ -7,7 +7,7 @@ namespace GameBattle
     /// <summary>
     /// 事件中心共享内核组件。
     /// </summary>
-    public abstract class EventHubCoreComponent : Entity
+    public abstract class EventHubCoreComponent : Fantasy.Entitas.Entity
     {
         private readonly Dictionary<Type, List<EventSubscription>> m_subscriptions = new();
         private readonly Dictionary<Type, int> m_publishDepths = new();

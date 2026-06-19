@@ -11,7 +11,7 @@ namespace GameBattle
     /// CurrentHp 承载运行时血量状态，避免属性重算覆盖当前生命值。
     /// </remarks>
     /// </summary>
-    public sealed class LogicUnitAttrComponent : Entity
+    public sealed class LogicUnitAttrComponent : Fantasy.Entitas.Entity
     {
         private LogicUnitAttrData m_baseAttr; // 当前单位的基础属性数据
         private LogicUnitAttrData m_runtimeBaseAttr; // 当前单位的运行时基础属性数据

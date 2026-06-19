@@ -105,7 +105,7 @@ namespace GameBattle
         /// <returns>创建的逻辑单位实例。</returns>
         private static T CreateInternal<T>(this LogicUnitFactoryComponent self) where T : LogicUnit, new()
         {
-            return Entity.Create<T>(self.Scene, true, true);
+            return Fantasy.Entitas.Entity.Create<T>(self.Scene, true, true);
         }
     }
 }

@@ -4,6 +4,8 @@ using Cysharp.Threading.Tasks;
 using Fantasy.Entitas;
 using GameBattle;
 using UnityEngine;
+using Entity = Fantasy.Entitas.Entity;
+
 // ReSharper disable InconsistentNaming
 // ReSharper disable MemberCanBePrivate.Global
 

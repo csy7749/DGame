@@ -8,7 +8,7 @@ namespace GameBattle
     /// <summary>
     /// 逻辑层单位基类。
     /// </summary>
-    public abstract class LogicUnit : Entity
+    public abstract class LogicUnit : Fantasy.Entitas.Entity
     {
         #region Components
 
@@ -332,7 +332,7 @@ namespace GameBattle
 
         protected virtual void DestroyRenderUnit()
         {
-            if (RenderUnit is Entity { IsDisposed: false } renderEntity)
+            if (RenderUnit is Fantasy.Entitas.Entity { IsDisposed: false } renderEntity)
             {
                 renderEntity.Dispose();
             }

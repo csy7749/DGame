@@ -7,7 +7,7 @@ namespace GameBattle
     /// 战斗上下文组件。
     /// <remarks>作为战斗场景的核心组件，管理战斗相关的所有逻辑。</remarks>
     /// </summary>
-    public sealed class BattleContextComponent : Entity
+    public sealed class BattleContextComponent : Fantasy.Entitas.Entity
     {
         #region Components
 

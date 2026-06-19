@@ -10,7 +10,7 @@ namespace GameBattle
     /// 不承载战斗属性与运行时血量状态。
     /// </remarks>
     /// </summary>
-    public sealed class LogicUnitGeometryComponent : Entity
+    public sealed class LogicUnitGeometryComponent : Fantasy.Entitas.Entity
     {
         /// <summary>
         /// 当前配置组件所属的逻辑单位。
