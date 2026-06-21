@@ -1,4 +1,6 @@
-﻿using Coffee.UIExtensions;
+﻿#if ENABLE_UI_PARTICLE
+
+using Coffee.UIExtensions;
 using DGame;
 using UnityEngine;
 
@@ -299,3 +301,5 @@ namespace GameLogic
         #endregion
     }
 }
+
+#endif
