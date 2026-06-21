@@ -24,7 +24,7 @@ namespace VInspector
 
         void OnGUI()
         {
-            if (!component) component = EditorUtility.InstanceIDToObject(componentIid) as Component;
+            if (!component) component = _EditorUtility_InstanceIDToObject(componentIid) as Component;
             if (!component) { Close(); return; }
             if (!editor) { Init(component); skipHeightUpdate = true; }
 
@@ -425,7 +425,11 @@ namespace VInspector
             this.component = component;
             this.editor = Editor.CreateEditor(component);
 
+#if UNITY_6000_3_OR_NEWER
+            this.componentIid = component.GetEntityId();
+#else
             this.componentIid = component.GetInstanceID();
+#endif
 
             hasCustomUITKEditor = editor.GetType().GetMethod("CreateInspectorGUI", maxBindingFlags) != null;
 
@@ -456,9 +460,12 @@ namespace VInspector
         public Component component;
         public Editor editor;
         public InspectorElement inspectorElement;
-
-        public int componentIid;
-
+#if UNITY_6000_3_OR_NEWER
+            public EntityId componentIid;
+#else
+            public int componentIid;
+#endif
+        
         bool useUITK => editor.target is MonoBehaviour && (HasUITKOnlyDrawers(editor.serializedObject) || hasCustomUITKEditor);
         bool hasCustomUITKEditor;
 

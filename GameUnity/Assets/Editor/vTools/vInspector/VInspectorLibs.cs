@@ -805,7 +805,7 @@ namespace VInspector.Libs
                 else
                     bounds.Encapsulate(b);
             }
-
+#if TERRAIN_PACKAGE_ENABLED
             foreach (var r in go.GetComponentsInChildren<Terrain>())
             {
                 var b = local ? new Bounds(r.terrainData.size / 2, r.terrainData.size) : new Bounds(r.transform.position + r.terrainData.size / 2, r.terrainData.size);
@@ -816,7 +816,7 @@ namespace VInspector.Libs
                     bounds.Encapsulate(new Bounds(r.transform.position + r.terrainData.size / 2, r.terrainData.size));
 
             }
-
+#endif
             if (bounds == default)
                 bounds.center = go.transform.position;
 
@@ -1244,7 +1244,11 @@ namespace VInspector.Libs
         public struct GlobalID : System.IEquatable<GlobalID>
         {
             public Object GetObject() => GlobalObjectId.GlobalObjectIdentifierToObjectSlow(globalObjectId);
-            public int GetObjectInstanceId() => GlobalObjectId.GlobalObjectIdentifierToInstanceIDSlow(globalObjectId);
+#if UNITY_6000_3_OR_NEWER
+            public EntityId GetObjectInstanceId() => _GlobalObjectId_GlobalObjectIdentifierToInstanceIDSlow(globalObjectId);
+#else
+            public int GetObjectInstanceId() => _GlobalObjectId_GlobalObjectIdentifierToInstanceIDSlow(globalObjectId);
+#endif
 
 
             public int idType => globalObjectId.identifierType;
@@ -1297,7 +1301,7 @@ namespace VInspector.Libs
         {
             var unityGlobalIds = new GlobalObjectId[instanceIds.Count()];
 
-            GlobalObjectId.GetGlobalObjectIdsSlow(instanceIds.ToArray(), unityGlobalIds);
+            _GlobalObjectId_GetGlobalObjectIdsSlow(instanceIds.ToArray(), unityGlobalIds);
 
             var globalIds = unityGlobalIds.Select(r => new GlobalID(r.ToString()));
 
@@ -1316,13 +1320,20 @@ namespace VInspector.Libs
             return objects;
 
         }
+#if UNITY_6000_3_OR_NEWER
+        public static EntityId[] GetObjectInstanceIds(this IEnumerable<GlobalID> globalIDs)
+#else
         public static int[] GetObjectInstanceIds(this IEnumerable<GlobalID> globalIDs)
+#endif
         {
             var goids = globalIDs.Select(r => r.globalObjectId).ToArray();
 
+#if UNITY_6000_3_OR_NEWER
+            var iids = new EntityId[goids.Length];
+#else
             var iids = new int[goids.Length];
-
-            GlobalObjectId.GlobalObjectIdentifiersToInstanceIDsSlow(goids, iids);
+#endif
+            _GlobalObjectId_GlobalObjectIdentifiersToInstanceIDsSlow(goids, iids);
 
             return iids;
 
@@ -1352,9 +1363,13 @@ namespace VInspector.Libs
                 var w = (EditorWindow)t.GetField("s_LastInteractedProjectBrowser").GetValue(null);
 
                 var m_ListAreaState = t.GetField("m_ListAreaState", maxBindingFlags).GetValue(w);
-
+                
+#if UNITY_6000_3_OR_NEWER
+                m_ListAreaState.GetType().GetField("m_SelectedInstanceIDs").SetValue(m_ListAreaState, new List<EntityId> { folder.GetEntityId() });
+#else
                 m_ListAreaState.GetType().GetField("m_SelectedInstanceIDs").SetValue(m_ListAreaState, new List<int> { folder.GetInstanceID() });
-
+#endif
+                
                 t.GetMethod("OpenSelectedFolders", maxBindingFlags).Invoke(null, null);
 
             }
@@ -1721,6 +1736,83 @@ namespace VInspector.Libs
 
 
 #endif
+
+        #endregion
+
+        #region Instance/Entity ID mess
+
+
+#if UNITY_6000_3_OR_NEWER
+        static EntityId _GlobalObjectId_GlobalObjectIdentifierToInstanceIDSlow(GlobalObjectId id)
+        {
+            return GlobalObjectId.GlobalObjectIdentifierToEntityIdSlow(id);
+#else
+        static int _GlobalObjectId_GlobalObjectIdentifierToInstanceIDSlow(GlobalObjectId id)
+        {
+            return GlobalObjectId.GlobalObjectIdentifierToInstanceIDSlow(id);
+#endif
+
+        }
+
+#if UNITY_6000_3_OR_NEWER
+        static void _GlobalObjectId_GlobalObjectIdentifiersToInstanceIDsSlow(GlobalObjectId[] identifiers, EntityId[] outputInstanceIDs)
+        {
+            GlobalObjectId.GlobalObjectIdentifiersToEntityIdsSlow(identifiers, outputInstanceIDs);
+#else
+        static void _GlobalObjectId_GlobalObjectIdentifiersToInstanceIDsSlow(GlobalObjectId[] identifiers, int[] outputInstanceIDs)
+        {
+            GlobalObjectId.GlobalObjectIdentifiersToInstanceIDsSlow(identifiers, outputInstanceIDs);
+#endif
+
+        }
+        static void _GlobalObjectId_GetGlobalObjectIdsSlow(int[] ids, GlobalObjectId[] outputIdentifiers)
+        {
+#if UNITY_6000_3_OR_NEWER
+            GlobalObjectId.GetGlobalObjectIdsSlow(ids.Select(r => (EntityId)r).ToArray(), outputIdentifiers);
+#else
+            GlobalObjectId.GetGlobalObjectIdsSlow(ids, outputIdentifiers);
+#endif
+
+        }
+
+
+
+#if UNITY_6000_3_OR_NEWER
+        public static Object _EditorUtility_InstanceIDToObject(EntityId iid)
+        {
+            return EditorUtility.EntityIdToObject(iid);
+#else
+        public static Object _EditorUtility_InstanceIDToObject(int iid)
+        {
+            return EditorUtility.InstanceIDToObject(iid);
+#endif
+        }
+
+        public static string _AssetDatabase_GetAssetPath(int instanceID)
+        {
+#if UNITY_6000_3_OR_NEWER
+            return AssetDatabase.GetAssetPath((EntityId)instanceID);
+#else
+            return AssetDatabase.GetAssetPath(instanceID);
+#endif
+        }
+
+#if UNITY_6000_3_OR_NEWER
+        public static EntityId[] _Selection_instanceIDs
+        {
+            get
+            {
+                return Selection.entityIds.Select(r => r).ToArray();
+#else
+        public static int[] _Selection_instanceIDs
+        {
+            get
+            {
+                return Selection.instanceIDs;
+#endif
+            }
+        }
+
 
         #endregion
 

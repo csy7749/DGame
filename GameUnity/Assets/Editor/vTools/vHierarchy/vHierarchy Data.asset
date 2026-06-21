@@ -11,7 +11,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3a9752b0c8e144801967e6897679604b, type: 3}
   m_Name: vHierarchy Data
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: VHierarchy::VHierarchy.VHierarchyData
   sceneDatas_byGuid:
     keys: []
     values: []
