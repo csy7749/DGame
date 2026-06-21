@@ -336,14 +336,16 @@ namespace GameBattle.EcsSystem
         /// <summary>
         /// 标记实体已经归还到对象池。
         /// </summary>
-        internal void MarkReturnedToPool()
+        internal bool MarkReturnedToPool()
         {
             if (IsInPool)
             {
                 BLogger.Warning($"Entity already returned to pool: {GetType().FullName}");
+                return false;
             }
 
             IsInPool = true;
+            return true;
         }
 
         /// <summary>

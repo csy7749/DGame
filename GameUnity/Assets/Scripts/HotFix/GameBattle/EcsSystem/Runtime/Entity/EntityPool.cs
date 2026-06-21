@@ -120,8 +120,10 @@ namespace GameBattle.EcsSystem
                 return;
             }
 
-            entity.MarkReturnedToPool();
-            stack.Push(entity);
+            if (entity.MarkReturnedToPool())
+            {
+                stack.Push(entity);
+            }
         }
 
         #endregion
@@ -146,8 +148,10 @@ namespace GameBattle.EcsSystem
             for (var i = stack.Count; i < targetCount; i++)
             {
                 var entity = new T();
-                entity.MarkReturnedToPool();
-                stack.Push(entity);
+                if(entity.MarkReturnedToPool())
+                {
+                    stack.Push(entity);
+                }
             }
         }
 
@@ -170,8 +174,10 @@ namespace GameBattle.EcsSystem
             for (var i = stack.Count; i < targetCount; i++)
             {
                 var entity = factory();
-                entity.MarkReturnedToPool();
-                stack.Push(entity);
+                if (entity.MarkReturnedToPool())
+                {
+                    stack.Push(entity);
+                }
             }
         }
 
