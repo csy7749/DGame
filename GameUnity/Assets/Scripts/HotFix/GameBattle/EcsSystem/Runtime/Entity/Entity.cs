@@ -334,13 +334,13 @@ namespace GameBattle.EcsSystem
         #region Pool
 
         /// <summary>
-        /// 标记实体已经归还到对象池。
+        /// 尝试标记实体已经归还到对象池。
         /// </summary>
-        internal bool MarkReturnedToPool()
+        /// <returns>状态切换成功时返回 true。</returns>
+        internal bool TryMarkReturnedToPool()
         {
             if (IsInPool)
             {
-                BLogger.Warning($"Entity already returned to pool: {GetType().FullName}");
                 return false;
             }
 

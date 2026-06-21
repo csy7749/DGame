@@ -111,6 +111,7 @@ namespace GameBattle.EcsSystem
             if (entity.IsInPool)
             {
                 BLogger.Error($"Entity already returned to pool: {entity.GetType().FullName}");
+                return;
             }
 
             var type = entity.GetType();
@@ -120,10 +121,13 @@ namespace GameBattle.EcsSystem
                 return;
             }
 
-            if (entity.MarkReturnedToPool())
+            if (!entity.TryMarkReturnedToPool())
             {
-                stack.Push(entity);
+                BLogger.Error($"Entity already returned to pool: {type.FullName}");
+                return;
             }
+
+            stack.Push(entity);
         }
 
         #endregion
@@ -148,7 +152,7 @@ namespace GameBattle.EcsSystem
             for (var i = stack.Count; i < targetCount; i++)
             {
                 var entity = new T();
-                if(entity.MarkReturnedToPool())
+                if (entity.TryMarkReturnedToPool())
                 {
                     stack.Push(entity);
                 }
@@ -174,7 +178,7 @@ namespace GameBattle.EcsSystem
             for (var i = stack.Count; i < targetCount; i++)
             {
                 var entity = factory();
-                if (entity.MarkReturnedToPool())
+                if (entity.TryMarkReturnedToPool())
                 {
                     stack.Push(entity);
                 }
