@@ -1,8 +1,8 @@
 ﻿namespace GameBattle.EcsSystem
 {
-    public static class Log
+    public static class BLogger
     {
-        private static ILogger m_logger = new EcsLogger();
+        private static ILogger m_logger = new DefaultEcsLoggerHelper();
         
         public static ILogger Logger
         {
@@ -13,37 +13,49 @@
         public static void SetLogLevel(bool debug, bool info, bool warning, bool error)
         {
             if (m_logger == null) return;
-            m_logger.SetLogLevel(debug, info, warning, error);
+            {
+                m_logger.SetLogLevel(debug, info, warning, error);
+            }
         }
         
-        public static void Debug(object message)
+        public static void Log(object message)
         {
             if (m_logger == null) return;
-            m_logger.Log(message);
+            {
+                m_logger.Log(message);
+            }
         }
         
         public static void Info(object message)
         {
             if (m_logger == null) return;
-            m_logger.Info(message);
+            {
+                m_logger.Info(message);
+            }
         }
         
         public static void Warning(object message)
         {
             if (m_logger == null) return;
-            m_logger.Warning(message);
+            {
+                m_logger.Warning(message);
+            }
         }
         
         public static void Error(object message)
         {
             if (m_logger == null) return;
-            m_logger.Error(message);
+            {
+                m_logger.Error(message);
+            }
         }
         
         public static void Exception(System.Exception exception)
         {
             if (m_logger == null) return;
-            m_logger.Exception(exception);
+            {
+                m_logger.Exception(exception);
+            }
         }
     }
 }

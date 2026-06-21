@@ -3,7 +3,7 @@ using DGame;
 
 namespace GameBattle.EcsSystem
 {
-    public sealed class EcsLogger : ILogger
+    public sealed class DefaultEcsLoggerHelper : ILogger
     {
         private bool m_enableDebugLog = true;
         private bool m_enableInfoLog = true;  

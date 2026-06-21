@@ -278,7 +278,7 @@ namespace GameBattle.EcsSystem
         {
             if (world == null)
             {
-                Log.Error($"Invalid world: {nameof(world)}");
+                BLogger.Error($"Invalid world: {nameof(world)}");
             }
 
             return world;
@@ -292,12 +292,12 @@ namespace GameBattle.EcsSystem
         {
             if (type == null)
             {
-                Log.Exception(new ArgumentNullException(nameof(type)));
+                BLogger.Exception(new ArgumentNullException(nameof(type)));
             }
 
             if (!typeof(Entity).IsAssignableFrom(type))
             {
-                Log.Error($"NotSupportedException Type must inherit from Entity: {type?.FullName}");
+                BLogger.Error($"NotSupportedException Type must inherit from Entity: {type?.FullName}");
             }
         }
 
@@ -340,7 +340,7 @@ namespace GameBattle.EcsSystem
         {
             if (IsInPool)
             {
-                Log.Warning($"Entity already returned to pool: {GetType().FullName}");
+                BLogger.Warning($"Entity already returned to pool: {GetType().FullName}");
             }
 
             IsInPool = true;
@@ -789,7 +789,7 @@ namespace GameBattle.EcsSystem
 
             if (m_components.ContainsKey(type))
             {
-                Log.Error($"Entity already has component: {type.FullName}");
+                BLogger.Error($"Entity already has component: {type.FullName}");
             }
 
             var component = World.CreateEntityInternal<T>(this, id);
@@ -811,7 +811,7 @@ namespace GameBattle.EcsSystem
 
             if (m_components.ContainsKey(type))
             {
-                Log.Error($"Entity already has component: {type.FullName}");
+                BLogger.Error($"Entity already has component: {type.FullName}");
             }
 
             var component = World.CreateEntityInternal(type, this, id);
@@ -893,7 +893,7 @@ namespace GameBattle.EcsSystem
         {
             if (IsDisposed || m_isDisposing || World == null)
             {
-                Log.Warning($"ObjectDisposedException: {GetType().FullName}");
+                BLogger.Warning($"ObjectDisposedException: {GetType().FullName}");
             }
         }
 

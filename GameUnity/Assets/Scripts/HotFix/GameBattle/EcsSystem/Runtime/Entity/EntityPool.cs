@@ -110,7 +110,7 @@ namespace GameBattle.EcsSystem
 
             if (entity.IsInPool)
             {
-                Log.Error($"Entity already returned to pool: {entity.GetType().FullName}");
+                BLogger.Error($"Entity already returned to pool: {entity.GetType().FullName}");
             }
 
             var type = entity.GetType();
@@ -292,12 +292,12 @@ namespace GameBattle.EcsSystem
         {
             if (type == null)
             {
-                Log.Exception(new ArgumentNullException(nameof(type)));
+                BLogger.Exception(new ArgumentNullException(nameof(type)));
             }
 
             if (!typeof(Entity).IsAssignableFrom(type))
             {
-                Log.Error($"Type must inherit from Entity: {type?.FullName}");
+                BLogger.Error($"Type must inherit from Entity: {type?.FullName}");
             }
         }
 
