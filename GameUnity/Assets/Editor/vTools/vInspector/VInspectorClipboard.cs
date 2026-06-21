@@ -108,8 +108,10 @@ namespace VInspector
                 typeof(Projector),
                 typeof(AudioReverbZone),
                 typeof(AudioEchoFilter),
+#if TERRAIN_PACKAGE_ENABLED
                 typeof(Terrain),
                 typeof(TerrainCollider),
+#endif
 
             };
 
@@ -150,7 +152,11 @@ namespace VInspector
             if (state != PlayModeStateChange.EnteredEditMode) return;
 
             foreach (var data in instance.savedComponentDatas)
-                if (EditorUtility.InstanceIDToObject(data.sourceComponent.GetInstanceID()) is Component sourceComponent)
+#if UNITY_6000_3_OR_NEWER
+                if (_EditorUtility_InstanceIDToObject(data.sourceComponent.GetEntityId()) is Component sourceComponent)
+#else
+                if (_EditorUtility_InstanceIDToObject(data.sourceComponent.GetInstanceID()) is Component sourceComponent)
+#endif
                     ApplyComponentData(data, sourceComponent);
                 else if (data.globalId.GetObject() is Component sourceComponent_)
                     ApplyComponentData(data, sourceComponent_);
@@ -196,7 +202,11 @@ namespace VInspector
         {
             foreach (var key in componentData.serializedPropertyValues_byPath.Keys.ToList())
                 if (componentData.serializedPropertyValues_byPath[key] is Object unityObject && !unityObject) // sometimes object references become null after playmode in unity 6, so we have to restore them by instanceId
-                    componentData.serializedPropertyValues_byPath[key] = EditorUtility.InstanceIDToObject(unityObject.GetInstanceID());
+#if UNITY_6000_3_OR_NEWER
+                    componentData.serializedPropertyValues_byPath[key] = _EditorUtility_InstanceIDToObject(unityObject.GetEntityId());
+#else
+                    componentData.serializedPropertyValues_byPath[key] = _EditorUtility_InstanceIDToObject(unityObject.GetInstanceID());
+#endif
 
             foreach (var kvp in componentData.serializedPropertyValues_byPath)
             {
