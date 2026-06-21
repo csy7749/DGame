@@ -302,12 +302,12 @@ namespace GameBattle.EcsSystem
         {
             if (type == null)
             {
-                BLogger.Exception(new ArgumentNullException(nameof(type)));
+                throw new ArgumentNullException(nameof(type));
             }
 
             if (!typeof(Entity).IsAssignableFrom(type))
             {
-                BLogger.Error($"Type must inherit from Entity: {type?.FullName}");
+                throw new ArgumentException($"Type must inherit from {nameof(Entity)}: {type.FullName}", nameof(type));
             }
         }
 

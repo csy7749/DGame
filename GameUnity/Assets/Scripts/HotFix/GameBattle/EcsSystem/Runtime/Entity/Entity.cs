@@ -278,7 +278,7 @@ namespace GameBattle.EcsSystem
         {
             if (world == null)
             {
-                BLogger.Error($"Invalid world: {nameof(world)}");
+                throw new ArgumentNullException(nameof(world));
             }
 
             return world;
@@ -292,12 +292,12 @@ namespace GameBattle.EcsSystem
         {
             if (type == null)
             {
-                BLogger.Exception(new ArgumentNullException(nameof(type)));
+                throw new ArgumentNullException(nameof(type));
             }
 
             if (!typeof(Entity).IsAssignableFrom(type))
             {
-                BLogger.Error($"NotSupportedException Type must inherit from Entity: {type?.FullName}");
+                throw new ArgumentException($"Type must inherit from Entity: {type?.FullName}", nameof(type));
             }
         }
 
@@ -791,7 +791,7 @@ namespace GameBattle.EcsSystem
 
             if (m_components.ContainsKey(type))
             {
-                BLogger.Error($"Entity already has component: {type.FullName}");
+                throw new InvalidOperationException($"Entity already has component: {type.FullName}");
             }
 
             var component = World.CreateEntityInternal<T>(this, id);
@@ -813,7 +813,7 @@ namespace GameBattle.EcsSystem
 
             if (m_components.ContainsKey(type))
             {
-                BLogger.Error($"Entity already has component: {type.FullName}");
+                throw new InvalidOperationException($"Entity already has component: {type.FullName}");
             }
 
             var component = World.CreateEntityInternal(type, this, id);
@@ -878,8 +878,9 @@ namespace GameBattle.EcsSystem
                 return;
             }
 
-            if (m_children.Remove(entity.RuntimeId))
+            if (m_children.TryGetValue(entity.RuntimeId, out var child) && ReferenceEquals(child, entity))
             {
+                m_children.Remove(entity.RuntimeId);
                 m_childOrder.Remove(entity);
             }
         }
@@ -893,9 +894,19 @@ namespace GameBattle.EcsSystem
         /// </summary>
         private void EnsureAlive()
         {
-            if (IsDisposed || m_isDisposing || World == null)
+            if (IsDisposed)
             {
-                BLogger.Warning($"ObjectDisposedException: {GetType().FullName}");
+                throw new ObjectDisposedException(GetType().FullName);
+            }
+
+            if (m_isDisposing)
+            {
+                throw new InvalidOperationException($"Entity is disposing: {GetType().FullName}");
+            }
+
+            if (World == null)
+            {
+                throw new InvalidOperationException($"Entity world is null: {GetType().FullName}");
             }
         }
 

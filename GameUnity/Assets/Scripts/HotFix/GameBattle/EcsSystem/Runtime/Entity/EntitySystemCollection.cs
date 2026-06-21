@@ -83,7 +83,7 @@ namespace GameBattle.EcsSystem
 
             if (!registered)
             {
-                BLogger.Warning($"Unsupported entity system: {system.GetType().FullName}-{nameof(system)}");
+                BLogger.Error($"Unsupported entity system: {system.GetType().FullName}");
             }
         }
 
