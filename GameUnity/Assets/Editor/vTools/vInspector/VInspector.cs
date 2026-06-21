@@ -307,9 +307,6 @@ namespace VInspector
             if (EditorWindow.mouseOverWindow is not EditorWindow hoveredWindow) return;
             if (!hoveredWindow) return;
             if (hoveredWindow.GetType() != t_InspectorWindow && hoveredWindow.GetType() != t_PropertyEditor) return;
-            if (!curEvent.isKeyDown) return;
-            if (curEvent.keyCode == KeyCode.None) return;
-
 
             void expandOrCollapseHovered()
             {
@@ -1566,7 +1563,7 @@ namespace VInspector
 
 
 
-        const string version = "2.0.14";
+        const string version = "2.0.18";
 
 
     }
