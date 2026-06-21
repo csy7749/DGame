@@ -78,14 +78,7 @@ namespace GameBattle.EcsSystem
                 return;
             }
 
-            InvokeSafely(entity, target =>
-            {
-                if (target is IAwake awake)
-                {
-                    awake.Awake();
-                }
-            }, "Awake");
-
+            InvokeDirectAwake(entity);
             InvokeExternalAwake(entity);
             TryRegisterUpdate(entity);
         }
@@ -103,14 +96,7 @@ namespace GameBattle.EcsSystem
                 return;
             }
 
-            InvokeSafely(entity, target =>
-            {
-                if (target is IAwake<T1> awake)
-                {
-                    awake.Awake(value1);
-                }
-            }, "Awake");
-
+            InvokeDirectAwake(entity, value1);
             InvokeExternalAwake(entity, value1);
             TryRegisterUpdate(entity);
         }
@@ -130,14 +116,7 @@ namespace GameBattle.EcsSystem
                 return;
             }
 
-            InvokeSafely(entity, target =>
-            {
-                if (target is IAwake<T1, T2> awake)
-                {
-                    awake.Awake(value1, value2);
-                }
-            }, "Awake");
-
+            InvokeDirectAwake(entity, value1, value2);
             InvokeExternalAwake(entity, value1, value2);
             TryRegisterUpdate(entity);
         }
@@ -159,14 +138,7 @@ namespace GameBattle.EcsSystem
                 return;
             }
 
-            InvokeSafely(entity, target =>
-            {
-                if (target is IAwake<T1, T2, T3> awake)
-                {
-                    awake.Awake(value1, value2, value3);
-                }
-            }, "Awake");
-
+            InvokeDirectAwake(entity, value1, value2, value3);
             InvokeExternalAwake(entity, value1, value2, value3);
             TryRegisterUpdate(entity);
         }
@@ -448,20 +420,90 @@ namespace GameBattle.EcsSystem
         #region Internal
 
         /// <summary>
-        /// 执行单个实体生命周期回调，并统一捕获日志。
+        /// 调用无参实体直接 Awake 生命周期。
         /// </summary>
         /// <param name="entity">目标实体。</param>
-        /// <param name="action">生命周期调用委托。</param>
-        /// <param name="lifecycle">生命周期名称。</param>
-        private static void InvokeSafely(Entity entity, Action<Entity> action, string lifecycle)
+        private static void InvokeDirectAwake(Entity entity)
         {
             try
             {
-                action(entity);
+                if (entity is IAwake awake)
+                {
+                    awake.Awake();
+                }
             }
             catch (Exception e)
             {
-                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {lifecycle} error: {e}");
+                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
+            }
+        }
+
+        /// <summary>
+        /// 调用带一个参数的实体直接 Awake 生命周期。
+        /// </summary>
+        /// <typeparam name="T1">Awake 参数类型。</typeparam>
+        /// <param name="entity">目标实体。</param>
+        /// <param name="value1">Awake 参数。</param>
+        private static void InvokeDirectAwake<T1>(Entity entity, T1 value1)
+        {
+            try
+            {
+                if (entity is IAwake<T1> awake)
+                {
+                    awake.Awake(value1);
+                }
+            }
+            catch (Exception e)
+            {
+                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
+            }
+        }
+
+        /// <summary>
+        /// 调用带两个参数的实体直接 Awake 生命周期。
+        /// </summary>
+        /// <typeparam name="T1">第一个 Awake 参数类型。</typeparam>
+        /// <typeparam name="T2">第二个 Awake 参数类型。</typeparam>
+        /// <param name="entity">目标实体。</param>
+        /// <param name="value1">第一个 Awake 参数。</param>
+        /// <param name="value2">第二个 Awake 参数。</param>
+        private static void InvokeDirectAwake<T1, T2>(Entity entity, T1 value1, T2 value2)
+        {
+            try
+            {
+                if (entity is IAwake<T1, T2> awake)
+                {
+                    awake.Awake(value1, value2);
+                }
+            }
+            catch (Exception e)
+            {
+                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
+            }
+        }
+
+        /// <summary>
+        /// 调用带三个参数的实体直接 Awake 生命周期。
+        /// </summary>
+        /// <typeparam name="T1">第一个 Awake 参数类型。</typeparam>
+        /// <typeparam name="T2">第二个 Awake 参数类型。</typeparam>
+        /// <typeparam name="T3">第三个 Awake 参数类型。</typeparam>
+        /// <param name="entity">目标实体。</param>
+        /// <param name="value1">第一个 Awake 参数。</param>
+        /// <param name="value2">第二个 Awake 参数。</param>
+        /// <param name="value3">第三个 Awake 参数。</param>
+        private static void InvokeDirectAwake<T1, T2, T3>(Entity entity, T1 value1, T2 value2, T3 value3)
+        {
+            try
+            {
+                if (entity is IAwake<T1, T2, T3> awake)
+                {
+                    awake.Awake(value1, value2, value3);
+                }
+            }
+            catch (Exception e)
+            {
+                DLogger.Error($"[GameBattle.EcsSystem] {entity.GetType().FullName} {nameof(IAwake.Awake)} error: {e}");
             }
         }
 
