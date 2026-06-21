@@ -41,6 +41,11 @@
             "name": "com.unity.inputsystem",
             "expression": "",
             "define": "ENABLE_INPUT_SYSTEM"
+        },
+        {
+            "name": "com.coffee.ui-particle",
+            "expression": "",
+            "define": "ENABLE_UI_PARTICLE"
         }
     ],
     "noEngineReferences": false
