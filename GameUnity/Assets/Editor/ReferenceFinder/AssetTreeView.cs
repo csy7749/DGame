@@ -13,6 +13,7 @@ using TreeViewState = UnityEditor.IMGUI.Controls.TreeViewState<int>;
 
 namespace DGame
 {
+    [System.Serializable]
     internal sealed class AssetTreeView : TreeView
     {
         private const float K_ICON_WIDTH = 18f;
