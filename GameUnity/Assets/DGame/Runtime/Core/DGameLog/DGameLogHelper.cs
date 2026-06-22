@@ -195,7 +195,7 @@ namespace DGame
         /// <summary>
         /// 当在 Project 窗口或 Console 窗口双击资源时触发。
         /// </summary>
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
         /// <param name="entityId">双击的资源的 EntityId</param>
 #else
         /// <param name="instanceID">双击的资源的实例 ID</param>
@@ -203,7 +203,7 @@ namespace DGame
         /// <param name="line">日志对应的行号（如果是从 Console 窗口触发的）</param>
         /// <returns></returns>
         [OnOpenAsset(0)]
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
         private static bool OnOpenAsset(EntityId entityId, int line)
         {
             return OnOpenAsset(AssetDatabase.GetAssetPath(entityId), line);

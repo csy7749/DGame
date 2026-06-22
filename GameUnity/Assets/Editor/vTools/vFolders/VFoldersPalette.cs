@@ -196,7 +196,7 @@ namespace VFolders
             }));
             iconRows.Add(new IconRow(new[]
             {
-            #if UNITY_6000_0_OR_NEWER
+            #if UNITY_6000_1_OR_NEWER
                 "PhysicsMaterial Icon",
             #else
                 "PhysicMaterial Icon",

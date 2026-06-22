@@ -157,7 +157,7 @@ namespace DGame
 
         #region 脚本替换工具
 
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
         private static Dictionary<Type, EntityId> m_classIdCache = new Dictionary<Type, EntityId>();
 
         public static EntityId GetClassIDCached(System.Type type)
@@ -188,7 +188,7 @@ namespace DGame
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
         private static EntityId GetClassID(System.Type type)
 #else
         private static int GetClassID(System.Type type)
@@ -206,7 +206,7 @@ namespace DGame
                 go = EditorUtility.CreateGameObjectWithHideFlags("Temp", HideFlags.HideAndDontSave);
                 Component uiSprite = go.AddComponent(type);
                 SerializedObject ob = new SerializedObject(uiSprite);
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
                 EntityId classID = ob.FindProperty("m_Script").objectReferenceEntityIdValue;
 #else
                 int classID = ob.FindProperty("m_Script").objectReferenceInstanceIDValue;
@@ -227,7 +227,7 @@ namespace DGame
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
         public static EntityId GetClassID<T>() where T : MonoBehaviour
 #else
         public static int GetClassID<T>() where T : MonoBehaviour
@@ -247,7 +247,7 @@ namespace DGame
             var id = GetClassIDCached(type);
             SerializedObject ob = new SerializedObject(mb);
             ob.Update();
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
             ob.FindProperty("m_Script").objectReferenceEntityIdValue = id;
 #else
             ob.FindProperty("m_Script").objectReferenceInstanceIDValue = id;
@@ -267,7 +267,7 @@ namespace DGame
             var id = GetClassID<T>();
             SerializedObject ob = new SerializedObject(mb);
             ob.Update();
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
             ob.FindProperty("m_Script").objectReferenceEntityIdValue = id;
 #else
             ob.FindProperty("m_Script").objectReferenceInstanceIDValue = id;
@@ -472,7 +472,7 @@ namespace DGame
 
         #region AssetDatabase.GetAssetPath
 
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
         public static string GetAssetPath(EntityId entityId)
             => AssetDatabase.GetAssetPath(entityId);
 #else

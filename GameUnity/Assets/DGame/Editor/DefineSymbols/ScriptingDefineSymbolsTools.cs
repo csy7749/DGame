@@ -135,7 +135,7 @@ namespace DGame
         /// <returns>平台的脚本宏定义。</returns>
         public static string[] GetScriptingDefineSymbols(BuildTargetGroup buildTargetGroup)
         {
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
             PlayerSettings.GetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup), out var result);
             return result;
 #else
@@ -150,7 +150,7 @@ namespace DGame
         /// <param name="scriptingDefineSymbols">要设置的脚本宏定义。</param>
         public static void SetScriptingDefineSymbols(BuildTargetGroup buildTargetGroup, string[] scriptingDefineSymbols)
         {
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
             PlayerSettings.SetScriptingDefineSymbols(NamedBuildTarget.FromBuildTargetGroup(buildTargetGroup), scriptingDefineSymbols);
 #else
             PlayerSettings.SetScriptingDefineSymbolsForGroup(buildTargetGroup, string.Join(";", scriptingDefineSymbols));
