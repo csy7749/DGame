@@ -179,6 +179,41 @@ def _extract_detail(tool_input):
     return '\n'.join(lines)
 
 
+def _short_button_text(text, max_len=14):
+    text = str(text or '').strip()
+    if len(text) <= max_len:
+        return text
+    return text[:max_len - 1] + '…'
+
+
+def _permission_suggestion_label(sugg, index):
+    if not isinstance(sugg, dict):
+        return f'记住选项 {index + 1}'
+
+    for key in ('label', 'title', 'name'):
+        value = sugg.get(key)
+        if isinstance(value, str) and value.strip():
+            return _short_button_text(value)
+
+    rules = sugg.get('rules', [])
+    if isinstance(rules, list) and len(rules) == 1:
+        rule = rules[0]
+        if isinstance(rule, dict):
+            tool = rule.get('toolName') or rule.get('tool_name') or rule.get('tool')
+            pattern = rule.get('command') or rule.get('pattern') or rule.get('rule')
+            if tool and pattern:
+                return _short_button_text(f'记住 {tool}: {pattern}')
+            if tool:
+                return _short_button_text(f'记住 {tool}')
+        elif isinstance(rule, str) and rule.strip():
+            return _short_button_text(f'记住 {rule}')
+
+    if isinstance(rules, list) and len(rules) > 1:
+        return f'记住 {len(rules)} 条规则'
+
+    return f'记住选项 {index + 1}'
+
+
 def _extract_plan(tool_input):
     """提取 ExitPlanMode 的方案正文；不同版本字段名可能不同，依次尝试。"""
     for key in ('plan', 'content', 'message', 'text'):
@@ -207,7 +242,7 @@ def show_permission_dialog(data):
     root.resizable(False, False)
     root.configure(bg=C['bg'])
 
-    win_w = 700 if is_plan else 560
+    win_w = 700 if is_plan else (720 if len(suggestions) > 1 else 560)
     win_h = 560 if is_plan else 330
     _center(root, win_w, win_h)
 
@@ -297,7 +332,7 @@ def show_permission_dialog(data):
     def on_deny():
         root.destroy()
 
-    # ── 按钮栏（右对齐：同意描边 / 记住实心紫 / 拒绝实心粉）──
+    # ── 按钮栏（右对齐：同意描边 / 权限建议实心紫 / 拒绝实心粉）──
     bar = tk.Frame(root, bg=C['bg'])
     bar.pack(fill='x', side='bottom', padx=20, pady=(4, 16))
 
@@ -312,9 +347,11 @@ def show_permission_dialog(data):
                 'behavior': 'allow',
                 'destination': 'localSettings',
             }]
-        RoundButton(bar, '记住', lambda s=suggestions[0]: on_allow_rule(s),
-                    C['remember'], C['remember2'], filled=True).pack(
-            side='right', padx=(8, 0))
+        for idx, suggestion in reversed(list(enumerate(suggestions))):
+            label = _permission_suggestion_label(suggestion, idx)
+            RoundButton(bar, label, lambda s=suggestion: on_allow_rule(s),
+                        C['remember'], C['remember2'], filled=True).pack(
+                side='right', padx=(8, 0))
 
     btn_allow = RoundButton(bar, '批准方案' if is_plan else '同意', on_allow_once,
                             C['accent'], C['accent2'], fg=C['accent'],
