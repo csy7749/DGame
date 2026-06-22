@@ -456,7 +456,7 @@ namespace DGame.PSD2UGUI
         #region UI 创建/更新
         private static Canvas FindCanvas()
         {
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
             return FindFirstObjectByType<Canvas>();
 #else
             return FindObjectOfType<Canvas>();
@@ -629,7 +629,7 @@ namespace DGame.PSD2UGUI
             if (!m_notText)
             {
                 text.overflowMode = TextOverflowModes.Overflow;
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
                 text.textWrappingMode = TextWrappingModes.NoWrap;
 #else
                 text.enableWordWrapping = false;
