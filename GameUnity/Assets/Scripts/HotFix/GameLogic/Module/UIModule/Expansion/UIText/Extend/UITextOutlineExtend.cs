@@ -110,7 +110,7 @@ namespace GameLogic
                 return shaderName;
             }
 
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
             return $"{shaderName}_{fontTexture.GetEntityId()}";
 #else
             return $"{shaderName}_{fontTexture.GetInstanceID()}";

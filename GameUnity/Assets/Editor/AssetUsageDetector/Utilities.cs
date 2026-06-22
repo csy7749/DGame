@@ -48,7 +48,7 @@ namespace AssetUsageDetectorNamespace
 		private static readonly HashSet<string> folderContentsSet = new HashSet<string>();
 
 #if UNITY_2018_3_OR_NEWER
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 		private static EntityId previousPingedPrefabInstanceId;
 #else
 		private static int previousPingedPrefabInstanceId;
@@ -239,7 +239,7 @@ namespace AssetUsageDetectorNamespace
 					var openPrefabStage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
 
 					// Try to open the prefab stage of pinged prefabs if they are double clicked
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 					EntityId prefabEntityId = objTR.GetEntityId();
 #else
 					int prefabEntityId = objTR.GetInstanceID();

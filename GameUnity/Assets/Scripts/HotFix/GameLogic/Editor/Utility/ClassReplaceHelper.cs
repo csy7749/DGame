@@ -5,7 +5,7 @@ using UnityEngine;
 
 public static class ClassReplaceHelper
 {
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
     public static EntityId GetClassID(System.Type type)
 #else
     public static int GetClassID(System.Type type)
@@ -14,7 +14,7 @@ public static class ClassReplaceHelper
         GameObject go = EditorUtility.CreateGameObjectWithHideFlags("Temp", HideFlags.HideAndDontSave);
         Component uiSprite = go.AddComponent(type);
         SerializedObject ob = new SerializedObject(uiSprite);
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
         EntityId classID = ob.FindProperty("m_Script").objectReferenceEntityIdValue;
 #else
         int classID = ob.FindProperty("m_Script").objectReferenceInstanceIDValue;
@@ -23,7 +23,7 @@ public static class ClassReplaceHelper
         return classID;
     }
 
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
     public static EntityId GetClassID<T>() where T : MonoBehaviour => GetClassID(typeof(T));
 #else
     public static int GetClassID<T>() where T : MonoBehaviour => GetClassID(typeof(T));
@@ -34,7 +34,7 @@ public static class ClassReplaceHelper
         var id = GetClassID(type);
         SerializedObject ob = new SerializedObject(mb);
         ob.Update();
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
         ob.FindProperty("m_Script").objectReferenceEntityIdValue = id;
 #else
         ob.FindProperty("m_Script").objectReferenceInstanceIDValue = id;

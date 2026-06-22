@@ -113,7 +113,7 @@ namespace DGame
             /// <param name="results"></param>
             /// <param name="callBack">回调函数 </param>
             /// <param name="filter2D">筛选条件</param>
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 
             public static bool TryOverlapBox2DNonAlloc<T>(Vector2 center, Vector2 size, float angle, ContactFilter2D filter2D, Collider2D[] results, UnityAction<T> callBack = null) where T : class
             {
@@ -145,7 +145,7 @@ namespace DGame
             /// <param name="results"></param>
             /// <param name="filter2D">筛选条件</param>
             /// <param name="callBack">回调函数</param>
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
             public static bool TryOverlapCircle2DNonAlloc<T>(Vector2 center, float radius, ContactFilter2D filter2D, Collider2D[] results, UnityAction<T> callBack = null) where T : class
             {
                 var count = Physics2D.OverlapCircle(center, radius, filter2D, results);
@@ -177,7 +177,7 @@ namespace DGame
             /// <param name="filter2D">筛选条件</param>
             /// <param name="callBack"></param>
             /// <returns></returns>
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
             public static bool TryOverlapCircle2DNonAlloc<T>(Vector2 point0, Vector2 point1, ContactFilter2D filter2D, Collider2D[] results, UnityAction<T> callBack = null) where T : class
             {
                 var count = Physics2D.OverlapArea(point0, point1, filter2D, results);
@@ -209,7 +209,7 @@ namespace DGame
             /// <param name="filter2D">筛选条件</param>
             /// <param name="callBack"></param>
             /// <returns></returns>
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
             public static bool TryOverlapCircle2DNonAlloc<T>(Vector2 point0, ContactFilter2D filter2D, Collider2D[] results, UnityAction<T> callBack = null) where T : class
             {
                 var count = Physics2D.OverlapPoint(point0, filter2D, results);
