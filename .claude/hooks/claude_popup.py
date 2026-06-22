@@ -9,13 +9,6 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 ERROR_LOG = os.path.join(SCRIPT_DIR, 'notify_error.log')
 RAW_LOG = os.path.join(SCRIPT_DIR, 'notify_raw.log')
 
-if sys.platform == 'win32':
-    try:
-        import ctypes
-        ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 0)
-    except Exception:
-        pass
-
 # cross-platform fonts
 if sys.platform == 'win32':
     FONT = 'Microsoft YaHei UI'
