@@ -333,7 +333,7 @@ namespace DGame
 
             public static T FindObjectOfType<T>() where T : UnityEngine.Object
                 =>
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
                 UnityEngine.Object.FindFirstObjectByType<T>();
 #else
                 UnityEngine.Object.FindObjectOfType<T>();

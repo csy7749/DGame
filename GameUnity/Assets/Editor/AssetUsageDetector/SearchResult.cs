@@ -46,7 +46,7 @@ namespace AssetUsageDetectorNamespace
 		[Serializable]
 		public class SerializableNode
 		{
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 			public Object unityObject;
 #else
 			public int instanceId;
@@ -885,7 +885,7 @@ namespace AssetUsageDetectorNamespace
 		private readonly int uid;
 
 		internal object nodeObject;
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 		private EntityId? instanceId; // entityId of the nodeObject if it is a Unity object, null otherwise
 #else
 		private int? instanceId; // instanceId of the nodeObject if it is a Unity object, null otherwise
@@ -895,7 +895,7 @@ namespace AssetUsageDetectorNamespace
 		private readonly List<Link> links;
 
 		public Object UnityObject { get { return instanceId.HasValue ?
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 				EditorUtility.EntityIdToObject( instanceId.Value )
 #else
 				EditorUtility.InstanceIDToObject( instanceId.Value )
@@ -983,7 +983,7 @@ namespace AssetUsageDetectorNamespace
 			Object unityObject = nodeObject as Object;
 			if( unityObject != null )
 			{
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 				instanceId = unityObject.GetEntityId();
 #else
 				instanceId = unityObject.GetInstanceID();
@@ -1091,7 +1091,7 @@ namespace AssetUsageDetectorNamespace
 				if( instanceId.HasValue ) // nodeObject is Unity object
 				{
 					bool isContains =
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 						AssetDatabase.Contains(instanceId.Value);
 #else
 						AssetDatabase.Contains(instanceId.Value);
@@ -1153,7 +1153,7 @@ namespace AssetUsageDetectorNamespace
 
 			SearchResult.SerializableNode serializedNode = new SearchResult.SerializableNode()
 			{
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 				unityObject = UnityObject,
 #else
 				instanceId = instanceId ?? 0,
@@ -1184,7 +1184,7 @@ namespace AssetUsageDetectorNamespace
 		// Deserialize this node and its links from the serialized data
 		public void Deserialize( SearchResult.SerializableNode serializedNode, List<ReferenceNode> allNodes )
 		{
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 			if( serializedNode.isUnityObject && serializedNode.unityObject != null )
 				instanceId = serializedNode.unityObject.GetEntityId();
 			else
@@ -1215,7 +1215,7 @@ namespace AssetUsageDetectorNamespace
 	{
 		public GUIContent label;
 		public ReferenceNodeGUI[] links;
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 		public EntityId? instanceId;
 #else
 		public int? instanceId;
@@ -1295,7 +1295,7 @@ namespace AssetUsageDetectorNamespace
 			if( GUI.Button( rect, label, Utilities.BoxGUIStyle ) && instanceId.HasValue )
 			{
 				// If a reference is clicked, highlight it (either on Hierarchy view or Project view)
-#if UNITY_6000_0_OR_NEWER
+#if UNITY_6000_1_OR_NEWER
 						EditorUtility.EntityIdToObject( instanceId.Value )
 #else
 						EditorUtility.InstanceIDToObject( instanceId.Value )
