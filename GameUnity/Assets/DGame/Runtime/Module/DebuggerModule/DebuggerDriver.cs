@@ -67,6 +67,7 @@ namespace DGame
         private RuntimeMemoryInformationWindow<TextAsset> m_runtimeMemoryTextAssetInformationWindow = new RuntimeMemoryInformationWindow<TextAsset>();
         private RuntimeMemoryInformationWindow<ScriptableObject> m_runtimeMemoryScriptableObjectInformationWindow = new RuntimeMemoryInformationWindow<ScriptableObject>();
         private ObjectPoolInformationWindow m_objectPoolInformationWindow = new ObjectPoolInformationWindow();
+        private GameObjectPoolInformationWindow m_gameObjectPoolInformationWindow = new GameObjectPoolInformationWindow();
         private MemoryPoolPoolInformationWindow m_memoryPoolPoolInformationWindow = new MemoryPoolPoolInformationWindow();
         private ProfilerInformationWindow m_profilerInformationWindow = new ProfilerInformationWindow();
 
@@ -165,6 +166,7 @@ namespace DGame
             RegisterDebuggerWindow("Profiler/Memory/TextAsset", m_runtimeMemoryTextAssetInformationWindow);
             RegisterDebuggerWindow("Profiler/Memory/ScriptableObject", m_runtimeMemoryScriptableObjectInformationWindow);
             RegisterDebuggerWindow("Profiler/Object Pool", m_objectPoolInformationWindow);
+            RegisterDebuggerWindow("Profiler/GameObject Pool", m_gameObjectPoolInformationWindow);
             RegisterDebuggerWindow("Profiler/Reference Pool", m_memoryPoolPoolInformationWindow);
             RegisterDebuggerWindow("Other/Settings", m_settingsWindow);
 

@@ -33,6 +33,11 @@ namespace DGame
                 PoolRoot = new GameObject("[GAME_OBJECT_POOL_ROOT]");
                 UnityEngine.Object.DontDestroyOnLoad(PoolRoot);
             }
+
+            if (!PoolRoot.TryGetComponent<GameObjectPoolRoot>(out _))
+            {
+                PoolRoot.AddComponent<GameObjectPoolRoot>();
+            }
         }
 
         public override void OnDestroy()
@@ -308,6 +313,22 @@ namespace DGame
 
         public bool TryGetGameObjectPool(string location, out GameObjectPool pool)
             => m_poolDict.TryGetValue(location, out pool);
+
+        public void GetDebugInfos(List<GameObjectPoolDebugInfo> results)
+        {
+            if (results == null)
+            {
+                throw new ArgumentNullException(nameof(results));
+            }
+
+            results.Clear();
+            foreach (var pool in m_poolDict.Values)
+            {
+                var info = new GameObjectPoolDebugInfo();
+                pool.FillDebugInfo(info);
+                results.Add(info);
+            }
+        }
 
         public void DestroyPool(string location)
         {
