@@ -174,14 +174,51 @@ namespace DGame
 
         private PrefabRefData m_goRef;
 
-        private const string NormalAtlasDir = "Assets/AssetArt/Atlas";
+        private const string DefaultAtlasFolderPath = "Assets/AssetArt/Atlas";
+        private const string DefaultUIPrefabFolderPath = "Assets/BundleAssets/UI";
         private static string AtlasExtension => AtlasConfig.Instance.enableV2 ? ".spriteatlasv2" : ".spriteatlas";
-        private string UIPrefabPath =>  Application.dataPath + "/BundleAssets/UI/";
+        private string UIPrefabPath => GetFullAssetFolderPath(AtlasRefWindowSettings.Instance?.UIPrefabFolderPath ?? DefaultUIPrefabFolderPath, DefaultUIPrefabFolderPath);
 
         private static Texture2D m_selectBackground;
         private GUIStyle m_selectStyle;
 
         private static StringBuilder m_sbGetHierarchyPath = new StringBuilder();
+        private bool m_showSettings;
+        private Vector2 m_settingsScrollPos;
+
+        [UnityEditor.FilePath("ProjectSettings/AtlasRefWindowSettings.asset", UnityEditor.FilePathAttribute.Location.ProjectFolder)]
+        private class AtlasRefWindowSettings : UnityEditor.ScriptableSingleton<AtlasRefWindowSettings>
+        {
+            [SerializeField]
+            private string m_atlasFolderPath = DefaultAtlasFolderPath;
+
+            [SerializeField]
+            private string m_uiPrefabFolderPath = DefaultUIPrefabFolderPath;
+
+            public static AtlasRefWindowSettings Instance => instance;
+
+            public string AtlasFolderPath => NormalizeAssetFolderPath(m_atlasFolderPath, DefaultAtlasFolderPath);
+            public string UIPrefabFolderPath => NormalizeAssetFolderPath(m_uiPrefabFolderPath, DefaultUIPrefabFolderPath);
+
+            public void SetAtlasFolderPath(string path)
+            {
+                m_atlasFolderPath = NormalizeAssetFolderPath(path, DefaultAtlasFolderPath);
+                Save(true);
+            }
+
+            public void SetUIPrefabFolderPath(string path)
+            {
+                m_uiPrefabFolderPath = NormalizeAssetFolderPath(path, DefaultUIPrefabFolderPath);
+                Save(true);
+            }
+
+            public void ResetToDefault()
+            {
+                m_atlasFolderPath = DefaultAtlasFolderPath;
+                m_uiPrefabFolderPath = DefaultUIPrefabFolderPath;
+                Save(true);
+            }
+        }
 
         [MenuItem("DGame Tools/性能分析工具/AtlasRefWindow")]
         static void OpenWindow()
@@ -199,8 +236,83 @@ namespace DGame
             ActiveInspectType = InspectType.Sprite;
         }
 
+        private static string NormalizeAssetFolderPath(string path, string defaultPath)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return defaultPath;
+            }
+
+            path = path.Replace("\\", "/").TrimEnd('/');
+            var dataPath = Application.dataPath.Replace("\\", "/");
+            if (path.StartsWith(dataPath, StringComparison.OrdinalIgnoreCase))
+            {
+                path = "Assets" + path.Substring(dataPath.Length);
+            }
+
+            if (path != "Assets" && !path.StartsWith("Assets/", StringComparison.Ordinal))
+            {
+                return defaultPath;
+            }
+
+            return path;
+        }
+
+        private static string GetFullAssetFolderPath(string assetFolderPath, string defaultPath)
+        {
+            assetFolderPath = NormalizeAssetFolderPath(assetFolderPath, defaultPath);
+            var projectPath = Directory.GetParent(Application.dataPath)?.FullName;
+            if (string.IsNullOrEmpty(projectPath))
+            {
+                return Application.dataPath;
+            }
+
+            return Path.GetFullPath(Path.Combine(projectPath, assetFolderPath)).Replace("\\", "/");
+        }
+
+        private static bool IsValidAssetFolder(string assetFolderPath)
+        {
+            return !string.IsNullOrEmpty(assetFolderPath) && AssetDatabase.IsValidFolder(assetFolderPath);
+        }
+
+        private bool ValidateAnalysisSettings()
+        {
+            var settings = AtlasRefWindowSettings.Instance;
+            if (settings == null)
+            {
+                Debug.LogError("AtlasRefWindow设置加载失败");
+                return false;
+            }
+
+            if (!IsValidAssetFolder(settings.UIPrefabFolderPath))
+            {
+                Debug.LogError($"AtlasRefWindow UI Prefab目录无效：{settings.UIPrefabFolderPath}");
+                return false;
+            }
+
+            if (!Directory.Exists(UIPrefabPath))
+            {
+                Debug.LogError($"AtlasRefWindow UI Prefab目录不存在：{UIPrefabPath}");
+                return false;
+            }
+
+            if (!IsValidAssetFolder(settings.AtlasFolderPath))
+            {
+                Debug.LogError($"AtlasRefWindow 图集目录无效：{settings.AtlasFolderPath}");
+                return false;
+            }
+
+            return true;
+        }
+
         private void AnalysisAtlas()
         {
+            if (!ValidateAnalysisSettings())
+            {
+                m_showSettings = true;
+                return;
+            }
+
             m_listSpriteRef.Clear();
             m_dicSpriteRef.Clear();
             m_listPrefabRef.Clear();
@@ -373,7 +485,8 @@ namespace DGame
         {
             var assetPath = AssetDatabase.GetAssetPath(sprite);
             string atlasName = TextureHelper.GetPackageTag(assetPath);
-            var path = $"{NormalAtlasDir}/{atlasName}{AtlasExtension}";
+            var atlasFolderPath = AtlasRefWindowSettings.Instance?.AtlasFolderPath ?? DefaultAtlasFolderPath;
+            var path = $"{atlasFolderPath}/{atlasName}{AtlasExtension}";
             return AssetDatabase.LoadAssetAtPath<SpriteAtlas>(path);
         }
 
@@ -456,11 +569,121 @@ namespace DGame
             m_scrollPos = Vector2.zero;
         }
 
+        private void ShowMainToolbar()
+        {
+            GUILayout.BeginHorizontal(EditorStyles.toolbar);
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button(m_showSettings ? "返回结果" : "设置", EditorStyles.toolbarButton, GUILayout.Width(80)))
+            {
+                m_showSettings = !m_showSettings;
+            }
+            GUILayout.EndHorizontal();
+        }
+
+        private void ShowSettings()
+        {
+            var settings = AtlasRefWindowSettings.Instance;
+            if (settings == null)
+            {
+                EditorGUILayout.HelpBox("AtlasRefWindow设置加载失败，请重新打开窗口后重试。", MessageType.Error);
+                return;
+            }
+
+            m_settingsScrollPos = EditorGUILayout.BeginScrollView(m_settingsScrollPos);
+            EditorGUILayout.LabelField("AtlasRefWindow设置", EditorStyles.boldLabel);
+            EditorGUILayout.Space(6);
+
+            var atlasFolderPath = DrawFolderField("图集目录", settings.AtlasFolderPath, DefaultAtlasFolderPath);
+            if (atlasFolderPath != settings.AtlasFolderPath)
+            {
+                settings.SetAtlasFolderPath(atlasFolderPath);
+            }
+
+            var uiPrefabFolderPath = DrawFolderField("UI Prefab目录", settings.UIPrefabFolderPath, DefaultUIPrefabFolderPath);
+            if (uiPrefabFolderPath != settings.UIPrefabFolderPath)
+            {
+                settings.SetUIPrefabFolderPath(uiPrefabFolderPath);
+            }
+
+            EditorGUILayout.Space(6);
+            EditorGUILayout.LabelField("当前图集扩展名", AtlasExtension);
+            EditorGUILayout.HelpBox("扩展名来源：图集配置窗口中的“启用V2打包”设置。启用时使用 .spriteatlasv2，未启用时使用 .spriteatlas。", MessageType.Info);
+
+            if (!IsValidAssetFolder(settings.AtlasFolderPath))
+            {
+                EditorGUILayout.HelpBox($"图集目录无效：{settings.AtlasFolderPath}", MessageType.Error);
+            }
+
+            if (!IsValidAssetFolder(settings.UIPrefabFolderPath))
+            {
+                EditorGUILayout.HelpBox($"UI Prefab目录无效：{settings.UIPrefabFolderPath}", MessageType.Error);
+            }
+
+            EditorGUILayout.Space(6);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("恢复默认", GUILayout.Width(120)))
+            {
+                settings.ResetToDefault();
+            }
+
+            if (GUILayout.Button("返回结果", GUILayout.Width(120)))
+            {
+                m_showSettings = false;
+            }
+            GUILayout.EndHorizontal();
+
+            EditorGUILayout.EndScrollView();
+        }
+
+        private string DrawFolderField(string label, string folderPath, string defaultPath)
+        {
+            var folderAsset = AssetDatabase.LoadAssetAtPath<DefaultAsset>(folderPath);
+            EditorGUI.BeginChangeCheck();
+            var newFolderAsset = EditorGUILayout.ObjectField(label, folderAsset, typeof(DefaultAsset), false) as DefaultAsset;
+            var result = folderPath;
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (newFolderAsset == null)
+                {
+                    result = defaultPath;
+                }
+                else
+                {
+                    var newPath = AssetDatabase.GetAssetPath(newFolderAsset);
+                    if (IsValidAssetFolder(newPath))
+                    {
+                        result = NormalizeAssetFolderPath(newPath, defaultPath);
+                    }
+                    else
+                    {
+                        Debug.LogWarning($"AtlasRefWindow 只支持拖入Assets下的文件夹：{newPath}");
+                    }
+                }
+            }
+
+            EditorGUI.BeginDisabledGroup(true);
+            EditorGUILayout.TextField("路径", result);
+            EditorGUI.EndDisabledGroup();
+            return result;
+        }
+
         void OnGUI()
         {
             m_selectStyle = new GUIStyle(GUI.skin.box);
             // 设置背景颜色
             m_selectStyle.normal.background = m_selectBackground;
+
+            if (m_stackData.Count == 0)
+            {
+                Init();
+            }
+
+            ShowMainToolbar();
+            if (m_showSettings)
+            {
+                ShowSettings();
+                return;
+            }
 
             if (m_stackData.Count > 1)
             {
