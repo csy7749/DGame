@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
@@ -64,6 +65,12 @@ namespace DGame
         GameObjectPool GetGameObjectPool(string location);
 
         bool TryGetGameObjectPool(string location, out GameObjectPool pool);
+
+        /// <summary>
+        /// 获取对象池调试快照。
+        /// </summary>
+        /// <param name="results">输出列表，由调用方负责复用。</param>
+        void GetDebugInfos(List<GameObjectPoolDebugInfo> results);
 
         /// <summary>
         /// 销毁指定对象池
