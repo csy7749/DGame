@@ -15,7 +15,7 @@ dotnet %LUBAN_DLL% ^
     -x tableImporter.name=default ^
     -x code.lineEnding=crlf ^
     -x outputCodeDir=%SERVER_CODE_OUTPATH% ^
-    -x bin.outputDataDir=%SERVER_BINARY_DATA_OUTPATH% ^
+    -x bin.outputDataDir=%SERVER_BIN_DATA_OUTPATH% ^
     -x json.outputDataDir=%SERVER_JSON_DATA_OUTPATH% ^
     -x outputSaver.bin.cleanUpOutputDir=1 ^
     -x outputSaver.json.cleanUpOutputDir=1 ^
