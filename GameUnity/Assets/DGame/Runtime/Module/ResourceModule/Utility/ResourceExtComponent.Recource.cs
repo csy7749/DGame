@@ -120,12 +120,6 @@ namespace DGame
                 }
                 else
                 {
-                    // 最后一次检查是否被替换
-                    if (!IsCurrentLocation(target, location))
-                    {
-                        return;
-                    }
-
                     // 防止重复加载同一资源。
                     if (!m_loadingAssetList.Add(location))
                     {
