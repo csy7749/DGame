@@ -18,7 +18,7 @@ namespace DGame
 
         #region Spine资源路径
 
-        private const string SPINE_PATH = "Assets/BundleAssets/Actor/Spine";
+        private const string SPINE_PATH = "Assets/AssetArt/Actor/Spine";
         private const string UI_SPINE_SAVE_PATH = "Assets/BundleAssets/Prefabs/UISpineModel";
         private const string SPINE_SAVE_PATH = "Assets/BundleAssets/Prefabs/Model";
 
