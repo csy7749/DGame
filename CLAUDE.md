@@ -26,9 +26,16 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 
 ---
 
-### 第一步：按等级获取规范（使用 dgame-dev skill）
+### 第一步：按等级获取规范（使用 dgame-dev / 专用 skill）
 
-**L1 任务直接跳到第二步。L2-L4 必须先触发 `dgame-dev` skill。**
+**L1 任务直接跳到第二步。L2-L4 必须先触发对应 skill。**
+
+#### 专用 skill 优先级
+
+- **Luban 配置表、Excel 数据、`__tables__.xlsx` / `__beans__.xlsx` / `__enums__.xlsx`、`#` 自动导入、DGame Sheet 拆表、导表脚本、`ConfigSystem` / `Tables` 配置消费排查、`GameLogic/ConfigMgr` 配置封装**：优先触发 `luban-dev`。
+- **代码落位、程序集边界、HotFix/Runtime/AOT 分层、资源模块生命周期、UI/事件/模块架构**：触发 `dgame-dev`。
+- 如果一个任务同时涉及配置表和业务代码，例如“新增配置表并在 UI 中使用”，先用 `luban-dev` 处理配置链路，再用 `dgame-dev` 查询业务代码落位、UI、事件或模块规范。
+- 不要用 `dgame-dev` 的 Luban 摘要替代 `luban-dev` 的具体配置表操作规则；`dgame-dev` 只补充 DGame 架构边界。
 
 **知识源**：`.claude/skills/dgame-dev/references/`（AI 专用精炼文档，唯一权威来源；完整原文见同目录 `originals/`）
 
@@ -63,7 +70,7 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 | 协议定义 / 路由 | proto-message-define.md — GameServer/Tools 协议、客户端与服务端协议、路由定义、协议导出工具 |
 | 帧同步 / 定点数学 | frame-sync-fixedpoint-foundation-claude.md — 定点数学/物理、确定性随机、FixedPointPhysics、GameBattle 建模 |
 | 服务端架构 | server-architecture.md — 服务端分层、启动链路、Main/Entity/Hotfix 职责、Scene 组织、Handler 落位 |
-| Luban 配置 | luban-game-config-claude.md — 配置表生成流程、访问方式 |
+| Luban 配置表 / Excel / 导表 / 配置消费 | `luban-dev` — 配置表 CRUD、`__tables__`/`__beans__`/`__enums__`、`#` 自动导入、Sheet 拆表、导表脚本、ConfigMgr 封装；如涉及代码落位或架构边界，再补充 `dgame-dev` 的 `luban-game-config-claude.md` |
 | 代码规范 | client-conventions-claude.md — 命名约定、节点前缀、异步、日志、Git 协作 |
 | 服务端规范 | server-conventions.md — 服务端命名、异步、日志、错误码、Scene 脚本落位、Handler/Helper/System 设计、Git 协作 |
 
