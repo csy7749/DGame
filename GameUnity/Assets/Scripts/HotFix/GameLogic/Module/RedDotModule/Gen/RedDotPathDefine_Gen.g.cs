@@ -239,7 +239,7 @@ namespace GameLogic
         /// </summary>
         public static void RegisterAll()
         {
-        	var mgr = RedDotModule.Instance;
+        	var mgr = GameModule.RedDotModule;
 
             // 主界面
             mgr.Register(Main.Id, Main.Path, Main.Segments, RedDotType.Dot, RedDotAggregateStrategy.Or);

@@ -82,7 +82,7 @@ namespace GameLogic
 				m_isInit = false;
 			}
 
-			m_redDotNode = RedDotModule.Instance.GetNode(redDotNodeID);
+			m_redDotNode = GameModule.RedDotModule.GetNode(redDotNodeID);
 			if (m_redDotNode == null)
 			{
 				return;
