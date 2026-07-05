@@ -152,7 +152,7 @@ namespace GameLogic
             sb.AppendLine($"{indent}/// </summary>");
             sb.AppendLine($"{indent}public static void RegisterAll()");
             sb.AppendLine($"{indent}{{");
-            sb.AppendLine($"{indent}\tvar mgr = RedDotModule.Instance;");
+            sb.AppendLine($"{indent}\tvar mgr = GameModule.RedDotModule;");
             sb.AppendLine();
 
             foreach (var root in config.RootNodes)
