@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import hashlib
 import traceback
 
 import tkinter as tk
@@ -570,8 +571,15 @@ def _already_notified(uuid):
 
 
 def show_idle_dialog(data):
-    # 取 Claude 最后说的话（通常就是它向你提的问题）
-    body_text, uuid = _last_assistant_text(data.get('transcript_path', ''))
+    # 优先用 hook stdin 里现成的本次回答；Stop 触发时 transcript 可能尚未落盘，
+    # 读文件会拿到上一轮内容（弹窗“慢一拍”的根因），故 stdin 字段为准。
+    body_text = (data.get('last_assistant_message') or '').strip()
+    if body_text:
+        # 本次内容无 uuid，用内容哈希做去重 key（Stop/Notification 会重复触发）
+        uuid = 'msg:' + hashlib.md5(body_text.encode('utf-8')).hexdigest()
+    else:
+        # 兜底：字段缺失时回退到读 transcript
+        body_text, uuid = _last_assistant_text(data.get('transcript_path', ''))
 
     # 同一条消息只弹一次（Stop/Notification 会重复触发）
     if _already_notified(uuid):
