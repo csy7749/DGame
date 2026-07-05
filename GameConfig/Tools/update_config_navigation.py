@@ -282,7 +282,12 @@ def build_navigation(data_dir: Path, output: Path, reference: Path | None, inclu
             and path.resolve() != output.resolve()
             and (include_meta or path.name not in META_FILES)
         ],
-        key=lambda p: (p.name not in META_FILES, relative_excel_path(p, data_dir)),
+        # 元定义表优先；同子目录的文件聚拢成一段，避免目录分组被字母序拆散；段内按相对路径排。
+        key=lambda p: (
+            p.name not in META_FILES,
+            relative_excel_path(p.parent, data_dir),
+            relative_excel_path(p, data_dir),
+        ),
     )
 
     all_sheets = []
@@ -302,17 +307,37 @@ def build_navigation(data_dir: Path, output: Path, reference: Path | None, inclu
     nav.freeze_panes = "A2"
     nav.auto_filter.ref = "A1:I1"
 
+    # 按子目录分组的样式：所有分组行统一底色与字体。
+    group_fill = PatternFill("solid", fgColor="DCE6F1")
+    group_font = Font(name="Microsoft YaHei", size=10, bold=True, color="1F497D")
+
     row = 2
-    nav.cell(row, 1, f"{data_dir.name}\\")
-    apply_style(nav.cell(row, 1), styles.get("folder"))
-    nav.cell(row, 9, f"{data_dir.as_posix()} 下所有 Excel 配置表")
-    row += 1
+    # files 已按 (元表优先, 同子目录聚拢) 排序，遍历时自然形成目录段。
+    # 每进入一个新目录段插入一行分组标题；根目录段标题显示 Datas\。
+    current_dir: str | None = None
 
     for path in files:
         data_relative = relative_excel_path(path, data_dir)
+        dir_relative = str(path.relative_to(data_dir).parent).replace("/", "\\")
+        if dir_relative == ".":
+            dir_relative = ""
+
+        # 进入新目录段时先写一行分组标题
+        if dir_relative != current_dir:
+            current_dir = dir_relative
+            folder_label = f"{data_dir.name}\\" if not dir_relative else f"{data_dir.name}\\{dir_relative}\\"
+            nav.cell(row, 1, folder_label)
+            apply_style(nav.cell(row, 1), styles.get("folder"))
+            nav.cell(row, 1).font = group_font
+            nav.cell(row, 1).fill = group_fill
+            for col in range(2, len(nav_headers) + 1):
+                cell = nav.cell(row, col)
+                cell.fill = group_fill
+            row += 1
+
         file_sheets = [item for item in all_sheets if item["file"] == data_relative]
         relative = str(path.relative_to(output.parent)).replace("/", "\\")
-        nav.cell(row, 2, data_relative)
+        nav.cell(row, 2, f"  {path.name}")
         add_link(nav.cell(row, 2), relative)
         nav.cell(row, 9, "Luban 元定义表" if path.name in META_FILES else "业务配置表")
         row += 1
