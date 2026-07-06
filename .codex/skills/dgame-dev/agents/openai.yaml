@@ -1,4 +1,6 @@
 interface:
-  display_name: "DGame 开发"
-  short_description: "处理 DGame Unity 项目开发与维护任务"
-  default_prompt: "使用 $dgame-dev 在 DGame 仓库中实现或修改功能。"
+  display_name: "DGame Dev"
+  short_description: "DGame Unity 开发、架构与 MCP 工具规范"
+  default_prompt: "Use $dgame-dev to implement or modify DGame Unity project code."
+policy:
+  allow_implicit_invocation: true
