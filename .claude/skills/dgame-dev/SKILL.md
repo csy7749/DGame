@@ -1,84 +1,46 @@
 ---
 name: dgame-dev
-description: 开发和维护 DGame 的 Unity 框架与游戏代码。在本仓库中处理 DGame 架构、Unity 运行时或编辑器代码、HotFix/GameLogic 功能、模块集成、UI 系统、Luban 配置流程、发布工具链、项目内调试与重构时使用。
+description: DGame Unity 项目开发指导。触发词：DGame, TEngine 二次封装, GameModule, UIWindow, UIWidget, UIModule, GameEventDriver, EEventGroup, LoadAssetAsync, LoadGameObjectAsync, HybridCLR, YooAsset, Luban, RedDotModule, CoplayDev unity-mcp, MCP, 热更, 资源加载, UI开发, 事件系统, 模块架构
 ---
 
-# DGame 开发
+# DGame 开发指导
 
-按照仓库内已经存在的分层和约定开发 DGame，不要把它当成普通 Unity 项目随意落代码。
+DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luban 构建。
+本 skill 提供 DGame 专属的 AI 精炼参考文档，优先描述本仓库实际 API、目录和落位规则。
 
-当需求涉及文件应该放在哪里、由哪一层负责、应该修改哪个程序集时，先读取 `references/project-map.md`。
-当需求涉及配置表、Luban、Excel 源表、生成脚本或配置产物链路时，先读取 `references/luban-game-config-claude.md`。
-当需求涉及客户端分层、启动链路、模块职责、UI 架构或 HotFix 与 Runtime 的协作边界时，先读取 `references/client-architecture-claude.md`。
-当需求涉及热更代码开发、HotFix 程序集划分、`GameStart`、Procedure 流程、HybridCLR、AOT 泛型补充或热更开发流程时，先读取 `references/client-hotfix-development-claude.md`。
-当需求涉及热更资源包管理、资源版本更新、下载器、缓存清理、YooAsset 或 `GameModule.ResourceModule` 的使用方式时，先读取 `references/client-hotpatch-development-claude.md`。
-当需求涉及资源管理、资源寻址、Sprite/Prefab/普通 Asset 加载与卸载、资源查询或 `GameModule.ResourceModule` 的使用方式时，先读取 `references/client-resource-management-claude.md`。
-当需求涉及客户端模块职责、`GameModule`、模块应该从哪里获取、某个系统该依赖哪个模块时，先读取 `references/client-modules-claude.md`。
-当需求涉及客户端 UI 开发、`UIWindow`、`UIWidget`、UIModule、列表与循环列表、Spine/粒子/序列帧 Widget、`IUIController`、`SwitchPageMgr` 或子页面体系时，先读取 `references/client-ui-development-claude.md`。
-当需求涉及客户端红点开发、红点节点刷新、`RedDotModule`、`RedDotItem`、`RedDotPathDefine` 或 UI 红点接入时，先读取 `references/client-reddot-development-claude.md`。
-当需求涉及代码规范、命名、UI 节点命名、异步编程、日志、中文文本、代码审查或 Git 工作流时，先读取 `references/client-conventions-claude.md`。
-当需求涉及客户端事件系统、接口事件、UI 事件监听、`GameEventDriver`、`EEventGroup`、事件定义规范或事件排障时，先读取 `references/client-event-system-claude.md`。
+## 核心红线
 
-## 工作规则
+1. **分层落位**：框架运行时放 `GameUnity/Assets/DGame/Runtime`，编辑器工具放 `GameUnity/Assets/DGame/Editor`，热更玩法放 `GameUnity/Assets/Scripts/HotFix/GameLogic`。
+2. **模块访问**：业务代码优先通过 `GameLogic.GameModule.XXX` 访问模块，不在业务层散落 `ModuleSystem.GetModule<T>()`。
+3. **异步优先**：IO、资源、场景等耗时操作优先使用 `UniTask`，不要新增 Coroutine 工作流。
+4. **资源生命周期成对**：非实例化资源用 `LoadAssetAsync/LoadAsset` 后按持有关系 `UnloadAsset`；GameObject 实例用 `LoadGameObjectAsync/LoadGameObject`，销毁实例时资源模块自动回收引用。
+5. **事件解耦**：UI 内部监听用 `UIBase.AddUIEvent` 自动清理；跨模块事件用 `[EventInterface(EEventGroup...)]`、`GameEvent.Get<T>()` 或 `GameEvent.AddEventListener`。
+6. **配置表边界**：配置表结构、Excel、导表脚本优先使用 `luban-dev`；本 skill 只补充 DGame 业务代码如何消费配置。
 
-编辑前先检查目标区域。若现有 DGame 模块或 HotFix 程序集已经负责该行为，不要额外发明新层级。
+## 文档路由
 
-优先做符合现有分层的最小改动：
+根据任务类型，读取对应的 reference 文档：
 
-- 框架能力和运行时代码放到 `GameUnity/Assets/DGame/Runtime`。
-- Unity 编辑器工具代码放到 `GameUnity/Assets/DGame/Editor`。
-- 热更业务和玩法功能代码放到 `GameUnity/Assets/Scripts/HotFix/GameLogic`。
-- 可复用的 HotFix 基础代码放到 `GameUnity/Assets/Scripts/HotFix/GameBase`。
-- 配置、协议、生成数据相关修改根据性质放到 `GameUnity/Assets/Scripts/HotFix/GameProto` 或 `GameConfig`。
+| 任务类型 | 必读文档 | 进阶文档 | 优先级 |
+|---------|---------|---------|--------|
+| UI 开发 | [ui-lifecycle.md](references/ui-lifecycle.md) | [ui-patterns.md](references/ui-patterns.md) | P0 |
+| 事件系统 | [event-system.md](references/event-system.md) | [event-antipatterns.md](references/event-antipatterns.md) | P0 |
+| 资源加载 | [resource-api.md](references/resource-api.md) | [resource-patterns.md](references/resource-patterns.md) | P0 |
+| 热更资源包 | [hotpatch-workflow.md](references/hotpatch-workflow.md) | [resource-api.md](references/resource-api.md) | P0 |
+| 模块使用 | [modules.md](references/modules.md) | — | P0 |
+| 热更代码 | [hotfix-workflow.md](references/hotfix-workflow.md) | — | P1 |
+| 代码规范 | [naming-rules.md](references/naming-rules.md) | — | P1 |
+| Luban 配置 | [luban-config.md](references/luban-config.md) | `luban-dev` | P1 |
+| 红点系统 | [reddot-system.md](references/reddot-system.md) | [ui-patterns.md](references/ui-patterns.md) | P1 |
+| 项目结构 | [architecture.md](references/architecture.md) | — | P2 |
+| 问题排查 | [troubleshooting.md](references/troubleshooting.md) | — | P2 |
+| MCP 场景/GO/UI/脚本/Editor | [mcp-tools.md](references/mcp-tools.md) | — | P1 |
+| MCP 材质/Shader/动画/VFX | [mcp-visual.md](references/mcp-visual.md) | — | P2 |
 
-始终考虑 TEngine 继承关系。新增服务或系统前，先确认 DGame 是否已经对原有能力做了二次封装或替换，例如 `GameTimer`、`ILocalizationModule`、`MemoryCollector`、`InputModule`、`AnimModule`、对象池或事件相关封装。
+## 使用原则
 
-## 执行流程
-
-1. 修改前先判断归属层级和程序集。
-2. 先阅读同模块附近实现和已有模式。
-3. 实现最小但完整的改动。
-4. 在当前环境允许的范围内验证编译或资源生成影响。
-5. 明确说明哪些校验仍然需要在 Unity 编辑器或生成工具里完成。
-
-## 常见任务
-
-### 运行时或框架层开发
-
-在 `GameUnity/Assets/DGame/Runtime` 中处理。新增底层能力前，优先复用 `Core` 和 `Module` 里已有模块。
-
-### 编辑器工具开发
-
-在 `GameUnity/Assets/DGame/Editor` 中处理。优先沿用现有工具分组，例如工具栏、发布、HybridCLR、Luban、Spine、设置辅助等，不要新建无关的编辑器目录。
-
-### HotFix 玩法与 UI 开发
-
-在 `GameUnity/Assets/Scripts/HotFix/GameLogic` 中处理。玩法功能、UI、数据中心、红点系统、GM、序列帧和工具类都尽量落在现有 `GameLogic` 子目录中。
-
-### 配置、数据与代码生成
-
-先检查 `GameConfig` 和 `Tools`。若需求涉及生成内容，要区分源表、生成工具和生成后的 C# 消费端；除非任务明确要求，否则不要手改生成产物。
-
-涉及 `GameConfig` 时，先确认本次修改属于以下哪一类：
-
-- 修改 Excel 数据表内容。
-- 修改 `__tables__`、`__beans__`、`__enums__` 等 schema 定义。
-- 修改 Luban 配置、模板或生成脚本。
-- 修改生成后的消费代码或加载链路。
-
-## 校验方式
-
-优先选择成本最低但有效的检查方式：
-
-- 纯文件修改时，先检查邻近代码和引用是否一致。
-- 涉及 C# 逻辑时，如果环境允许，运行本地构建或定向编译。
-- 涉及编辑器流程时，明确说明最终验证需要使用 Unity 2021.3.30f1c1 打开工程并走对应菜单、场景或 Inspector 流程。
-- 涉及启动流程时，注意主启动场景位于 `GameUnity/Assets/Scenes/GameStart`。
-
-## 输出要求
-
-在这个仓库里完成任务时：
-
-- 说明本次修改属于哪一层。
-- 说明对生成文件、HybridCLR、Luban 或 Unity 专属校验的假设。
-- 若运行时改动同时影响 HotFix、配置或编辑器侧，要明确标出跨层影响。
+- 先读与任务直接相关的 reference，不要一次性加载全部文档。
+- 如果 reference 与源码冲突，使用 `rg` 搜索实际签名，优先信任源码，并在回复中标注冲突点。
+- 修改配置表、`__tables__.xlsx`、`__beans__.xlsx`、`__enums__.xlsx`、导表脚本或 `GameConfig/` 数据时，先使用 `luban-dev`。
+- 生成 UI 代码时匹配本仓库实际生命周期：`ScriptGenerator`、`BindMemberProperty`、`RegisterEvent`、`OnCreate`、`OnRefresh`、`OnDestroy`。
+- 资源地址通常等于 `GameUnity/Assets/BundleAssets` 下资源文件名，不含路径和扩展名；改动前用实际资源和 YooAsset 设置验证。
