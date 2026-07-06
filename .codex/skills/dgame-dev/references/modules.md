@@ -308,6 +308,7 @@ DLogger.Assert(condition, "unexpected state");
 ---
 
 ## 常见错误
+
 | 错误写法 | 正确写法 | 原因 |
 |---------|---------|------|
 | `ModuleSystem.GetModule<IResourceModule>()` | `GameModule.ResourceModule` | 业务层使用统一缓存入口 |
