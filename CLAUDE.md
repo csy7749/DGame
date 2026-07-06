@@ -1,133 +1,140 @@
 # CLAUDE.md
 
-请使用中文写提案和回答
+请使用中文写提案和回答。
 这个文件为 Claude Code (claude.ai/code) 提供指导，用于处理此代码库中的代码。
 
-DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luban 构建。Unity 版本 2021.3.30f1c1，主启动场景位于 `GameUnity/Assets/Scenes/GameStart`。
+DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luban 构建。Unity 版本为 `2021.3.30f1c1`，主启动场景位于 `GameUnity/Assets/Scenes/GameStart/GameStart.unity`。
 
 ---
 
-## ⚡ 强制工作流（所有任务必须遵守）
-
-> **禁止跳过** — 无论任务大小，必须按此顺序执行：
+## ⚡ 强制工作流
 
 ### 第零步：判断任务等级
 
-在执行任何操作前，先判断任务等级：
-
 | 等级 | 判断标准 | 知识查询策略 |
-|------|---------|-------------|
-| **L1 简单** | typo 修正、注释修改、日志输出、单行变量改名（**前提：不涉及框架 API 名称、UI 节点前缀、事件定义或资源路径**） | ❌ 跳过查询，直接编码 |
-| **L2 调用** | 调用已知 API、单一模块的局部修改 | ✅ 触发 `dgame-dev` skill（只查该主题） |
-| **L3 功能** | 新功能开发、跨文件修改、新增 UI/资源/事件逻辑 | ✅ 触发 `dgame-dev` skill（全量相关主题） |
-| **L4 架构** | 模块设计、系统重构、多模块协作、架构决策 | ✅ 触发 `dgame-dev` skill（并行多主题） |
+|------|----------|--------------|
+| **L1 简单** | typo、注释、日志文案、单行变量改名；前提是不涉及框架 API、UI 节点前缀、事件定义、资源路径、Luban 配置 | 可跳过 skill，直接处理 |
+| **L2 调用** | 调用已知 API、单模块局部修改 | 使用 `dgame-dev` skill 查询对应主题 |
+| **L3 功能** | 新功能、跨文件修改、新增 UI / 资源 / 事件 / 模块逻辑 | 使用 `dgame-dev` 查询全量相关主题；涉及配置先用 `luban-dev` |
+| **L4 架构** | 模块设计、系统重构、多模块协作、架构决策 | 使用 `dgame-dev` 并按需并行查询多个 reference；配置链路同时使用 `luban-dev` |
 
-> **判断原则**：宁可高估等级，不可低估——不确定时上调一级。
+不确定时上调一级。凡涉及 DGame API 名称、程序集边界、资源地址、UI 节点前缀、事件接口、热更流程、Luban 表结构，都不要按 L1 处理。
+
+### 第一步：按主题获取规范
+
+同一会话中已查过的主题可复用摘要；只有涉及新主题或发现文档与源码冲突时才重新查询。配置表相关任务优先 `luban-dev`，业务落位和运行时代码再补 `dgame-dev`。
+
+| 场景 | 必须查询主题 |
+|------|--------------|
+| 文件落位 / 程序集边界 | `architecture.md` |
+| UI 生命周期 / 窗口 / Widget / IUIController | `ui-lifecycle.md`、`ui-patterns.md` |
+| 资源加载 / 释放 / 场景切换资源整理 | `resource-api.md`、`resource-patterns.md` |
+| 热更资源包 / YooAsset 下载链路 / ReleaseTools | `hotpatch-workflow.md` |
+| 热更代码 / HybridCLR / AOT 泛型 | `hotfix-workflow.md` |
+| 模块 API / DataCenterModule / MemoryPool / Audio / Fsm | `modules.md` |
+| 事件系统 / EventCenter / 事件反模式 | `event-system.md`、`event-antipatterns.md` |
+| Luban 配置消费 | `luban-config.md`；编辑配置表时使用 `luban-dev` |
+| 红点系统 | `reddot-system.md` |
+| 命名 / UI 节点前缀 / 代码规范 | `naming-rules.md` |
+| MCP 工具链 | `mcp-tools.md`、`mcp-visual.md` |
+| 排障 | `troubleshooting.md` |
+
+### 第二步：输出代码或方案
+
+基于已查询规范实现。若 reference 与源码冲突：
+
+1. 用 `rg` 搜索实际签名和调用点。
+2. 优先信任当前源码。
+3. 在回复中标注冲突点；如果任务本身是维护 skill，直接修正 `.codex/skills/dgame-dev/references/` 对应文档。
 
 ---
 
-### 第一步：按等级获取规范（使用 dgame-dev / 专用 skill）
+## DGame 开发指导
 
-**L1 任务直接跳到第二步。L2-L4 必须先触发对应 skill。**
+处理 DGame 代码时优先使用 `dgame-dev` skill。它参考 TEngine 的 `tengine-dev` 组织方式，但内容按 DGame 当前项目结构、API 和封装编写。
 
-#### 专用 skill 优先级
+**知识源**：`.codex/skills/dgame-dev/references/`
 
-- **Luban 配置表、Excel 数据、`__tables__.xlsx` / `__beans__.xlsx` / `__enums__.xlsx`、`#` 自动导入、DGame Sheet 拆表、导表脚本、`ConfigSystem` / `Tables` 配置消费排查、`GameLogic/ConfigMgr` 配置封装**：优先触发 `luban-dev`。
-- **代码落位、程序集边界、HotFix/Runtime/AOT 分层、资源模块生命周期、UI/事件/模块架构**：触发 `dgame-dev`。
-- 如果一个任务同时涉及配置表和业务代码，例如“新增配置表并在 UI 中使用”，先用 `luban-dev` 处理配置链路，再用 `dgame-dev` 查询业务代码落位、UI、事件或模块规范。
-- 不要用 `dgame-dev` 的 Luban 摘要替代 `luban-dev` 的具体配置表操作规则；`dgame-dev` 只补充 DGame 架构边界。
-
-**知识源**：`.claude/skills/dgame-dev/references/`（AI 专用精炼文档，唯一权威来源；完整原文见同目录 `originals/`）
-
-#### 调用方式
+### 使用方式
 
 ```
-使用 Skill 工具，skill = "dgame-dev"
+使用 skill = "dgame-dev"
 描述需要查询的技术问题或功能点
 ```
 
-#### 会话内缓存（避免重复查询）
+### 专用 skill 优先级
 
-同一会话中已查询过的主题无需重复触发 skill：
-- 直接引用本次会话已获取的规范摘要
-- 仅当任务涉及**本次会话未覆盖的新主题**时才重新触发
-
-#### 触发时机
-
-| 场景 | 必须查询主题 |
-|------|------------|
-| 文件落位 / 改哪个程序集 | project-map.md — 目录职责、落位规则 |
-| 架构 / 启动 / 分层 | client-architecture-claude.md — 分层、启动链路、HotFix 与 Runtime 边界 |
-| UI 开发 | client-ui-development-claude.md — UIWindow/UIWidget、UIModule、循环列表、子页面 |
-| 资源加载 | client-resource-management-claude.md — GameModule.ResourceModule、加载与释放 |
-| 热更代码 | client-hotfix-development-claude.md — 程序集划分、GameStart、Procedure、HybridCLR、AOT |
-| 热更资源包 | client-hotpatch-development-claude.md — 资源版本更新、下载器、缓存、YooAsset |
-| 模块使用 | client-modules-claude.md — GameModule.XXX、模块获取与依赖 |
-| 事件系统 | client-event-system-claude.md — GameEventDriver、EEventGroup、UI 事件监听 |
-| 红点系统 | client-reddot-development-claude.md — RedDotModule、RedDotItem、RedDotPathDefine |
-| Luban 配置表 / Excel / 导表 / 配置消费 | `luban-dev` — 配置表 CRUD、`__tables__`/`__beans__`/`__enums__`、`#` 自动导入、Sheet 拆表、导表脚本、ConfigMgr 封装；如涉及代码落位或架构边界，再补充 `dgame-dev` 的 `luban-game-config-claude.md` |
-| 代码规范 | client-conventions-claude.md — 命名约定、节点前缀、异步、日志、Git 协作 |
+- Luban 配置表、Excel、`__tables__.xlsx` / `__beans__.xlsx` / `__enums__.xlsx`、导表脚本、`GameConfig/` 数据：优先使用 `luban-dev`。
+- 代码落位、程序集边界、HotFix/Runtime/AOT 分层、资源模块生命周期、UI/事件/模块架构：使用 `dgame-dev`。
+- 同时涉及配置和业务代码时，先用 `luban-dev` 处理配置链路，再用 `dgame-dev` 处理业务落位与调用方式。
 
 ---
 
-### 第二步：输出代码/方案
+## 核心红线
 
-基于 dgame-dev skill 返回的规范编写实现。
-
-**当 references 规范与代码实际 API 冲突时**：
-1. 使用 Grep 搜索实际方法签名验证（例：`Grep "GameModule.ResourceModule"` 确认 API）
-2. 优先信任代码中的实际实现
-3. 在输出中标注冲突点，并记录到 `.claude/memory/` 供后续修正
-
----
-
-## 核心原则（编码红线）
-
-1. **分层落位**：框架运行时 → `GameUnity/Assets/DGame/Runtime`；编辑器工具 → `GameUnity/Assets/DGame/Editor`；热更玩法 → `GameUnity/Assets/Scripts/HotFix/GameLogic`；HotFix 基础 → `GameUnity/Assets/Scripts/HotFix/GameBase`
-2. **优先复用 TEngine 二次封装**：新增服务/系统前，先确认 DGame 是否已对原能力做封装或替换（如 `GameTimer`、`ILocalizationModule`、`MemoryCollector`、`InputModule`、`AnimModule`、对象池与事件封装），不要绕过封装层
-3. **模块访问**：通过 `GameModule.XXX` 访问，而非 `ModuleSystem.GetModule<T>()`
-4. **异步优先**：IO 操作用 `UniTask`，禁止同步加载 / Coroutine
-5. **资源必须释放**：资源加载与卸载成对出现，遵循 `GameModule.ResourceModule` 的生命周期约定
-6. **事件解耦**：模块间用 `GameEventDriver` / 接口事件，UI 内部用 UI 事件监听，遵循 `EEventGroup` 定义规范
+1. **分层落位**：框架运行时放 `GameUnity/Assets/DGame/Runtime`；编辑器工具放 `GameUnity/Assets/DGame/Editor`；热更业务放 `GameUnity/Assets/Scripts/HotFix/GameLogic`；配置生成代码放 `GameUnity/Assets/Scripts/HotFix/GameProto`。
+2. **优先复用 DGame 封装**：新增服务前先确认 `GameModule`、`DGame/Runtime/Module`、`GameLogic/Module` 是否已有封装。
+3. **模块访问**：业务层通过 `GameLogic.GameModule.XXX` 访问模块，不散落 `ModuleSystem.GetModule<T>()`。
+4. **异步优先**：IO、资源、场景等耗时操作优先使用 `UniTask`，不要新增 Coroutine 工作流。
+5. **资源必须释放**：普通资源加载与 `UnloadAsset` 成对；实例化 GameObject 由实例销毁触发资源引用回收。
+6. **事件解耦**：UI 内监听用 `AddUIEvent`；跨模块事件用 `GameEvent` / `[EventInterface(EEventGroup...)]`。
 
 ---
 
-## 📚 References 参考文档
+## Reference 路由
 
-> **AI 唯一权威来源：`.claude/skills/dgame-dev/references/`**（精简版供查询，`originals/` 存完整原文）
-
-| 文档 | 内容 | 层级 |
-|-----|------|------|
-| project-map.md | 仓库目录职责 / 文件落位规则 | 核心 |
-| client-architecture-claude.md | 项目结构 / 分层 / 启动链路 / 程序集边界 | 核心 |
-| client-modules-claude.md | 模块访问规则（GameModule.XXX）| 核心 |
-| client-ui-development-claude.md | UI 开发（UIWindow/UIWidget/UIModule/子页面）| 核心 |
-| client-event-system-claude.md | 事件系统（GameEventDriver / EEventGroup）| 核心 |
-| client-resource-management-claude.md | 资源加载 / 卸载 / 寻址 | 核心 |
-| client-hotfix-development-claude.md | 热更代码（HybridCLR / 程序集划分 / Procedure）| 核心 |
-| client-hotpatch-development-claude.md | 热更资源包（版本更新 / 下载器 / YooAsset）| 核心 |
-| luban-game-config-claude.md | 配置表（Luban / Excel / 生成链路）| 核心 |
-| client-conventions-claude.md | 代码规范 / 命名约定 / 节点前缀 / Git 协作 | 核心 |
-| client-reddot-development-claude.md | 红点系统（RedDotModule / RedDotPathDefine）| 进阶 |
+| 场景 | 文档 |
+|------|------|
+| 项目结构 / 启动 / 分层 | `architecture.md` |
+| 模块访问 | `modules.md` |
+| UI 开发 | `ui-lifecycle.md`、`ui-patterns.md` |
+| 事件系统 | `event-system.md`、`event-antipatterns.md` |
+| 资源加载 | `resource-api.md`、`resource-patterns.md` |
+| 热更代码 | `hotfix-workflow.md` |
+| 热更资源包 | `hotpatch-workflow.md` |
+| Luban 配置消费 | `luban-config.md` |
+| 红点系统 | `reddot-system.md` |
+| 代码规范 | `naming-rules.md` |
+| 问题排查 | `troubleshooting.md` |
+| MCP 场景 / GameObject / UI / 脚本 / Editor | `mcp-tools.md` |
+| MCP 材质 / Shader / 动画 / VFX | `mcp-visual.md` |
 
 ---
 
-## 🔧 自我优化机制
+## 冲突处理
 
-### 问题记录
+当 reference 与代码实际 API 冲突时：
 
-**触发条件**（满足任一即记录）：
-1. 发现 references 文档描述与实际代码 API 不符（通过 Grep/Read 验证）
-2. AI 生成的代码在编译/运行时报错，根因是知识库描述有误
-3. 用户明确指出某文档描述有误
+1. 使用 `rg` 搜索实际方法签名和调用点。
+2. 优先信任当前源码。
+3. 在回复中标注冲突点，方便后续修正文档。
 
-**记录规范**：
-- 文件名：`problem_YYYY-MM-DD.md`（如 `problem_2026-04-21.md`）
-- 必填字段：
-  - **问题现象**：错误表现或报错信息
-  - **文档位置**：哪篇 reference 文档哪一节
-  - **正确 API**：经代码验证后的正确用法
-  - **建议修正**：文档应改成什么表述
+---
+
+## 自我优化机制
+
+满足任一条件时，需要把问题反馈到本次回答；如果用户任务就是维护 skill，则直接修正对应 reference：
+
+1. reference 文档与当前源码 API、路径、签名不一致。
+2. 生成代码失败的根因来自过期文档或错误模式。
+3. 用户明确指出 DGame skill、`AGENTS.md` 或 `CLAUDE.md` 描述不准确。
+
+记录或修正文档时写清楚：
+
+- 问题现象：错误 API、错误路径或失败表现。
+- 文档位置：哪个 reference 或根文档的哪一节。
+- 正确事实：经源码核实后的 API、路径、签名。
+- 修正建议：文档应改成什么。
+
+---
+
+## DGame 补充准则
+
+- 只改和任务直接相关的文件。
+- 不顺手重构无关代码。
+- 不回滚用户已有改动。
+- 生成或修改 UI、资源、事件、配置消费代码前，先确认 DGame 当前 API。
+- 能验证就验证；不能验证时说明限制。
 
 ---
 
