@@ -63,7 +63,8 @@
         "ConfigMgr"
       ],
       "forbidden_patterns": [
-        "手改.*LubanConfig"
+        "手改.*LubanConfig",
+        "手改.*GameProto"
       ]
     },
     {
@@ -173,7 +174,7 @@
     {
       "id": 11,
       "name": "mcp-create-ui-script",
-      "description": "验证 MCP 创建 UI 脚本时使用 DGame 热更 UI 路径，不误用 TEngine 的 GameScripts 路径，也不把 manage_ui 当作 uGUI 创建工具。",
+      "description": "验证 MCP 创建 UI 脚本时使用 DGame 热更 UI 路径与命名空间，不误用其他目录结构，也不把 manage_ui 当作 uGUI 创建工具。",
       "prompt": "用 CoplayDev unity-mcp 帮我创建一个 BattleMainWindow 的 DGame UI 脚本，放在正确的热更 UI 目录，并说明应该用哪个工具。",
       "expected_patterns": [
         "manage_script",
@@ -185,8 +186,7 @@
       "forbidden_patterns": [
         "GameScripts",
         "Assets/AssetRaw",
-        "manage_ui.*(Button|Text|Image|uGUI|UGUI)",
-        "using TEngine"
+        "manage_ui.*(Button|Text|Image|uGUI|UGUI)"
       ]
     },
     {
@@ -331,6 +331,20 @@
         "manage_ui.*create",
         "manage_ui.*uGUI",
         "Resources\\.Load"
+      ]
+    },
+    {
+      "id": 19,
+      "name": "set-sprite-callback",
+      "description": "验证 Image 设置图片使用 SetSprite 扩展，其回调是 Action<Image>，不是 Action<Sprite>。",
+      "prompt": "我要给一个 Image 异步设置图集里的图标，加载完成后做一些处理，应该用哪个 API、回调签名是什么？",
+      "expected_patterns": [
+        "SetSprite",
+        "Action<Image>"
+      ],
+      "forbidden_patterns": [
+        "Action<Sprite>",
+        "SetSpriteAsync"
       ]
     }
   ]

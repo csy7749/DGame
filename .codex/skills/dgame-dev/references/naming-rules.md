@@ -6,23 +6,32 @@
 
 - 使用中文写提案和回答。
 - 修改范围保持克制，不做无关重构。
-- 优先复用 DGame 二次封装，不绕过到 Unity/TEngine 原始 API。
+- 优先复用 DGame 二次封装，不绕过到底层原始 API。
 - 新增异步逻辑使用 `UniTask`。
 - 业务日志使用 `DLogger`。
 
-## 字段风格
+## 字段与方法命名
 
-匹配现有代码：
+匹配现有代码，私有字段用 `m_`、私有静态用 `s_`：
 
 ```csharp
-private GameTimer m_timer;
-private static UIModule s_instance;
-public int NodeCount => m_nodeDict.Count;
+private GameTimer m_timer;                  // 私有实例字段：m_ 前缀
+private static UIModule s_instance;         // 私有静态字段：s_ 前缀
+public int NodeCount => m_nodeDict.Count;   // 公开属性：PascalCase
 ```
+
+| 场景 | 约定 | DGame 示例 |
+|------|------|------------|
+| 私有实例字段 | `m_` + camelCase | `m_timer`、`m_cts` |
+| 私有静态字段 | `s_` + camelCase | `s_instance` |
+| 公开属性 | PascalCase | `NodeCount` |
+| 异步方法 | `Async` 后缀 | `SaveAllClientDataAsync`、`OnShowWaitingUIAsync`（`UniTaskVoid` 也带 `Async`） |
+| 事件回调方法 | `On` 前缀 | `OnHpChanged`、`OnShowWaitingUIAsync` |
+| 常量 | 全大写下划线 | `DATE_MASK_YEAR`、`DATE_MASK_MONTH`（`const`/`static readonly`） |
 
 ## 通用 C# 类型命名约定
 
-类型名使用 PascalCase；接口保留 `I` 前缀；DGame 现有 Procedure 使用 `XxxProcedure` 后缀，不使用 TEngine 文档里的 `ProcedureXxx` 前缀形态。
+类型名使用 PascalCase；接口保留 `I` 前缀；启动流程状态机使用 `XxxProcedure` 后缀形态（如 `SplashProcedure`）。
 
 | 类型/场景 | 命名约定 | DGame 示例 | 备注 |
 |-----------|----------|------------|------|
@@ -127,11 +136,34 @@ UI 脚本生成前缀以 `GameUnity/Assets/Editor/UIScriptGenerator/UIScriptGene
 
 字段名由节点名去掉代码风格前缀后再加当前代码风格前缀生成，组件语义片段会保留。当前 `UIScriptGeneratorSettings.asset` 的 `codeStyle` 是 `MPrefix`，例如 `m_btnClose` 生成 `private Button m_btnClose;`，`m_dropDownLanguage` 生成 `private Dropdown m_dropDownLanguage;`。
 
+## 使用模式
+
+### 异步编程规范
+
+```csharp
+// UniTask 替代 Task，UniTaskVoid 替代 void async
+public async UniTask<int> GetDataAsync() { }
+public async UniTaskVoid StartBattleAsync() { }  // 调用方加 .Forget()
+
+// CancellationToken 防止销毁后回调
+private CancellationTokenSource m_cts = new();
+protected override void OnDestroy() { m_cts.Cancel(); m_cts.Dispose(); }
+
+// 并发加载
+var (a, b, c) = await UniTask.WhenAll(LoadA(), LoadB(), LoadC());
+```
+
+失败或异常统一用 `DLogger.Error` 记录，不用 `Debug.Log`。
+
 ## 禁用/慎用模式
 
 | 模式 | 替代 |
 |------|------|
 | `Resources.Load` 加载业务资源 | `GameModule.ResourceModule` |
+| `Instantiate` 直接实例化资源体 | `GameModule.ResourceModule.LoadGameObjectAsync` |
+| `FindObjectOfType` / `GameObject.Find` 查全局对象 | `GameModule.XXX` 模块入口或已有引用 |
+| `Update` / 高频回调里 `new` 临时对象 | `MemoryPool.Spawn<T>()` 复用后 `Release` |
+| 静态字段长期持有 `Asset` 引用 | 用完 `UnloadAsset`，实例随 GameObject 销毁回收 |
 | Coroutine 新增异步工作流 | `UniTask` |
 | 业务层散落 `ModuleSystem.GetModule<T>()` | `GameModule.XXX` |
 | UI 手动注册 `GameEvent.AddEventListener` | `AddUIEvent` |
@@ -146,3 +178,11 @@ UI 脚本生成前缀以 `GameUnity/Assets/Editor/UIScriptGenerator/UIScriptGene
 | 大功能一次性改多个层 | 先确认落位和边界 |
 | 释放后继续访问 MemoryPool 对象 | Release 后禁止再访问 |
 | 发现无关死代码直接删除 | 只说明，不顺手改 |
+
+---
+
+## 交叉引用
+
+- 架构总览见 [architecture.md](architecture.md)
+- UI 生命周期见 [ui-lifecycle.md](ui-lifecycle.md)
+- UI 进阶模式见 [ui-patterns.md](ui-patterns.md)

@@ -42,11 +42,14 @@ var downloader = GameModule.ResourceModule.CreateResourceDownloader(packageName)
 GameModule.ResourceModule.Downloader = downloader;
 ```
 
-下载参数：
+下载参数与常用成员：
 
 - `DownloadingMaxNum`
 - `FailedTryAgainNum`
 - `UpdatableWhilePlaying`
+- `GameModule.ResourceModule.GetPackageVersion(customPackageName)`：读取本地资源包版本
+- `downloader.TotalDownloadBytes`：待下载总字节
+- `downloader.DownloadUpdateCallback`：下载进度回调（DGame 实际成员，非 `OnDownloadProgressCallback`）
 
 ## 端到端下载示例
 
@@ -93,7 +96,15 @@ var clearOp = GameModule.ResourceModule.ClearCacheFilesAsync(
 await clearOp;
 ```
 
-DGame AOT 流程中这些步骤分散在 `InitResourceProcedure`、`CreateDownloaderProcedure`、`DownloadFileProcedure` 和 `ClearCacheProcedure`，业务排障时按同一顺序串起来看。
+DGame AOT 启动链按后缀式命名（`XxxProcedure`）有序驱动，排障时按此顺序串起来看：
+
+```
+LaunchProcedure → SplashProcedure → InitResourceProcedure → InitPackageProcedure
+→ CreateDownloaderProcedure → DownloadFileProcedure → DownloadOverProcedure
+→ PreloadProcedure → LoadAssemblyProcedure → StartGameProcedure
+```
+
+上面的版本、清单、下载器、下载、清缓存步骤主要落在 `InitResourceProcedure`、`CreateDownloaderProcedure`、`DownloadFileProcedure`（进度回调用 `DownloadUpdateCallback`）与 `ClearCacheProcedure`。
 
 ## 缓存清理
 
@@ -101,6 +112,16 @@ DGame AOT 流程中这些步骤分散在 `InitResourceProcedure`、`CreateDownlo
 GameModule.ResourceModule.ClearCacheFilesAsync(EFileClearMode.ClearUnusedBundleFiles, packageName);
 GameModule.ResourceModule.ClearAllBundleFiles(packageName);
 ```
+
+## 日常开发步骤
+
+```
+1. Editor 直接 Play：编辑器模式下热更 DLL 编译进工程，无需打包
+2. 模拟热更：HybridCLR → Generate All → ReleaseTools 打资源包 → BuildDllCommand 拷贝 DLL
+3. 真机测试：出包 → 部署热更资源到 CDN → 启动触发热更下载
+```
+
+（代码域边界、程序集划分与 GameApp.Entrance 见 [hotfix-workflow.md](hotfix-workflow.md)，本文件只覆盖资源包侧。）
 
 ## 常见错误
 
