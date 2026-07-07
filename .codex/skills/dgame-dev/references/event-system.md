@@ -6,8 +6,8 @@
 
 | API | 用途 |
 |-----|------|
-| `GameEvent.AddEventListener` | 添加普通事件监听 |
-| `GameEvent.RemoveEventListener` | 移除普通事件监听 |
+| `GameEvent.AddEventListener` | 添加普通事件监听，返回 bool（监听是否成功；UI 内用 AddUIEvent 无需关心） |
+| `GameEvent.RemoveEventListener` | 移除普通事件监听；另有 `RemoveEventListener(int, Delegate)` 重载 |
 | `GameEvent.Send` | 通过字符串事件发送 |
 | `GameEvent.Get<T>()` | 获取接口事件代理 |
 | `EventCenter.AddEvent/RemoveEvent` | Source Generator 生成的监听/移除包装，内部调用 `GameEvent.AddEventListener/RemoveEventListener` |
@@ -24,7 +24,7 @@
 | `GameEventLauncher` | 生成器生成/热更入口调用 | 注册接口事件代理，让 `GameEvent.Get<T>()` 可用 | `GameStart.Entrance` 早期调用 `GameEventLauncher.Init()` |
 | `EventCenter` | 生成器生成 | 生成 `AddEvent` / `RemoveEvent` 包装类，减少手写事件 ID 和泛型参数错误 | 非 UI 监听可用；不负责生命周期清理 |
 
-DGame 的公开类名是 `EventMgr` 和 `GameEventDriver`，没有公开 `GameEventMgr` 类。不要把 TEngine 文档里的 `GameEventMgr.Clear()` 当作 DGame API。
+DGame 的公开类名是 `EventMgr` 和 `GameEventDriver`，没有公开 `GameEventMgr` 类。
 
 ## 模式对比
 
@@ -236,3 +236,11 @@ GameEventLauncher.Init();
 | 接口事件未加 `[EventInterface]` | 按职责选择 `EEventGroup` |
 | 手写事件 ID | 优先使用生成的 `*_Event` 常量 |
 | 6 参数 `Send` 传字符串 | 使用生成的 int 事件 ID，或改用接口事件 |
+
+## 交叉引用
+
+| 关联主题 | 文档 | 说明 |
+|---------|------|------|
+| 事件反模式 | event-antipatterns.md | 监听未清理、幻觉 API、生命周期时序等常见错误 |
+| UI 内事件 | ui-lifecycle.md | `AddUIEvent` 在 `RegisterEvent` 中注册、随窗口自动清理 |
+| 模块访问 | modules.md | 跨模块通过 `GameModule.XXX` 获取，配合事件解耦 |

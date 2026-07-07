@@ -16,6 +16,67 @@ m_goEmpty = FindChild("m_goEmpty").gameObject;
 
 ---
 
+## 端到端 UIWindow 示例
+
+窗口用属性覆写设置层级；节点绑定和按钮 `onClick.AddListener` 通常由 `*_Gen.g.cs` 自动生成，业务写在 `partial` 类里。
+
+```csharp
+public partial class BagWindow : UIWindow
+{
+    protected override UILayer windowLayer => UILayer.UI;
+    public override bool FullScreen => true;
+
+    private readonly List<ItemWidget> m_items = new();
+
+    // ScriptGenerator 与 m_btnClose.onClick.AddListener(OnClickCloseBtn)
+    // 通常由 BagWindow_Gen.g.cs 自动生成
+
+    protected override void RegisterEvent()
+    {
+        AddUIEvent<int>(IBag_Event.OnItemChanged, _ => OnRefresh());
+    }
+
+    protected override void OnCreate()
+    {
+        m_titleWidget = CreateWidget<TitleWidget>("m_tfTitle");
+    }
+
+    protected override void OnRefresh()
+    {
+        var data = BagData.Items;
+        AdjustItemNum(m_items, data.Count, m_tfContent, m_itemPrefab);
+        for (int i = 0; i < data.Count; i++)
+            m_items[i].SetData(data[i]);
+    }
+
+    private partial void OnClickCloseBtn() => GameModule.UIModule.CloseWindow<BagWindow>();
+}
+```
+
+## UIWidget 模板
+
+```csharp
+public class ItemWidget : UIWidget
+{
+    private Text  m_textName;
+    private Image m_imgIcon;
+
+    protected override void ScriptGenerator()
+    {
+        m_textName = FindChildComponent<Text>("m_textName");
+        m_imgIcon  = FindChildComponent<Image>("m_imgIcon");
+    }
+
+    public void SetData(ItemConfig cfg)
+    {
+        m_textName.text = cfg.Name;
+        m_imgIcon.SetSprite(cfg.IconPath);  // 内置缓存池，随 Image 销毁自动释放
+    }
+}
+```
+
+---
+
 ## UIWidget 创建方式
 
 所有泛型 `T` 必须满足 `where T : UIWidget, new()`。
@@ -159,7 +220,6 @@ SetUINotFit(m_tfFixed as RectTransform);
 | 错误 | 正确做法 |
 |------|---------|
 | 列表增删直接 `Destroy/Instantiate` | 使用 `AdjustItemNum`、`AsyncAwaitAdjustItemNum` 或 SuperScrollView |
-| 使用 TEngine 的 `AdjustIconNum` | DGame 使用 `AdjustItemNum` |
 | 重复打开同一窗口创建多个实例 | `UIModule` 按 `WindowFullName` 复用窗口 |
 | 模态背景自己复制一套 Prefab | 复用 `GetModelType()` 和 `ModelSprite` |
 | 弹窗队列自己写全局队列 | 使用 `PushWindowToQueue` |
@@ -175,3 +235,4 @@ SetUINotFit(m_tfFixed as RectTransform);
 | 事件系统（AddUIEvent / GameEvent） | [event-system.md](event-system.md) |
 | 节点前缀命名规范 | [naming-rules.md](naming-rules.md) |
 | 资源加载/卸载 API | [resource-api.md](resource-api.md) |
+| UI 红点绑定 | [reddot-system.md](reddot-system.md) |

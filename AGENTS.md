@@ -3,7 +3,7 @@
 请使用中文写提案和回答。
 这个文件为 Codex 提供指导，用于处理此代码库中的代码。
 
-DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luban 构建。Unity 版本为 `2021.3.30f1c1`，主启动场景位于 `GameUnity/Assets/Scenes/GameStart/GameStart.unity`。
+主启动场景位于 `GameUnity/Assets/Scenes/GameStart/GameStart.unity`。
 
 ---
 
@@ -29,7 +29,8 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 | 文件落位 / 程序集边界 | `architecture.md` |
 | UI 生命周期 / 窗口 / Widget / IUIController | `ui-lifecycle.md`、`ui-patterns.md` |
 | 资源加载 / 释放 / 场景切换资源整理 | `resource-api.md`、`resource-patterns.md` |
-| 热更资源包 / YooAsset 下载链路 / ReleaseTools | `hotpatch-workflow.md` |
+| 热更资源包 / YooAsset 下载链路 | `hotpatch-workflow.md` |
+| 整包 / AB 打包 / Jenkins 自动化 / ReleaseTools | `build-pipeline.md` |
 | 热更代码 / HybridCLR / AOT 泛型 | `hotfix-workflow.md` |
 | 模块 API / DataCenterModule / MemoryPool / Audio / Fsm | `modules.md` |
 | 事件系统 / EventCenter / 事件反模式 | `event-system.md`、`event-antipatterns.md` |
@@ -92,6 +93,7 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 | 资源加载 | `resource-api.md`、`resource-patterns.md` |
 | 热更代码 | `hotfix-workflow.md` |
 | 热更资源包 | `hotpatch-workflow.md` |
+| 构建打包 / Jenkins | `build-pipeline.md` |
 | Luban 配置消费 | `luban-config.md` |
 | 红点系统 | `reddot-system.md` |
 | 代码规范 | `naming-rules.md` |

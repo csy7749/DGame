@@ -50,20 +50,27 @@ protected override void OnDestroy()
 
 常用 API：
 
-- `CreateOnceGameTimer`
-- `CreateLoopGameTimer`
-- `CreateUnscaledOnceGameTimer`
-- `CreateUnscaledLoopGameTimer`
-- `CreateLoopCountGameTimer`
-- `DestroyGameTimer`
+- 创建：`CreateOnceGameTimer`、`CreateLoopGameTimer`、`CreateUnscaledOnceGameTimer`、`CreateUnscaledLoopGameTimer`、`CreateLoopCountGameTimer`
+- 控制：`Pause(timer)`、`Resume(timer)`、`Restart(timer)`、`Reset(timer, interval, isLoop, isUnscaled[, handler])`（两个重载）
+- 查询：`IsRunning(timer)`、`GetTimerLeft(timer)`
+- 销毁：`DestroyGameTimer(timer)`、`DestroyAllGameTimer()`
 
 ### SceneModule 场景管理
 
 ```csharp
-await GameModule.SceneModule.LoadSceneAsync("BattleScene");
+// 主场景：Single 模式默认卸载旧场景并 GC
+await GameModule.SceneModule.LoadSceneAsync("BattleScene",
+    LoadSceneMode.Single, progressCallBack: p => SetProgress(p));
+
+// 叠加场景：Additive 模式共存，用 ActivateScene 切换激活场景
+await GameModule.SceneModule.LoadSceneAsync("UIScene", LoadSceneMode.Additive);
+GameModule.SceneModule.ActivateScene("UIScene");
+
 await GameModule.SceneModule.UnloadAsync("OldScene");
 GameModule.SceneModule.Unload("OldScene");
 ```
+
+`LoadSceneAsync(location, sceneMode, suspendLoad, priority, gcCollect, progressCallBack)`：`gcCollect` 仅主场景生效；`ActivateScene(location)` 在多场景共存时切换激活场景。
 
 ### AudioModule 音频
 
@@ -101,14 +108,7 @@ bool hasSensitiveWord = GameModule.SensitiveWordModule.ContainsSensitiveWord(inp
 string safeText = GameModule.SensitiveWordModule.ReplaceSensitiveWords(input);
 ```
 
-常用 API：
-
-- `SetKeywords(List<string> keywords)`
-- `SetKeywords(List<string> keywords, List<int> blacklistTypes)`
-- `ContainsSensitiveWord(string content)`
-- `ReplaceSensitiveWords(string content, char replaceChar = '\0')`
-- `FindAllSensitiveWords(string content)`
-- `FindFirst(string content)` / `FindAll(string content)`：黑名单分级查询。
+常用 API：`SetKeywords(keywords[, blacklistTypes])` 设词库、`ContainsSensitiveWord`/`ReplaceSensitiveWords(content[, replaceChar])` 检测替换、`FindAllSensitiveWords`/`FindFirst`/`FindAll` 黑名单分级查询。
 
 ### AnimModule 动画图
 
@@ -118,16 +118,7 @@ playable.Play("Idle", fadeDuration: 0.2f);
 GameModule.AnimModule.DestroyAnimPlayable(playable);
 ```
 
-常用 API：
-
-- `ContainsAnimPlayable(string name)`
-- `GetAnimPlayable(string name)`
-- `CreateAnimPlayable(Animator animator)`
-- `CreateAnimPlayable(Animator animator, List<AnimationClip> animations)`
-- `CreateAnimPlayable(Animator animator, List<AnimationWrapper> animations)`
-- `DestroyAnimPlayable(IAnimPlayable animPlayable)` / `DestroyAnimPlayable(string name)`
-
-创建的 `IAnimPlayable` 必须有明确销毁点，避免 PlayableGraph 长期保留。
+常用 API：`ContainsAnimPlayable`/`GetAnimPlayable(name)`、`CreateAnimPlayable(animator[, animations])`（三个重载，clip 列表可选）、`DestroyAnimPlayable(animPlayable | name)`。创建的 `IAnimPlayable` 必须有明确销毁点，避免 PlayableGraph 长期保留。
 
 ### FsmModule 有限状态机
 
@@ -150,6 +141,27 @@ fsm.Start<IdleState>();
 - `DestroyFsm<T>()` / `DestroyFsm<T>(string name)` / `DestroyFsm(fsm)`
 
 规则：业务层通过 `GameModule.FsmModule` 获取，不散落 `ModuleSystem.GetModule<IFsmModule>()`。创建的状态机必须有明确销毁点，避免 owner 已销毁但状态仍在更新。
+
+状态定义（`IFsmState<T>`）：
+
+```csharp
+public sealed class IdleState : IFsmState<MyOwner>
+{
+    public void OnCreate(IFsm<MyOwner> fsm) { }   // 状态被 CreateFsm 时构建
+    public void OnEnter() { }                     // 进入状态
+    public void OnUpdate(float elapse, float real) { }
+    public void OnFixedUpdate() { }
+    public void OnExit() { }                      // 退出状态
+    public void OnDestroy() { }
+}
+```
+
+状态切换与共享数据（在状态内通过持有的 `IFsm<T>` 调用）：
+
+- 切换：`fsm.SwitchState<BattleState>()` / `fsm.SwitchState(type)`
+- 共享数据：`AddShareData`、`GetShareData<TData>`、`TryGetShareData<TData>`、`UpdateShareData`、`RemoveShareData` / `ClearShareData`
+
+> **注意**：状态切换用 `SwitchState`、共享数据用 `AddShareData`/`GetShareData`；`OnEnter`/`OnExit` 无参，`fsm` 在 `OnCreate` 时注入。
 
 ### GameObjectPool 对象池
 
@@ -182,15 +194,7 @@ GameModule.GameObjectPool.Recycle(go);
 
 ### DataCenterModule 数据中心模块
 
-热更业务的角色数据、跨 UI/模块共享状态可收口到 `DataCenterModule<T>`。继承 `DataCenterModule<T>` 的类会由 `DataCenterModuleGenerator` 源代码生成器自动注册到 `DataCenterSys.m_dataCenterModuleList`。
-
-生成器会扫描 `GameLogic` 命名空间下继承 `DataCenterModule...` 的类，并生成：
-
-- `partial void InitModule()`
-- `RegisterModule(IDataCenterModule module)`
-- `RegisterModule(XxxDataCenter.Instance)` 调用
-
-`DataCenterSys.OnInit()` 调用 `InitModule()`；注册时会先执行模块 `OnInit()`，再加入 `m_dataCenterModuleList`。`DataCenterSys.OnUpdate()` 会逐个调用模块 `OnUpdate()`；`ClearClientData()` 会在有当前角色数据时关闭所有窗口并调用模块 `OnRoleLogout()`。
+热更业务的角色数据、跨 UI/模块共享状态可收口到 `DataCenterModule<T>`：继承 `DataCenterModule<自身类型>` 的类由 `DataCenterModuleGenerator` 源生成器自动扫描注册（勿手改生成文件 `DataCenterModule_Gen.g.cs`），无需手动挂接。生命周期回调：`OnInit`（注册时触发）、`OnRoleLogin`、`OnRoleLogout`（登出/切角色清理）、`OnMainPlayerMapChange`。
 
 示例：
 
@@ -201,47 +205,24 @@ namespace GameLogic
     {
         private readonly Dictionary<int, int> m_itemCounts = new Dictionary<int, int>();
 
-        public override void OnInit()
-        {
-            m_itemCounts.Clear();
-        }
+        public override void OnInit() => m_itemCounts.Clear();
+        public override void OnRoleLogin() { /* 拉取或重建当前角色背包缓存。 */ }
+        public override void OnRoleLogout() => m_itemCounts.Clear();
+        public override void OnMainPlayerMapChange() { /* 地图切换后刷新的角色状态。 */ }
 
-        public override void OnRoleLogin()
-        {
-            // 拉取或重建当前角色背包缓存。
-        }
-
-        public override void OnRoleLogout()
-        {
-            m_itemCounts.Clear();
-        }
-
-        public override void OnMainPlayerMapChange()
-        {
-            // 处理地图切换后需要刷新的角色状态。
-        }
-
-        public int GetCount(int itemId)
-        {
-            return m_itemCounts.TryGetValue(itemId, out var count) ? count : 0;
-        }
+        public int GetCount(int itemId) => m_itemCounts.TryGetValue(itemId, out var c) ? c : 0;
     }
 }
 ```
 
-使用：
-
-```csharp
-int count = BagDataCenter.Instance.GetCount(itemId);
-```
+使用：`int count = BagDataCenter.Instance.GetCount(itemId);`
 
 规则：
 
-- 类放在 `GameLogic` 命名空间下，并继承 `DataCenterModule<自身类型>`。
-- 类必须可 `new()`，不要依赖有参构造。
-- 不要手动改 `DataCenterSys.m_dataCenterModuleList`、`InitModule()` 或生成文件 `DataCenterModule_Gen.g.cs`。
-- `DataCenterModule<T>` 适合放角色级/客户端级状态和生命周期回调；不要把纯配置查询替代成 DataCenter，配置访问仍优先走 `ConfigMgr`。
-- 需要登出清理的数据放在 `OnRoleLogout()`，避免切账号后旧角色状态残留。
+- 类放在 `GameLogic` 命名空间，继承 `DataCenterModule<自身类型>`，且可 `new()`（不依赖有参构造）。
+- 不要手动改 `DataCenterSys.m_dataCenterModuleList`、`InitModule()` 或生成文件。
+- 只放角色级/客户端级状态和生命周期回调；纯配置查询仍走 `ConfigMgr`，不要用 DataCenter 替代。
+- 需要登出清理的数据放 `OnRoleLogout()`，避免切账号后旧角色状态残留。
 
 ### MemoryPool 内存池
 
@@ -279,7 +260,11 @@ MemoryObject.Release(driver);
 - `MemoryPool.ClearMemoryCollector<T>()` / `MemoryPool.ClearAll()`
 - `MemoryPool.EnableStrictCheck`：严格检查开关，调试时使用。
 
-规则：可池化对象实现 `IMemory`，或继承 `MemoryObject` 并在 `OnRelease()` 中清理状态。不要把 Unity `GameObject` 生命周期和 `MemoryPool` 混用；GameObject 复用使用 `GameObjectPool`。
+规则：
+
+- 可池化对象实现 `IMemory`，或继承 `MemoryObject` 并在 `OnRelease()` 中清理状态。
+- `Release` 后该对象已回池，禁止再访问其字段或再次 `Release`（二次 Release 会污染池、导致对象被多处复用）；`Release` 后立刻把本地引用置 `null`。
+- 不要把 Unity `GameObject` 生命周期和 `MemoryPool` 混用；GameObject 复用使用 `GameObjectPool`。
 
 ### DLogger 日志
 
@@ -294,7 +279,7 @@ DLogger.Fatal(exception);
 DLogger.Assert(condition, "unexpected state");
 ```
 
-`DLogger` 方法带条件编译属性，日志是否输出以 `DLogger.cs` 对应方法的 `[Conditional]` 标注为准。例如 debug 级别方法受 `ENABLE_DGAME_LOG`、`ENABLE_DGAME_DEBUG_LOG`、`ENABLE_DGAME_DEBUG_AND_ABOVE_LOG` 控制。新增业务日志优先用 `DLogger`，不要直接散落 `UnityEngine.Debug.Log`。
+`DLogger` 的 debug 级方法带 `[Conditional]` 编译宏，发布包会自动剥离（具体宏以 `DLogger.cs` 标注为准）。新增业务日志优先用 `DLogger`，不要直接散落 `UnityEngine.Debug.Log`。
 
 ---
 
@@ -325,7 +310,9 @@ DLogger.Assert(condition, "unexpected state");
 
 ## 交叉引用
 
-- UI 模块见 [ui-lifecycle.md](ui-lifecycle.md)
-- 资源模块见 [resource-api.md](resource-api.md)
-- 事件系统见 [event-system.md](event-system.md)
-- 红点系统见 [reddot-system.md](reddot-system.md)
+| 关联主题 | 文档 | 说明 |
+|---------|------|------|
+| UI 管理 | ui-lifecycle.md | `GameModule.UIModule` 的窗口生命周期与层级 |
+| 资源加载/卸载 | resource-api.md | `GameModule.ResourceModule` 的完整 API 与生命周期 |
+| 事件系统 | event-system.md | `GameEvent` 模块间解耦，`AddUIEvent` UI 内部事件 |
+| 红点系统 | reddot-system.md | `GameModule.RedDotModule` 红点树注册与刷新 |
