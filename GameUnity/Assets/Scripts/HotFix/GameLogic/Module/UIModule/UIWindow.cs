@@ -436,7 +436,7 @@ namespace GameLogic
                     break;
 
                 case ModelType.TransparentType:
-                    m_curModelAlpha = 0.4f;
+                    m_curModelAlpha = 0.01f;
                     break;
 
                 case ModelType.NormalType75:

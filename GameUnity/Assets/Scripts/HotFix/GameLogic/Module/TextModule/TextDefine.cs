@@ -32,7 +32,7 @@ namespace GameLogic
 		ID_LABEL_TEN, //十
 
 		#endregion
-
+		
 		#region 时间差格式
 
 		ID_LABEL_TIME_SPAN_SECOND = 10000019, //刚刚
@@ -42,8 +42,16 @@ namespace GameLogic
 		ID_LABEL_TIME_SPAN_HOUR_WITHOUT_MIN, //{0}小时前
 
 		#endregion
+		
+		#region 单位
 
-		ID_LABEL_START_GAME = 10000024,
+		ID_LABEL_COMM_THOUSAND = 10000024, // {0}千
+		ID_LABEL_COMM_MYRIAD, // {0}万
+		ID_LABEL_COMM_BILLION, // {0}亿
+
+		#endregion
+
+		ID_LABEL_START_GAME = 10000027,
 		ID_LABEL_QUIT_GAME,
 
 		#region G.R自动生成
