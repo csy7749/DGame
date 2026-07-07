@@ -151,9 +151,7 @@ namespace DGame
 
                 strFile.AppendLine("using UnityEngine;");
                 strFile.AppendLine("using UnityEngine.UI;");
-                strFile.AppendLine("using GameProto;");
-                strFile.AppendLine("using GameBattle;");
-                strFile.AppendLine("using DGame;");
+                // strFile.AppendLine("using DGame;");
                 strFile.AppendLine();
                 strFile.AppendLine($"namespace {UIScriptGeneratorSettings.GetUINameSpace()}");
                 strFile.AppendLine("{");
