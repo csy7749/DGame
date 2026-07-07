@@ -1,0 +1,4 @@
+interface:
+  display_name: "Fantasy Net"
+  short_description: "Fantasy C# server and Unity client development guide"
+  default_prompt: "Use $fantasy-net to implement or review Fantasy C# server or Unity client code."

@@ -39,6 +39,7 @@
 | 命名 / UI 节点前缀 / 代码规范 | `naming-rules.md` |
 | MCP 工具链 | `mcp-tools.md`、`mcp-visual.md` |
 | 排障 | `troubleshooting.md` |
+| Fantasy 服务端 / 客户端 / ECS / 协议 / Roaming / 数据库 | `fantasy-net` skill |
 
 ### 第二步：输出代码或方案
 
@@ -100,6 +101,7 @@
 | 问题排查 | `troubleshooting.md` |
 | MCP 场景 / GameObject / UI / 脚本 / Editor | `mcp-tools.md` |
 | MCP 材质 / Shader / 动画 / VFX | `mcp-visual.md` |
+| Fantasy 服务端 / 客户端 / ECS / 协议 / Roaming / 数据库 | `fantasy-net` skill |
 
 ---
 
