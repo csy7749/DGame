@@ -100,7 +100,7 @@ public static void Entrance(object[] objects)
 }
 ```
 
-`GameStart.Entrance` 位于 `Assets/Scripts/HotFix/GameLogic/GameStart.cs`。DGame 使用 `GameEventLauncher.Init()`，不是 TEngine 的 `GameEventHelper.Init()`。
+`GameStart.Entrance` 位于 `Assets/Scripts/HotFix/GameLogic/GameStart.cs`，接口事件初始化调用 `GameEventLauncher.Init()`。
 
 ---
 
@@ -189,6 +189,7 @@ protected override void OnRefresh()
 ### 反模式 9：Widget 销毁阶段依赖父窗口事件
 
 ```csharp
+// UIWindow 销毁顺序：RemoveAllUIEvents → 子 Widget.OnDestroy → UIWindow.OnDestroy
 // 错误：销毁阶段发送事件给父窗口，父窗口可能已经清理 UI 事件
 protected override void OnDestroy()
 {
@@ -249,7 +250,23 @@ protected override void OnUpdate()
 }
 ```
 
-高频数据优先本地轮询、节流或聚合。不要把事件系统当作每帧数据总线。
+高频数据优先本地轮询、节流或聚合。不要把事件系统当作每帧数据总线。固定节奏刷新也可用 `GameModule.GameTimerModule` 定时器替代 `OnUpdate` 手写计时：
+
+```csharp
+// 每 0.1 秒刷新一次，而不是每帧或每次事件都刷
+private GameTimer m_refreshTimer;
+
+protected override void OnCreate()
+{
+    m_refreshTimer = GameModule.GameTimerModule.CreateLoopGameTimer(0.1f, _ => RefreshPosition(m_hero.position));
+}
+
+protected override void OnDestroy()
+{
+    GameModule.GameTimerModule.DestroyGameTimer(m_refreshTimer);
+    m_refreshTimer = null;
+}
+```
 
 ---
 
@@ -273,6 +290,8 @@ GameEventHelper.Init();
 | UI 生命周期内监听 | `AddUIEvent(eventId, handler)` |
 | 非 UI 手动监听 | `GameEvent.AddEventListener(eventId, handler)` |
 | 非 UI 手动移除 | `GameEvent.RemoveEventListener(eventId, handler)` |
+| EventCenter 包装监听 | `EventCenter.AddEvent.<组>.<方法>(handler)` |
+| EventCenter 包装移除 | `EventCenter.RemoveEvent.<组>.<方法>(handler)`，与 AddEvent 配套调用 |
 | 接口事件初始化 | `GameEventLauncher.Init()` |
 | 接口事件发送 | `GameEvent.Get<IEvent>().Method(args)` |
 | 全局销毁事件系统 | 框架内部 `GameEvent.EventMgr.Destroy()`；普通业务不要调用 |

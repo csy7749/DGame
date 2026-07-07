@@ -1,16 +1,16 @@
 ---
 name: dgame-dev
-description: DGame Unity 项目开发指导。触发词：DGame, TEngine 二次封装, GameModule, UIWindow, UIWidget, UIModule, GameEventDriver, EEventGroup, LoadAssetAsync, LoadGameObjectAsync, HybridCLR, YooAsset, Luban, RedDotModule, CoplayDev unity-mcp, MCP, 热更, 资源加载, UI开发, 事件系统, 模块架构
+description: DGame Unity 项目开发指导。触发词：DGame, GameModule, UIWindow, UIWidget, UIModule, AddUIEvent, GameEvent, GameEventDriver, EEventGroup, LoadAssetAsync, LoadGameObjectAsync, SetSprite, ConfigSystem, HybridCLR, YooAsset, Luban, RedDotModule, CoplayDev unity-mcp, MCP, 热更, 资源加载, UI开发, 事件系统, 模块架构
 ---
 
 # DGame 开发指导
 
-DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luban 构建。
+DGame 使用 HybridCLR + YooAsset + UniTask + Luban 构建。
 本 skill 提供 DGame 专属的 AI 精炼参考文档，优先描述本仓库实际 API、目录和落位规则。
 
 ## 核心红线
 
-1. **分层落位**：框架运行时放 `GameUnity/Assets/DGame/Runtime`，编辑器工具放 `GameUnity/Assets/DGame/Editor`，热更玩法放 `GameUnity/Assets/Scripts/HotFix/GameLogic`。
+1. **分层落位**：框架运行时放 `GameUnity/Assets/DGame/Runtime`，编辑器工具放 `GameUnity/Assets/DGame/Editor`，热更玩法放 `GameUnity/Assets/Scripts/HotFix/GameLogic`。热更边界：`DGame.Runtime`/`DGame.AOT` 不热更，`Scripts/HotFix/*` 全部热更。
 2. **模块访问**：业务代码优先通过 `GameLogic.GameModule.XXX` 访问模块，不在业务层散落 `ModuleSystem.GetModule<T>()`。
 3. **异步优先**：IO、资源、场景等耗时操作优先使用 `UniTask`，不要新增 Coroutine 工作流。
 4. **资源生命周期成对**：非实例化资源用 `LoadAssetAsync/LoadAsset` 后按持有关系 `UnloadAsset`；GameObject 实例用 `LoadGameObjectAsync/LoadGameObject`，销毁实例时资源模块自动回收引用。
@@ -27,6 +27,7 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 | 事件系统 | [event-system.md](references/event-system.md) | [event-antipatterns.md](references/event-antipatterns.md) | P0 |
 | 资源加载 | [resource-api.md](references/resource-api.md) | [resource-patterns.md](references/resource-patterns.md) | P0 |
 | 热更资源包 | [hotpatch-workflow.md](references/hotpatch-workflow.md) | [resource-api.md](references/resource-api.md) | P0 |
+| 构建打包 | [build-pipeline.md](references/build-pipeline.md) | [hotfix-workflow.md](references/hotfix-workflow.md) | P1 |
 | 模块使用 | [modules.md](references/modules.md) | — | P0 |
 | 热更代码 | [hotfix-workflow.md](references/hotfix-workflow.md) | — | P1 |
 | 代码规范 | [naming-rules.md](references/naming-rules.md) | — | P1 |

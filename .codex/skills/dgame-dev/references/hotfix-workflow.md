@@ -45,6 +45,22 @@ public static void Entrance(object[] objects)
 - 入口方法必须是 public static `Entrance(object[] objects)`。
 - `GameEventLauncher.Init()` 是 DGame 接口事件初始化入口。
 
+> **热更层无 Procedure**：启动状态机（`XxxProcedure`）全在 `DGame.AOT`，热更业务不写 Procedure。`GameStart.StartGame()` 直接 `GameModule.UIModule.ShowWindow<MainWindow>()` 驱动首屏，新流程从这里往下接，不要去热更层找热更域状态机。
+
+---
+
+## 日常开发步骤
+
+| 场景 | 步骤 |
+|------|------|
+| Editor 内开发 | 直接改热更代码 Play，DLL 随工程编译，无需打包 |
+| 模拟热更验证 | HybridCLR Generate → `DGame Tools/Build/Build Dll And CopyTo AssemblyTextAssetPath` 拷 DLL → ReleaseTools 打资源包 |
+| 真机测试 | 出整包 → 热更资源部署到 CDN → 启动触发下载（详见 [hotpatch-workflow.md](hotpatch-workflow.md)） |
+
+首包构建或 AOT 程序集/泛型引用变动时，如果启用了 HybridCLR 热更新（`ENABLE_HYBRIDCLR` / `UpdateSettings.Enable` 为 true），必须先执行一次 `HybridCLR/Generate/All`（GenerateAll 等价入口），再执行 BuildPlayer、`BuildDllCommand.BuildAndCopyDlls()` 和 AB 构建。
+
+新功能落位顺序：事件接口 `IEvent/` → UI（`GameLogic/UI`）→ 业务模块（`GameLogic/Module`）→ 在 `GameStart` 或对应模块初始化处接入，不新增 AOT 层 Procedure。
+
 ---
 
 ## DLL 加载流程
@@ -85,14 +101,23 @@ HybridCLR.RuntimeApi.LoadMetadataForAOTAssembly(
 
 当真机出现 AOT 泛型缺失、`ExecutionEngineException` 或 Editor 正常但 IL2CPP 异常时，按这个顺序处理：
 
-1. 先执行一次目标平台 BuildPlayer，生成裁剪后的 AOT DLL。
-2. 执行 HybridCLR Generate / 编译热更 DLL，刷新泛型引用。
-3. 使用菜单 `DGame Tools/Build/Build Dll And CopyTo AssemblyTextAssetPath`。
+1. 启用 HybridCLR 热更新时，先执行 `HybridCLR/Generate/All`，刷新 HybridCLR 生成产物和泛型引用。
+2. 执行一次目标平台 BuildPlayer，生成裁剪后的 AOT DLL。
+3. 使用菜单 `DGame Tools/Build/Build Dll And CopyTo AssemblyTextAssetPath` 编译并复制热更 DLL 与 AOT metadata。
 4. 确认 DLL 已复制到 `GameUnity/Assets/BundleAssets/DLL/*.dll.bytes`。
 5. 重新构建 YooAsset 资源包，保证 DLL bytes 进入包体或远端资源。
 6. 真机运行时由 `LoadAssemblyProcedure` 先加载 AOT metadata，再加载 `GameProto.dll`、`GameBattle.dll`、`GameLogic.dll`。
 
 如果仍缺失泛型，补显式泛型引用或生成对应 AOTGenericReferences，再重复上述步骤。
+
+常见需要补充的泛型（AOT 未实例化、热更侧首次用到时易缺失）：
+
+- `List<自定义类型>`、`Dictionary<自定义, 自定义>` 等容器
+- `UniTask<自定义类型>` 异步返回值
+- `Action<自定义类型>` / `Func<自定义类型>` 委托
+- `MemoryPool.Spawn<自定义类型>()` 等泛型方法调用
+
+处理办法：在 AOT 层（如 `AOTGenericReferences` 或任意 AOT 程序集）显式写出这些封闭泛型的引用，让 IL2CPP 预先实例化。
 
 ---
 
@@ -124,5 +149,21 @@ HybridCLR.RuntimeApi.LoadMetadataForAOTAssembly(
 | 热更 DLL TextAsset 加载后不释放 | `LoadAssemblyProcedure` 中 `UnloadAsset(textAsset)` |
 | 在 `GameProto` 写业务逻辑 | 放到 `GameLogic` 或 `GameBattle` |
 | 用 `dynamic`/Emit 绕过 AOT 泛型问题 | 补 AOT metadata 和显式泛型引用 |
+| 首包或 AOT 变动后未跑 GenerateAll | 启用 HybridCLR 热更新时先执行 `HybridCLR/Generate/All` |
 | 手工复制原始 AOT DLL | 复制 BuildPlayer 后裁剪 DLL |
 | 资源路径写 `AssetRaw/DLL` | DGame 使用 `BundleAssets/DLL` |
+
+## 交叉引用
+
+热更 DLL 更新依赖 YooAsset 资源包下载。资源包版本、清单、下载器链路在 [hotpatch-workflow.md](hotpatch-workflow.md)，关键方法：
+
+- `GameModule.ResourceModule.RequestPackageVersionAsync(...)`：请求最新包版本
+- `GameModule.ResourceModule.UpdatePackageManifestAsync(...)`：更新资源清单
+- `GameModule.ResourceModule.CreateResourceDownloader(...)`：创建下载器
+- `GameModule.ResourceModule.GetPackageVersion(...)`：读取本地包版本
+
+| 关联主题 | 文档 |
+|---------|------|
+| 资源包下载与缓存清理 | [hotpatch-workflow.md](hotpatch-workflow.md) |
+| 整包 / AB 构建 | [build-pipeline.md](build-pipeline.md) |
+| 程序集分层与落位 | [architecture.md](architecture.md) |

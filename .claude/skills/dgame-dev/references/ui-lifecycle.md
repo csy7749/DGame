@@ -16,7 +16,7 @@
 | 3 | `Tips` | Toast、飘字 |
 | 4 | `System` | 系统层、等待界面 |
 
-窗口通过覆写属性设置层级，不使用 TEngine 的 `[Window]` 特性：
+窗口通过覆写属性设置层级：
 
 ```csharp
 public class BagWindow : UIWindow
@@ -92,6 +92,9 @@ GameModule.UIModule.ShowWindow<MainWindow>();
 GameModule.UIModule.ShowWindowAsync<GMPanel>();
 var waiting = await GameModule.UIModule.ShowWindowAsyncAwait<WaitingUI>();
 
+// 传参：ShowWindow 系列都是 params object[]，窗口内用 UserData / UserDatas 读取
+GameModule.UIModule.ShowWindow<ItemDetailWindow>(itemId, from);
+
 var mainWindow = GameModule.UIModule.GetWindow<MainWindow>();
 var loadedWindow = await GameModule.UIModule.GetWindowAsyncAwait<MainWindow>();
 GameModule.UIModule.GetWindowAsync<MainWindow>(window => window.RefreshData());
@@ -102,9 +105,15 @@ GameModule.UIModule.CloseAllWindowsWithOut(mainWindow);
 GameModule.UIModule.CloseAllWindowsWithOut(new List<UIWindow> { mainWindow, waiting });
 GameModule.UIModule.CloseAllWindowsWithOut<MainWindow>();
 bool loading = GameModule.UIModule.IsAnyLoading();
+
+// 已持有窗口实例时，也可直接隐藏/关闭
+waiting.Hide();   // 隐藏并启动 HideTimeToClose 关闭计时器
+waiting.Close();  // 直接关闭
 ```
 
 `CloseAllWindowsWithOut` 有 3 个公开重载：`List<UIWindow>`、单个 `UIWindow`、泛型 `T`。
+
+`ShowWindow` / `ShowWindowAsync` / `ShowWindowAsyncAwait` 均为 `params object[] userDatas`。窗口内读取：`UserData`（首个参数 `m_userDatas[0]`，无则 null）、`UserDatas`（完整数组）。在 `OnRefresh` 里按需取值刷新界面。
 
 ### IUIController 全局 UI 消息
 
@@ -176,6 +185,8 @@ var widget = CreateWidgetByPrefab<ItemWidget>(prefab, parent);
 AdjustItemNum(m_items, count, parent, prefab);
 await AsyncAwaitAdjustItemNum(m_items, count, parent, prefab, maxNumPerFrame: 5, updateAction: RefreshItem);
 ```
+
+UIWidget 生命周期与 UIWindow 一致：`ScriptGenerator → BindMemberProperty → RegisterEvent → OnCreate → OnRefresh → OnDestroy`。
 
 ---
 
