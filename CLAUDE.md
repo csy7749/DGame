@@ -3,7 +3,7 @@
 请使用中文写提案和回答。
 这个文件为 Claude Code (claude.ai/code) 提供指导，用于处理此代码库中的代码。
 
-DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luban 构建。Unity 版本为 `2021.3.30f1c1`，主启动场景位于 `GameUnity/Assets/Scenes/GameStart/GameStart.unity`。
+主启动场景位于 `GameUnity/Assets/Scenes/GameStart/GameStart.unity`。
 
 ---
 
@@ -29,7 +29,8 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 | 文件落位 / 程序集边界 | `architecture.md` |
 | UI 生命周期 / 窗口 / Widget / IUIController | `ui-lifecycle.md`、`ui-patterns.md` |
 | 资源加载 / 释放 / 场景切换资源整理 | `resource-api.md`、`resource-patterns.md` |
-| 热更资源包 / YooAsset 下载链路 / ReleaseTools | `hotpatch-workflow.md` |
+| 热更资源包 / YooAsset 下载链路 | `hotpatch-workflow.md` |
+| 整包 / AB 打包 / Jenkins 自动化 / ReleaseTools | `build-pipeline.md` |
 | 热更代码 / HybridCLR / AOT 泛型 | `hotfix-workflow.md` |
 | 模块 API / DataCenterModule / MemoryPool / Audio / Fsm | `modules.md` |
 | 事件系统 / EventCenter / 事件反模式 | `event-system.md`、`event-antipatterns.md` |
@@ -45,7 +46,7 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 
 1. 用 `rg` 搜索实际签名和调用点。
 2. 优先信任当前源码。
-3. 在回复中标注冲突点；如果任务本身是维护 skill，直接修正 `.codex/skills/dgame-dev/references/` 对应文档。
+3. 在回复中标注冲突点；如果任务本身是维护 skill，直接修正 `.claude/skills/dgame-dev/references/` 对应文档。
 
 ---
 
@@ -53,7 +54,7 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 
 处理 DGame 代码时优先使用 `dgame-dev` skill。它参考 TEngine 的 `tengine-dev` 组织方式，但内容按 DGame 当前项目结构、API 和封装编写。
 
-**知识源**：`.codex/skills/dgame-dev/references/`
+**知识源**：`.claude/skills/dgame-dev/references/`
 
 ### 使用方式
 
@@ -92,6 +93,7 @@ DGame 基于 TEngine 二次封装，使用 HybridCLR + YooAsset + UniTask + Luba
 | 资源加载 | `resource-api.md`、`resource-patterns.md` |
 | 热更代码 | `hotfix-workflow.md` |
 | 热更资源包 | `hotpatch-workflow.md` |
+| 构建打包 / Jenkins | `build-pipeline.md` |
 | Luban 配置消费 | `luban-config.md` |
 | 红点系统 | `reddot-system.md` |
 | 代码规范 | `naming-rules.md` |

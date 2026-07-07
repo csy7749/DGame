@@ -22,7 +22,7 @@
 ┌─────────────────────────────────────────────┐
 │            DGame 框架层                      │
 │  DGame.Runtime / ModuleSystem / Resource     │
-│  ↑ 对 TEngine 能力做项目级二次封装           │
+│  ↑ 项目级框架封装与模块系统                  │
 └─────────────────────────────────────────────┘
                      ↓ 依赖
 ┌─────────────────────────────────────────────┐
@@ -45,6 +45,11 @@
 | `GameProto` | `GameUnity/Assets/Scripts/HotFix/GameProto` | 是 | Luban 生成代码和 `ConfigSystem` |
 | `GameLogic` | `GameUnity/Assets/Scripts/HotFix/GameLogic` | 是 | 主热更业务、UI、业务模块 |
 | `GameBattle` | `GameUnity/Assets/Scripts/HotFix/GameBattle` | 是 | 战斗域逻辑 |
+
+**约束**：
+- `GameLogic` 可依赖 `GameProto` 和 `DGame.Runtime`。
+- `DGame.Runtime` 只提供框架能力，不引用任何热更业务程序集。
+- `DGame.AOT` 通过反射调用热更入口 `GameStart.Entrance`，不直接依赖热更类型。
 
 ---
 
@@ -76,8 +81,9 @@ DGame/
 
 | 目录/标签 | 用途 | 注意 |
 |-----------|------|------|
-| `GameUnity/Assets/BundleAssets` | DGame YooAsset 热更资源根目录 | 不使用 TEngine 的 `AssetRaw` |
+| `GameUnity/Assets/BundleAssets` | DGame YooAsset 热更资源根目录 | 所有热更资源统一放这里 |
 | `GameUnity/Assets/BundleAssets/DLL` | 热更 DLL 和 AOT metadata 的默认 `.dll.bytes` 输出目录 | 实际目录由 `UpdateSettings.AssemblyTextAssetPath` 配置 |
+| `GameUnity/Assets/AssetArt` | 非热更资源根目录（如图集 `Atlas`） | 按资源类型划分子目录，不参与 YooAsset 热更收集 |
 | `PRELOAD` 标签 | AOT `PreloadProcedure` 会通过 `GetAssetInfos("PRELOAD")` 预加载 | 适合启动前必须可用的小体量资源 |
 | `WEBGL_PRELOAD` 标签 | WebGL 下额外预加载 | 仅 `UNITY_WEBGL` 分支处理 |
 
@@ -140,15 +146,15 @@ LaunchProcedure
 
 ## 常见错误
 
-| 错误 | 修复 |
-|------|------|
-| 把业务 UI 放进 `DGame.Runtime` | 放到 `GameLogic/UI`，保持热更 |
-| 在 `DGame.Runtime` 引用 `GameLogic` | Runtime 只提供框架能力，不依赖业务 |
-| 误认为配置生成代码可手改 | 修改 `GameConfig` 源数据或模板后重新导表 |
-| 热更入口写成 `Entrance(List<Assembly>)` | 实际签名是 `Entrance(object[] objects)` |
-| 新资源放进 `AssetRaw` | DGame 使用 `BundleAssets` |
-| 热更业务使用 `Resources.Load()` | 使用 `GameModule.ResourceModule`；Obfuz 密钥读取是 AOT 框架层例外 |
-| 大资源滥用 `PRELOAD` | 只预加载启动必须资源 |
+| 错误 | 原因 | 修复 |
+|------|------|------|
+| 把业务 UI 放进 `DGame.Runtime` | Runtime 不热更，改动需重新出包 | 放到 `GameLogic/UI`，保持热更 |
+| 在 `DGame.Runtime` 引用 `GameLogic` | 会形成下层依赖上层的反向依赖 | Runtime 只提供框架能力，不依赖业务 |
+| 误认为配置生成代码可手改 | 生成代码会在下次导表被覆盖 | 修改 `GameConfig` 源数据或模板后重新导表 |
+| 热更入口写成 `Entrance(List<Assembly>)` | AOT 层按 `object[]` 反射调用入口 | 实际签名是 `Entrance(object[] objects)` |
+| 新资源放到 `BundleAssets` 之外的目录 | 热更资源必须被 YooAsset 收集 | 统一放 `GameUnity/Assets/BundleAssets` |
+| 热更业务使用 `Resources.Load()` | 绕过 YooAsset 无法热更和统一管理 | 使用 `GameModule.ResourceModule`；Obfuz 密钥读取是 AOT 框架层例外 |
+| 大资源滥用 `PRELOAD` | 启动预加载会拉长首屏耗时 | 只预加载启动必须资源 |
 
 ---
 

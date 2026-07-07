@@ -35,6 +35,19 @@ var material = GameModule.ResourceModule.LoadAsset<Material>("UIMat");
 GameModule.ResourceModule.UnloadAsset(material);
 ```
 
+### 非泛型（Type）重载
+
+资源类型在运行时才确定时，用 `Type` 参数的非泛型重载，返回 `UnityEngine.Object`：
+
+```csharp
+UniTask<UnityEngine.Object> LoadAssetAsync(string location, Type assetType,
+    CancellationToken cancellationToken = default, string packageName = "");
+
+UnityEngine.Object LoadAsset(string location, Type assetType, string packageName = "");
+```
+
+同样按持有关系 `UnloadAsset`；实例化 GameObject 仍用 `LoadGameObject(Async)`。
+
 ### 回调式重载
 
 除 `UniTask<T>` 外，`IResourceModule` 还保留回调式异步加载：
@@ -93,13 +106,30 @@ var go2 = GameModule.ResourceModule.LoadGameObject(location, parent);
 
 ### AssetHandle
 
+返回 `AssetHandle` 的加载方式，适合需要精细控制加载过程的场景，四个句柄签名（同步/异步 × 泛型/非泛型）：
+
 ```csharp
-AssetHandle handle = GameModule.ResourceModule.LoadAssetAsyncHandle<AudioClip>(location);
-handle.Completed += OnCompleted;
-handle.Dispose();
+// 同步句柄
+AssetHandle LoadAssetSyncHandle<T>(string location, string packageName = "");
+AssetHandle LoadAssetSyncHandle(string location, Type assetType, string packageName = "");
+
+// 异步句柄
+AssetHandle LoadAssetAsyncHandle<T>(string location, string packageName = "");
+AssetHandle LoadAssetAsyncHandle(string location, Type assetType, string packageName = "");
 ```
 
-持有 `AssetHandle` 的代码必须明确 `Dispose` 责任。
+使用示例（`using` + `IsValid` + `AssetObject` + `.Task`）：
+
+```csharp
+using var syncHandle = GameModule.ResourceModule.LoadAssetSyncHandle<AudioClip>(location);
+if (syncHandle.IsValid) { var clip = syncHandle.AssetObject as AudioClip; }
+
+using var asyncHandle = GameModule.ResourceModule.LoadAssetAsyncHandle<AudioClip>(location);
+await asyncHandle.Task;
+if (asyncHandle.IsValid) { var clip = asyncHandle.AssetObject as AudioClip; }
+```
+
+持有 `AssetHandle` 的代码必须明确 `Dispose` 责任（`using` 或手动 `handle.Dispose()`）。
 
 ### 加载方式选择
 
@@ -235,7 +265,8 @@ GameModule.ResourceModule.ForceUnloadAllAssets();
 - 资源文件落位在 `GameUnity/Assets/BundleAssets/...`。
 - `UpdateSettings.AssemblyTextAssetPath` 当前是 `BundleAssets/DLL`。
 - location 通常由 YooAsset 收集器地址决定。当前项目启用 Addressable 时，DLL 加载地址可直接是 `GameLogic.dll`；未启用时会拼为 `Assets/BundleAssets/DLL/GameLogic.dll.bytes`。
-- 不要写 TEngine 的 `Assets/AssetRaw/...`。
+- 热更资源统一放 `Assets/BundleAssets/...`（经 YooAsset 收集，走 `ResourceModule` 加载）。
+- 非热更资源放 `Assets/AssetArt/...`，按资源类型划分子目录（如 `Atlas`）。
 
 ---
 
@@ -252,3 +283,11 @@ GameModule.ResourceModule.ForceUnloadAllAssets();
 | 写 `ReleaseSprite(...)` | DGame 不存在该 API；直接加载的 `Sprite` 用 `UnloadAsset`，`SetSprite` 链路不手动释放 |
 | UI 异步加载不传取消令牌 | 使用 `gameObject.GetCancellationTokenOnDestroy()` |
 | 热更下载和加载传不同包名 | 检查、下载、加载传同一个 `packageName` |
+
+## 交叉引用
+
+| 关联主题 | 文档 | 说明 |
+|---------|------|------|
+| 加载/释放模式 | resource-patterns.md | 生命周期归属、场景切换、并发预加载、CancellationToken |
+| 热更资源包 | hotpatch-workflow.md | 包版本、下载器、缓存清理 |
+| 构建打包 | build-pipeline.md | AB 构建与 `BundleAssets` 资源落位 |

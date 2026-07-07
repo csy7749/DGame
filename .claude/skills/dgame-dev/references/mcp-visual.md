@@ -76,6 +76,16 @@
 
 `manage_material` 的当前实现会在未指定 `property` 时优先尝试 `_BaseColor`，再尝试 `_Color`；写文档或脚本时仍建议显式传入实际属性名。
 
+`shader` 传完整 Shader 名字符串：
+
+| Shader 名 | 用途 |
+|-----------|------|
+| `Universal Render Pipeline/Lit` | URP 不透明主材质 |
+| `Universal Render Pipeline/Unlit` | URP 无光照 |
+| `Standard` | Built-in 标准管线（URP 项目下慎用） |
+| `Sprites/Default` | 2D 精灵 |
+| `UI/Default` | uGUI 默认 UI 材质 |
+
 ### manage_shader
 
 | action | 说明 |
@@ -129,7 +139,7 @@ UI 图标/图集源图通常放 `Assets/BundleAssets/UIRaw/`。设置 UI Sprite 
 | `controller_` | `create`、`add_state`、`add_transition`、`add_parameter`、`get_info`、`assign`、`add_layer`、`remove_layer`、`set_layer_weight`、`create_blend_tree_1d`、`create_blend_tree_2d`、`add_blend_tree_child` |
 | `clip_` | `create`、`get_info`、`add_curve`、`set_curve`、`set_vector_curve`、`create_preset`、`assign`、`add_event`、`remove_event` |
 
-示例 action 写法是 `controller_create`、`clip_create`、`animator_set_parameter`，不是 TEngine 文档里的无前缀 `create_controller`。
+`manage_animation` 的 action 必须带 `controller_`/`clip_`/`animator_` 前缀，如 `controller_create`、`clip_create`、`animator_set_parameter`。
 
 动画控制器和 Clip 放在对应角色或特效资源目录下，例如 `Assets/BundleAssets/Actor/<Role>/Animations/`。
 
@@ -270,6 +280,42 @@ UI 图标/图集源图通常放 `Assets/BundleAssets/UIRaw/`。设置 UI Sprite 
 }
 ```
 
+### 粒子 workflow：命中爆点特效
+
+分步创建并配置一个瞬发爆点粒子，字段均为 `manage_vfx` 实际参数：
+
+```json
+[
+  {
+    "tool": "manage_vfx",
+    "params": { "action": "particle_create", "target": "HitEffect", "autoAssignMaterial": true }
+  },
+  {
+    "tool": "manage_vfx",
+    "params": {
+      "action": "particle_set_main", "target": "HitEffect",
+      "duration": 1.0, "looping": false, "startLifetime": 0.5,
+      "startSpeed": 6.0, "startSize": 0.3, "maxParticles": 100,
+      "simulationSpace": "World"
+    }
+  },
+  {
+    "tool": "manage_vfx",
+    "params": { "action": "particle_set_emission", "target": "HitEffect", "rateOverTime": 0 }
+  },
+  {
+    "tool": "manage_vfx",
+    "params": { "action": "particle_add_burst", "target": "HitEffect", "time": 0.0, "count": 30 }
+  },
+  {
+    "tool": "manage_vfx",
+    "params": { "action": "particle_set_shape", "target": "HitEffect", "shapeType": "Sphere", "radius": 0.2 }
+  }
+]
+```
+
+瞬发爆点用 `rateOverTime: 0` + `add_burst` 一次性喷发，`looping: false`；持续拖尾类改 `rateOverTime` 常量并 `looping: true`。命中/飞行特效务必 `simulationSpace: "World"`，默认 `Local` 会让粒子跟随物体移动。
+
 特效资源保存到 `Assets/BundleAssets/Effects/`，运行时加载用 `GameModule.ResourceModule`，生命周期按 [resource-api.md](resource-api.md) 释放。
 
 ## 生成与导入资源
@@ -328,5 +374,7 @@ UI 图标/图集源图通常放 `Assets/BundleAssets/UIRaw/`。设置 UI Sprite 
 | Shader 属性凭经验写 | 先查材质/Shader 信息，再设置 `_BaseColor` / `_Color` 等属性 |
 | `manage_material.create` 写 `savePath` / `shaderName` | 写 `materialPath` / `shader` |
 | `set_material_color` 写 `colorProperty` 或拆散 `r/g/b/a` | 写 `property` 和 `color: { r,g,b,a }` |
+| `particle_set_main` 省略 `simulationSpace` | 命中/飞行特效显式写 `simulationSpace: "World"`，默认 Local 会让粒子跟随物体移动 |
+| `controller_add_transition` 用默认 `hasExitTime` | 移动/战斗等即时响应过渡写 `hasExitTime: false`，默认 `true` 需等动画播完才切换 |
 | 只创建材质不放入收集目录 | 放入 `BundleAssets` 并确认 YooAsset 收集 |
 | 导入模型后不查依赖 | 用 `manage_asset get_info` 检查贴图、材质、Prefab 依赖 |

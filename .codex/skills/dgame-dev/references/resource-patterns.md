@@ -13,6 +13,8 @@
 | AudioClip 池化资源 | AudioModule 内部 handle 池 | AudioModule 管理 |
 | DLL TextAsset | `LoadAssemblyProcedure` | 加载 Assembly 后 `UnloadAsset` |
 
+时序陷阱：`UIWidget.OnDestroy` 先于父 `Window.OnDestroy` 执行。父窗口若在 Widget 销毁后访问其资源会出现空引用，跨节点释放顺序需按此排布。
+
 ## UI 中加载资源
 
 ```csharp
@@ -79,7 +81,7 @@ var prefabWidget = await CreateWidgetByPathAsync<ItemWidget>(
     "ItemWidget");
 ```
 
-列表重建使用 DGame 的 `AdjustItemNum` 系列，不要写 TEngine 的 `AdjustIconNum`：
+列表重建使用 `AdjustItemNum` 系列：
 
 ```csharp
 AdjustItemNum(m_items, data.Count, m_tfContent, m_itemPrefab);
@@ -99,7 +101,7 @@ DGame 资源异步 API 支持取消令牌：
 
 ```csharp
 var token = gameObject.GetCancellationTokenOnDestroy();
-var prefab = await GameModule.ResourceModule.LoadAssetAsync<GameObject>("ItemWidget", token);
+var config = await GameModule.ResourceModule.LoadAssetAsync<TextAsset>("LevelData", token);
 ```
 
 规则：
@@ -151,10 +153,8 @@ protected override void OnDestroy()
 var iconTask = GameModule.ResourceModule.LoadAssetAsync<Sprite>("IconSword", token);
 var textTask = GameModule.ResourceModule.LoadAssetAsync<TextAsset>("ItemText", token);
 
-await UniTask.WhenAll(iconTask, textTask);
-
-var icon = iconTask.GetAwaiter().GetResult();
-var text = textTask.GetAwaiter().GetResult();
+// UniTask<T> 只能消费一次，用 WhenAll 的元组返回值解构，不要再对单个 task 调 GetResult
+var (icon, text) = await UniTask.WhenAll(iconTask, textTask);
 ```
 
 列表资源分帧创建：
@@ -184,18 +184,68 @@ GameModule.ResourceModule.ForceUnloadUnusedAssets(true);
 
 ## 场景切换资源整理
 
-切场景前后先处理业务持有关系，再触发资源模块整理，不要把 `ForceUnloadUnusedAssets(true)` 当成替代释放的万能入口：
+切场景前后先处理业务持有关系，再触发资源模块整理，不要把 `ForceUnloadUnusedAssets(true)` 当成替代释放的万能入口。前置断引用：
 
 1. 关闭不应跨场景保留的窗口，确保窗口 `OnDestroy` 里释放 `LoadAssetAsync<T>` 持有的资源。
 2. 停止或回收本场景创建的 GameObject、Widget、对象池实例，避免仍有场景对象引用旧资源。
 3. 清掉模块级或静态缓存中持有的 `UnityEngine.Object`、`AssetHandle`。
-4. 最后调用：
+
+完整切换流程（API 已核实）：
 
 ```csharp
-GameModule.ResourceModule.ForceUnloadUnusedAssets(true);
+public async UniTask SwitchToBattleScene()
+{
+    // 1. 关闭全部窗口，触发各 UIWindow.OnDestroy 释放资源
+    GameModule.UIModule.CloseAllWindows();
+
+    // 2. Single 模式加载新场景，自动卸载旧场景
+    await GameModule.SceneModule.LoadSceneAsync("BattleScene", LoadSceneMode.Single,
+        progressCallBack: p => { /* 显示进度条 */ });
+
+    // 3. 引用断开后整理未使用资源
+    GameModule.ResourceModule.UnloadUnusedAssets();
+
+    // 4. 内存压力大时再强制整理 + 可选 GC
+    // GameModule.ResourceModule.ForceUnloadUnusedAssets(true);
+}
 ```
 
-这里不要引入未核实的场景模块入口。场景切换流程只要求资源侧在引用断开后执行强制未使用资源整理。
+## 叠加场景
+
+叠加场景在卸载时必须显式 `UnloadAsync`，再整理其释放出的资源：
+
+```csharp
+// 叠加加载
+await GameModule.SceneModule.LoadSceneAsync("MinigameScene", LoadSceneMode.Additive);
+
+// 卸载叠加场景并清理
+await GameModule.SceneModule.UnloadAsync("MinigameScene");
+GameModule.ResourceModule.UnloadUnusedAssets();
+```
+
+## 分包下载门控
+
+分包资源使用前先用 `ContainsAsset` 判断是否需要从远端下载，`AssetOnline` 时先下载再加载：
+
+```csharp
+public async UniTask EnsureDLCReady(string location, string packageName)
+{
+    // AssetOnline 表示资源需要从远端下载
+    if (GameModule.ResourceModule.ContainsAsset(location, packageName) != CheckAssetStatus.AssetOnline)
+    {
+        return;
+    }
+
+    var downloader = GameModule.ResourceModule.CreateResourceDownloader(packageName);
+    if (downloader.TotalDownloadCount > 0)
+    {
+        downloader.BeginDownload();
+        await downloader.Task;
+    }
+}
+```
+
+下载、检查、加载必须传同一个 `packageName`。
 
 ## 泄漏根因分类
 
