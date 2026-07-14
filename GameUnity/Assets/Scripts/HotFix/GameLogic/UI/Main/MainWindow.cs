@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Cysharp.Threading.Tasks;
 using DGame;
 using GameProto;
 
@@ -86,9 +87,11 @@ namespace GameLogic
 
 		#region 事件
 
-		private partial void OnClickStartGameBtn()
-		{
-		}
+			private partial void OnClickStartGameBtn()
+			{
+				SurvivorFlowController.EnterAsync(this).Forget();
+			}
+
 
 		private partial void OnClickQuitGameBtn()
 		{
