@@ -1,6 +1,7 @@
 using System;
 using Cysharp.Threading.Tasks;
 using DGame;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace GameLogic
@@ -10,8 +11,18 @@ namespace GameLogic
         private static SurvivorSession s_session;
         private static bool s_busy;
 
-        public static async UniTask EnterAsync(MainWindow mainWindow)
+        public static async UniTask EnterAsync(UIWindow launcherWindow, SurvivorStartOptions startOptions)
         {
+            if (launcherWindow == null)
+            {
+                throw new ArgumentNullException(nameof(launcherWindow));
+            }
+
+            if (startOptions == null)
+            {
+                throw new ArgumentNullException(nameof(startOptions));
+            }
+
             if (s_busy)
             {
                 DLogger.Error("Survivor enter ignored because another flow operation is running.");
@@ -21,12 +32,13 @@ namespace GameLogic
             s_busy = true;
             try
             {
-                await EnterInternalAsync(mainWindow);
+                await EnterInternalAsync(launcherWindow, startOptions);
             }
             catch
             {
                 await DestroySessionAsync();
                 await GameModule.SceneModule.UnloadAsync(SurvivorConstants.SceneLocation);
+                RestoreUiCameraAsBase();
                 throw;
             }
             finally
@@ -58,6 +70,7 @@ namespace GameLogic
             {
                 await DestroySessionAsync();
                 await GameModule.SceneModule.UnloadAsync(SurvivorConstants.SceneLocation);
+                RestoreUiCameraAsBase();
                 GameModule.ResourceModule.UnloadUnusedAssets();
                 GameModule.UIModule.ShowWindow<MainWindow>();
             }
@@ -67,18 +80,64 @@ namespace GameLogic
             }
         }
 
-        private static async UniTask EnterInternalAsync(MainWindow mainWindow)
+        private static async UniTask EnterInternalAsync(
+            UIWindow launcherWindow,
+            SurvivorStartOptions startOptions)
         {
             EnsureSceneLocationValid();
-            await GameModule.SceneModule.LoadSceneAsync(SurvivorConstants.SceneLocation, LoadSceneMode.Additive);
+            Scene scene = await GameModule.SceneModule.LoadSceneAsync(
+                SurvivorConstants.SceneLocation,
+                LoadSceneMode.Additive);
             if (!GameModule.SceneModule.ActivateScene(SurvivorConstants.SceneLocation))
             {
                 throw new InvalidOperationException("Survivor scene activation failed.");
             }
 
-            s_session = new SurvivorSession();
+            StackUiCameraOnSceneCamera(scene);
+            s_session = new SurvivorSession(startOptions);
             await s_session.StartAsync();
-            mainWindow.Close();
+            launcherWindow.Close();
+        }
+
+        private static void StackUiCameraOnSceneCamera(Scene scene)
+        {
+            Camera baseCamera = FindSceneBaseCamera(scene);
+            Camera uiCamera = GameModule.UIModule.UICamera;
+            if (uiCamera == null)
+            {
+                throw new InvalidOperationException("UIRoot is missing UICamera.");
+            }
+
+            DGame.Utility.CameraUtil.StackOverlayCamera(baseCamera, uiCamera);
+        }
+
+        private static Camera FindSceneBaseCamera(Scene scene)
+        {
+            GameObject[] roots = scene.GetRootGameObjects();
+            for (int i = 0; i < roots.Length; i++)
+            {
+                Camera[] cameras = roots[i].GetComponentsInChildren<Camera>(true);
+                for (int j = 0; j < cameras.Length; j++)
+                {
+                    if (cameras[j].CompareTag(SurvivorConstants.MainCameraTag))
+                    {
+                        return cameras[j];
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("Survivor scene is missing MainCamera.");
+        }
+
+        private static void RestoreUiCameraAsBase()
+        {
+            Camera uiCamera = GameModule.UIModule.UICamera;
+            if (uiCamera == null)
+            {
+                throw new InvalidOperationException("UIRoot is missing UICamera.");
+            }
+
+            DGame.Utility.CameraUtil.SetCameraRenderTypeBase(uiCamera);
         }
 
         private static async UniTask DestroySessionAsync()

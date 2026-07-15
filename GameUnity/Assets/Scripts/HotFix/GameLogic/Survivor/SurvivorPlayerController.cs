@@ -11,8 +11,10 @@ namespace GameLogic
 
         private Rigidbody2D m_rigidbody;
         private Vector2 m_moveInput;
+        private bool m_isControlEnabled = true;
+        private float m_moveSpeedMultiplier = 1f;
 
-        public float MoveSpeed => moveSpeed;
+        public float MoveSpeed => moveSpeed * m_moveSpeedMultiplier;
 
         private void Awake()
         {
@@ -21,6 +23,7 @@ namespace GameLogic
 
         public void ResetState()
         {
+            m_isControlEnabled = true;
             m_moveInput = Vector2.zero;
             if (m_rigidbody != null)
             {
@@ -31,8 +34,33 @@ namespace GameLogic
             transform.position = Vector3.zero;
         }
 
+        public void ApplyStartOptions(SurvivorStartOptions options)
+        {
+            if (options == null)
+            {
+                throw new System.ArgumentNullException(nameof(options));
+            }
+
+            m_moveSpeedMultiplier = options.MoveSpeedMultiplier;
+        }
+
+        public void SetControlEnabled(bool enabled)
+        {
+            m_isControlEnabled = enabled;
+            if (!enabled)
+            {
+                m_moveInput = Vector2.zero;
+                StopMovement();
+            }
+        }
+
         private void Update()
         {
+            if (!m_isControlEnabled)
+            {
+                return;
+            }
+
 #if ENABLE_INPUT_SYSTEM
             Vector2 input = Vector2.zero;
             Keyboard keyboard = Keyboard.current;
@@ -78,7 +106,17 @@ namespace GameLogic
                 return;
             }
 
-            m_rigidbody.velocity = m_moveInput * moveSpeed;
+            m_rigidbody.velocity = m_isControlEnabled
+                ? m_moveInput * MoveSpeed
+                : Vector2.zero;
+        }
+
+        private void StopMovement()
+        {
+            if (m_rigidbody != null)
+            {
+                m_rigidbody.velocity = Vector2.zero;
+            }
         }
     }
 }
