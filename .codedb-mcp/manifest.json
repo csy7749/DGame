@@ -1,0 +1,22 @@
+{
+  "version": 23,
+  "created_unix_ms": 1784261327548,
+  "config_hash": "b2cea37fcbc4ca8e",
+  "embedding_model": "D:/codedb-mcp-cache/models/potion-code-16M",
+  "embedding_dims": 0,
+  "file_count": 5660,
+  "chunk_count": 11722,
+  "semantic_unit_count": 5660,
+  "vector_count": 5660,
+  "graph_stats": {
+    "nodes": 5998,
+    "edges": 29544,
+    "communities": 486
+  },
+  "payload_file": "index.1784261327072.15020.0.bin",
+  "outlines_file": "outlines.1784261327072.15020.0.bin",
+  "outlines_index_file": "outlines_index.1784261327072.15020.0.bin",
+  "fingerprints_file": "fingerprints.1784261327072.15020.0.bin",
+  "bm25_postings_file": "bm25.1784261327072.15020.0.postings",
+  "deps_file": "deps.1784261327072.15020.0.bin"
+}

@@ -25,3 +25,4 @@ Tools/BuildTools/Log/
 .claude/*/*.log
 .codex/*/*.log
 .codex/hooks/.last_idle
+/GameUnity/Packages/com.farlocus.locus/Editor/Native/x86_64
