@@ -7,7 +7,6 @@
 //----------------------------------------------------------
 using UnityEngine;
 using UnityEngine.UI;
-using DGame;
 
 namespace GameLogic
 {
@@ -20,6 +19,8 @@ namespace GameLogic
 		private Button m_btnStartGame;
 		private Button m_btnQuitGame;
 		private Dropdown m_dropDownLanguage;
+		private ScrollRect m_scrollbar;
+		private GameObject m_itemTest;
 
 		protected override void ScriptGenerator()
 		{
@@ -28,6 +29,8 @@ namespace GameLogic
 			m_btnStartGame = m_bindComponent.GetComponent<Button>(1);
 			m_btnQuitGame = m_bindComponent.GetComponent<Button>(2);
 			m_dropDownLanguage = m_bindComponent.GetComponent<Dropdown>(3);
+			m_scrollbar = m_bindComponent.GetComponent<ScrollRect>(4);
+			m_itemTest = m_bindComponent.GetComponent<RectTransform>(5).gameObject;
 			m_btnStartGame.onClick.AddListener(OnClickStartGameBtn);
 			m_btnQuitGame.onClick.AddListener(OnClickQuitGameBtn);
 		}

@@ -14,8 +14,13 @@ namespace GameLogic
     {
         private UIBindComponent m_uiBindComponent;
         private ReorderableList m_reorderableList;
-
+        private ReorderableList m_manifestList;
         private SerializedProperty m_componentsProperty;
+        private SerializedProperty m_bindingEntriesProperty;
+        private SerializedProperty m_useBindingManifestProperty;
+        private SerializedProperty m_isWidgetRootProperty;
+        private SerializedProperty m_manifestSignatureProperty;
+        private SerializedProperty m_generatedSignatureProperty;
         private SerializedProperty m_genCodePath;
         private SerializedProperty m_isGenImpClass;
         private SerializedProperty m_impCodePath;
@@ -32,6 +37,11 @@ namespace GameLogic
         {
             m_uiBindComponent = (UIBindComponent)target;
             m_componentsProperty = serializedObject.FindProperty("m_components");
+            m_bindingEntriesProperty = serializedObject.FindProperty("m_bindingEntries");
+            m_useBindingManifestProperty = serializedObject.FindProperty("m_useBindingManifest");
+            m_isWidgetRootProperty = serializedObject.FindProperty("m_isWidgetRoot");
+            m_manifestSignatureProperty = serializedObject.FindProperty("m_manifestSignature");
+            m_generatedSignatureProperty = serializedObject.FindProperty("m_generatedSignature");
             m_genCodePath = serializedObject.FindProperty("genCodePath");
             m_isGenImpClass = serializedObject.FindProperty("isGenImpClass");
             m_impCodePath = serializedObject.FindProperty("impCodePath");
@@ -57,8 +67,44 @@ namespace GameLogic
             {
                 m_impCodePath.stringValue = UIScriptGeneratorSettings.GetImpCodePath();
             }
+            InitializeUIType();
             serializedObject.ApplyModifiedProperties();
             CreateReorderableList();
+            CreateManifestList();
+        }
+
+        private void InitializeUIType()
+        {
+            if (!string.IsNullOrWhiteSpace(m_uiType.stringValue))
+            {
+                return;
+            }
+
+            string defaultType = m_uiBindComponent.IsWidgetRoot ? nameof(UIWidget) : nameof(UIWindow);
+            if (UIScriptGeneratorSettings.GetUIGenType(defaultType) != null)
+            {
+                m_uiType.stringValue = defaultType;
+            }
+        }
+
+        private void CreateManifestList()
+        {
+            m_manifestList = new ReorderableList(serializedObject, m_bindingEntriesProperty, false, true, false, false);
+            m_manifestList.drawHeaderCallback = rect => EditorGUI.LabelField(rect, "绑定清单");
+            m_manifestList.elementHeightCallback = index =>
+            {
+                SerializedProperty element = m_bindingEntriesProperty.GetArrayElementAtIndex(index);
+                return EditorGUI.GetPropertyHeight(element, true) + 4f;
+            };
+            m_manifestList.drawElementCallback = (rect, index, isActive, isFocused) =>
+            {
+                SerializedProperty element = m_bindingEntriesProperty.GetArrayElementAtIndex(index);
+                rect.y += 2f;
+                rect.height = EditorGUI.GetPropertyHeight(element, true);
+                EditorGUI.PropertyField(rect, element, GUIContent.none, true);
+            };
+            m_manifestList.drawNoneElementCallback = rect =>
+                EditorGUI.LabelField(rect, "选中 Prefab 节点后，通过逐组件 +/- 建立绑定。");
         }
 
         private void CreateReorderableList()
@@ -143,10 +189,113 @@ namespace GameLogic
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
+            if (m_uiBindComponent.IsManifestBinding)
+            {
+                DrawManifestInspector();
+                serializedObject.ApplyModifiedProperties();
+                return;
+            }
+
+            DrawManifestMigrationButton();
             DrawTopButtons();
             EditorGUILayout.Space();
             m_reorderableList.DoLayoutList();
             serializedObject.ApplyModifiedProperties();
+        }
+
+        private void DrawManifestMigrationButton()
+        {
+            EditorGUILayout.HelpBox("当前 Prefab 仍使用旧组件索引绑定。启用 Manifest 后，请在 Prefab Stage 逐节点添加绑定。", MessageType.Info);
+            if (!GUILayout.Button("启用 Manifest", GUILayout.Height(24)))
+            {
+                return;
+            }
+
+            Undo.RecordObject(m_uiBindComponent, "启用 UI Binding Manifest");
+            m_uiBindComponent.EnableBindingManifest();
+            m_useBindingManifestProperty.boolValue = true;
+            serializedObject.ApplyModifiedProperties();
+            EditorUtility.SetDirty(m_uiBindComponent);
+        }
+
+        private void DrawManifestInspector()
+        {
+            EditorGUILayout.HelpBox("Manifest 是该 UI 的唯一绑定来源。请在 Prefab Stage 选中节点，通过每个组件独立的 +/- 修改清单。", MessageType.Info);
+            DrawWidgetRootProperty();
+            DrawManifestSignatureStatus();
+            DrawManifestGenerateButton();
+            EditorGUILayout.Space();
+            m_manifestList.DoLayoutList();
+            DrawCodeGenerationSettings();
+        }
+
+        private void DrawWidgetRootProperty()
+        {
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(m_isWidgetRootProperty, new GUIContent("Widget 根节点"));
+            if (EditorGUI.EndChangeCheck())
+            {
+                m_manifestSignatureProperty.stringValue = string.Empty;
+            }
+        }
+
+        private void DrawManifestSignatureStatus()
+        {
+            bool isCurrent = !string.IsNullOrEmpty(m_manifestSignatureProperty.stringValue)
+                && m_manifestSignatureProperty.stringValue == m_generatedSignatureProperty.stringValue;
+            string state = isCurrent ? "已同步" : "已陈旧";
+            EditorGUILayout.LabelField("生成状态", state);
+            EditorGUILayout.LabelField("Manifest签名", m_manifestSignatureProperty.stringValue);
+            EditorGUILayout.LabelField("代码签名", m_generatedSignatureProperty.stringValue);
+        }
+
+        private void DrawManifestGenerateButton()
+        {
+            if (GUILayout.Button("校验并生成 Manifest 代码", GUILayout.Height(26)))
+            {
+                serializedObject.ApplyModifiedProperties();
+                UIScriptGenerator.GenerateManifestCSharpScript(m_uiBindComponent, false);
+            }
+        }
+
+        private void DrawCodeGenerationSettings()
+        {
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("代码生成设置", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(m_className, new GUIContent("类名"));
+            bool isBothGeneric = DrawUITypePopup();
+            if (isBothGeneric)
+            {
+                EditorGUILayout.PropertyField(m_widgetTypeName, new GUIContent("Widget类型"));
+                EditorGUILayout.PropertyField(m_dataTypeName, new GUIContent("数据类型"));
+            }
+            DrawFolderField("生成组件代码路径", string.Empty, m_genCodePath);
+        }
+
+        private bool DrawUITypePopup()
+        {
+            m_uiGenTypes = UIScriptGeneratorSettings.Instance.UIGenTypes;
+            m_uiTypeOptions = m_uiGenTypes.Select(type => type.uiTypeName).ToArray();
+            if (m_uiTypeOptions.Length == 0)
+            {
+                EditorGUILayout.HelpBox("请先在 UISettings 中配置 UI 类型。", MessageType.Error);
+                return false;
+            }
+
+            int currentIndex = System.Array.IndexOf(m_uiTypeOptions, m_uiType.stringValue);
+            if (currentIndex < 0 && !string.IsNullOrWhiteSpace(m_uiType.stringValue))
+            {
+                EditorGUILayout.HelpBox($"UI 类型 {m_uiType.stringValue} 未在 UISettings 中配置。", MessageType.Error);
+            }
+
+            int newIndex = EditorGUILayout.Popup("UI类型", currentIndex, m_uiTypeOptions);
+            if (newIndex >= 0 && newIndex != currentIndex)
+            {
+                m_uiType.stringValue = m_uiTypeOptions[newIndex];
+                m_manifestSignatureProperty.stringValue = string.Empty;
+            }
+
+            return newIndex >= 0 && UIScriptGeneratorSettings.GetUIGenType(m_uiTypeOptions[newIndex]).bothGeneric;
         }
 
         private void DrawTopButtons()
