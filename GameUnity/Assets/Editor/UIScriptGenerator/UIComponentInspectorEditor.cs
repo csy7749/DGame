@@ -21,9 +21,6 @@ namespace GameLogic
         private SerializedProperty m_isWidgetRootProperty;
         private SerializedProperty m_manifestSignatureProperty;
         private SerializedProperty m_generatedSignatureProperty;
-        private SerializedProperty m_genCodePath;
-        private SerializedProperty m_isGenImpClass;
-        private SerializedProperty m_impCodePath;
         private SerializedProperty m_className;
         private SerializedProperty m_uiType;
         private SerializedProperty m_dataTypeName;
@@ -42,30 +39,15 @@ namespace GameLogic
             m_isWidgetRootProperty = serializedObject.FindProperty("m_isWidgetRoot");
             m_manifestSignatureProperty = serializedObject.FindProperty("m_manifestSignature");
             m_generatedSignatureProperty = serializedObject.FindProperty("m_generatedSignature");
-            m_genCodePath = serializedObject.FindProperty("genCodePath");
-            m_isGenImpClass = serializedObject.FindProperty("isGenImpClass");
-            m_impCodePath = serializedObject.FindProperty("impCodePath");
             m_className = serializedObject.FindProperty("className");
             m_uiType = serializedObject.FindProperty("uiType");
             m_dataTypeName = serializedObject.FindProperty("dataTypeName");
             m_widgetTypeName = serializedObject.FindProperty("widgetTypeName");
 
             serializedObject.Update();
-            // m_className.stringValue = target.name;
-            // m_genCodePath.stringValue = UIScriptGeneratorSettings.GetGenCodePath();
-            // m_impCodePath.stringValue = UIScriptGeneratorSettings.GetImpCodePath();
-            // 仅在首次（为空）时初始化，避免覆盖用户在 UIComponentEditor.cs 中配置的持久化数据
             if (string.IsNullOrEmpty(m_className.stringValue))
             {
                 m_className.stringValue = target.name;
-            }
-            if (string.IsNullOrEmpty(m_genCodePath.stringValue))
-            {
-                m_genCodePath.stringValue = UIScriptGeneratorSettings.GetGenCodePath();
-            }
-            if (string.IsNullOrEmpty(m_impCodePath.stringValue))
-            {
-                m_impCodePath.stringValue = UIScriptGeneratorSettings.GetImpCodePath();
             }
             InitializeUIType();
             serializedObject.ApplyModifiedProperties();
@@ -221,12 +203,14 @@ namespace GameLogic
         private void DrawManifestInspector()
         {
             EditorGUILayout.HelpBox("Manifest 是该 UI 的唯一绑定来源。请在 Prefab Stage 选中节点，通过每个组件独立的 +/- 修改清单。", MessageType.Info);
+            string autoTypeName = string.IsNullOrWhiteSpace(m_className.stringValue) ? target.name + "Auto" : m_className.stringValue + "Auto";
+            EditorGUILayout.HelpBox($"继承式生成：自动类为 {autoTypeName}，业务类请声明为 {m_className.stringValue} : {autoTypeName}。", MessageType.None);
             DrawWidgetRootProperty();
             DrawManifestSignatureStatus();
             DrawManifestGenerateButton();
+            DrawCodeGenerationSettings();
             EditorGUILayout.Space();
             m_manifestList.DoLayoutList();
-            DrawCodeGenerationSettings();
         }
 
         private void DrawWidgetRootProperty()
@@ -251,6 +235,15 @@ namespace GameLogic
 
         private void DrawManifestGenerateButton()
         {
+            if (GUILayout.Button("重新收集绑定", GUILayout.Height(24)))
+            {
+                serializedObject.ApplyModifiedProperties();
+                if (UIScriptGenerator.RecollectManifestBindings(m_uiBindComponent))
+                {
+                    serializedObject.Update();
+                }
+            }
+
             if (GUILayout.Button("校验并生成 Manifest 代码", GUILayout.Height(26)))
             {
                 serializedObject.ApplyModifiedProperties();
@@ -269,7 +262,7 @@ namespace GameLogic
                 EditorGUILayout.PropertyField(m_widgetTypeName, new GUIContent("Widget类型"));
                 EditorGUILayout.PropertyField(m_dataTypeName, new GUIContent("数据类型"));
             }
-            DrawFolderField("生成组件代码路径", string.Empty, m_genCodePath);
+            DrawProjectCodePaths();
         }
 
         private bool DrawUITypePopup()
@@ -319,8 +312,10 @@ namespace GameLogic
                         }
                     }
                     // RemoveNullComponents();
-                    UIScriptGenerator.GenerateCSharpScript(true, false, true, m_genCodePath.stringValue,
-                        m_className.stringValue, m_uiTypeOptions[m_selectedIndex], m_isGenImpClass.boolValue, m_impCodePath.stringValue, m_widgetTypeName.stringValue, m_dataTypeName.stringValue);
+                    UIScriptGenerator.GenerateCSharpScript(true, false, true,
+                        UIScriptGeneratorSettings.GetGenCodePath(), m_className.stringValue,
+                        m_uiTypeOptions[m_selectedIndex], m_widgetTypeName.stringValue,
+                        m_dataTypeName.stringValue);
                 }
                 if (GUILayout.Button("自动生成UniTask脚本", GUILayout.Height(25)))
                 {
@@ -333,8 +328,10 @@ namespace GameLogic
                         }
                     }
                     // RemoveNullComponents();
-                    UIScriptGenerator.GenerateCSharpScript(true, true, true, m_genCodePath.stringValue,
-                        m_className.stringValue, m_uiTypeOptions[m_selectedIndex], m_isGenImpClass.boolValue, m_impCodePath.stringValue, m_widgetTypeName.stringValue, m_dataTypeName.stringValue);
+                    UIScriptGenerator.GenerateCSharpScript(true, true, true,
+                        UIScriptGeneratorSettings.GetGenCodePath(), m_className.stringValue,
+                        m_uiTypeOptions[m_selectedIndex], m_widgetTypeName.stringValue,
+                        m_dataTypeName.stringValue);
                 }
             }
             EditorGUILayout.EndHorizontal();
@@ -416,16 +413,8 @@ namespace GameLogic
                     EditorGUILayout.PropertyField(m_dataTypeName, new GUIContent("数据类型"));
                 }
 
-                DrawFolderField("生成组件代码路径", string.Empty, m_genCodePath);
+                DrawProjectCodePaths();
 
-                // 是否生成实现类
-                EditorGUILayout.PropertyField(m_isGenImpClass, new GUIContent("生成实现类", "是否同时生成实现类文件"));
-
-                // 如果启用了生成实现类，显示实现类路径
-                if (m_isGenImpClass.boolValue)
-                {
-                    DrawFolderField("生成实现类路径", string.Empty, m_impCodePath);
-                }
             }
             EditorGUILayout.EndVertical();
 
@@ -459,79 +448,19 @@ namespace GameLogic
             Debug.Log($"已清除空引用，剩余组件数量: {m_componentsProperty.arraySize}");
         }
 
-        private static void DrawFolderField(string label, string labelIcon, SerializedProperty pathProperty)
+        /// <summary>
+        /// 路径由项目配置统一管理，Prefab 只保留自身的类型与生成行为。
+        /// </summary>
+        private static void DrawProjectCodePaths()
         {
-            EditorGUILayout.BeginHorizontal();
-            string path = pathProperty.stringValue;
-            var buttonGUIContent = new GUIContent("选择", EditorGUIUtility.IconContent("Folder Icon").image);
-
-            if (!string.IsNullOrEmpty(labelIcon))
+            EditorGUILayout.LabelField("项目代码生成路径", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("组件代码", UIScriptGeneratorSettings.GetGenCodePath());
+            string logicRoot = UIScriptGeneratorSettings.GetImpCodePath();
+            EditorGUILayout.LabelField("Window逻辑", $"{logicRoot}/<WindowName>/<WindowName>.cs");
+            EditorGUILayout.LabelField("Item逻辑", $"{logicRoot}/Item/<ItemName>.cs");
+            if (GUILayout.Button("打开项目配置", GUILayout.Height(22)))
             {
-                var labelGUIContent = new GUIContent(" " + label, EditorGUIUtility.IconContent(labelIcon).image);
-                path = EditorGUILayout.TextField(labelGUIContent, path);
-            }
-            else
-            {
-                path = EditorGUILayout.TextField(label, path);
-            }
-            if (path != pathProperty.stringValue)
-            {
-                pathProperty.stringValue = path;
-            }
-            if (GUILayout.Button(buttonGUIContent, GUILayout.Width(60), GUILayout.Height(20)))
-            {
-                string currentPath = pathProperty.stringValue;
-
-                EditorApplication.delayCall += () =>
-                {
-                    var newPath = EditorUtility.OpenFolderPanel(label, currentPath, string.Empty);
-                    if (string.IsNullOrEmpty(newPath))
-                    {
-                        Debug.LogError("路径不能为空" + newPath);
-                        string defaultPath = GetDefaultPathByPropertyType(pathProperty);
-                        pathProperty.stringValue = defaultPath;
-
-                    }
-                    else
-                    {
-                        if (newPath.StartsWith(Application.dataPath))
-                        {
-                            newPath = newPath.Replace(Application.dataPath, "Assets");
-                        }
-                        pathProperty.stringValue = newPath;
-                    }
-                    pathProperty.serializedObject.ApplyModifiedProperties();
-                };
-            }
-            if (GUILayout.Button("默认", GUILayout.Width(60), GUILayout.Height(20)))
-            {
-                // 根据不同的属性类型获取不同的默认路径
-                string defaultPath = GetDefaultPathByPropertyType(pathProperty);
-                if (!string.IsNullOrEmpty(defaultPath))
-                {
-                    pathProperty.stringValue = defaultPath;
-                }
-            }
-            EditorGUILayout.EndHorizontal();
-        }
-
-        private static string GetDefaultPathByPropertyType(SerializedProperty property)
-        {
-            // 通过属性名称来判断类型
-            switch (property.name)
-            {
-                case "m_genCodePath":
-                case "genCodePath":
-                    return UIScriptGeneratorSettings.GetGenCodePath();
-
-                case "m_impCodePath":
-                case "impCodePath":
-                    return UIScriptGeneratorSettings.GetImpCodePath();
-
-                default:
-                    // 如果无法识别属性类型，返回空字符串或当前值
-                    Debug.LogWarning($"未知的属性类型: {property.name}，无法获取默认路径");
-                    return property.stringValue;
+                DGameUIGeneratorSettingsProvider.OpenUIGeneratorSettings();
             }
         }
     }

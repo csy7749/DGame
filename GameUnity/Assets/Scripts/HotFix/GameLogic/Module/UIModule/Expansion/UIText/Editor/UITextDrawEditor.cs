@@ -10,18 +10,67 @@ namespace GameLogic
 {
     public static class UITextDrawEditor
     {
+        private const string UI_GENERATOR_SETTINGS_PATH =
+            "Assets/Editor/UIScriptGenerator/UIScriptGeneratorSettings.asset";
+        private const string DEFAULT_UI_TEXT_FONT_PROPERTY = "defaultUITextFont";
+
         [MenuItem("GameObject/UI/UIText", priority = 31)]
         public static void CreateUIText()
         {
+            if (!TryGetDefaultFont(out Font defaultFont))
+            {
+                return;
+            }
+
+            CreateUIText(defaultFont);
+        }
+
+        /// <summary>
+        /// 使用已校验的项目默认字体创建 UIText。
+        /// </summary>
+        public static void CreateUIText(Font defaultFont)
+        {
+            if (defaultFont == null)
+            {
+                throw new ArgumentNullException(nameof(defaultFont));
+            }
+
             UIText uiText = new GameObject("UIText", typeof(RectTransform), typeof(UIText)).GetComponent<UIText>();
             UnityEditorUtil.ResetInCanvasFor(uiText.rectTransform);
             uiText.text = "UIText";
+            uiText.font = defaultFont;
             uiText.color = Color.black;
             uiText.fontSize = 24;
             uiText.raycastTarget = false;
             uiText.rectTransform.sizeDelta = new Vector2(200, 50);
             uiText.alignment = TextAnchor.MiddleCenter;
             uiText.rectTransform.localPosition = Vector3.zero;
+        }
+
+        /// <summary>
+        /// 读取项目配置中的默认字体；配置异常时明确阻止创建。
+        /// </summary>
+        public static bool TryGetDefaultFont(out Font defaultFont)
+        {
+            defaultFont = null;
+            UnityEngine.Object settingsAsset = AssetDatabase.LoadMainAssetAtPath(UI_GENERATOR_SETTINGS_PATH);
+            if (settingsAsset == null)
+            {
+                Debug.LogError($"[UIText] 未找到项目配置: {UI_GENERATOR_SETTINGS_PATH}");
+                return false;
+            }
+
+            // GameLogic 不能引用 Editor 程序集，通过 Unity 序列化接口读取同一项目配置资产。
+            var settings = new SerializedObject(settingsAsset);
+            SerializedProperty fontProperty = settings.FindProperty(DEFAULT_UI_TEXT_FONT_PROPERTY);
+            defaultFont = fontProperty?.objectReferenceValue as Font;
+            if (defaultFont != null)
+            {
+                return true;
+            }
+
+            Debug.LogError("[UIText] 项目配置中的 UIText 默认字体为空或类型无效。");
+            return false;
         }
 
         #region 字符间距

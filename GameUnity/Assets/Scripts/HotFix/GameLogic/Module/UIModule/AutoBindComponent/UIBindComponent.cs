@@ -19,6 +19,7 @@ namespace GameLogic
         Click,
         ToggleValueChanged,
         SliderValueChanged,
+        DropdownValueChanged,
     }
 
     [Serializable]
@@ -133,6 +134,7 @@ namespace GameLogic
             m_eventKind = UIBindingEventKind.None;
             m_eventHandlerName = string.Empty;
 
+            // 只有支持生成监听代码的交互组件才默认启用事件，普通显示组件保持纯引用绑定。
             if (m_target is Button)
             {
                 SetUnityEvent(UIBindingEventKind.Click, "OnClick", "m_btn", "Btn");
@@ -148,6 +150,12 @@ namespace GameLogic
             if (m_target is Slider)
             {
                 SetUnityEvent(UIBindingEventKind.SliderValueChanged, "OnSlider", "m_slider", "Change");
+                return;
+            }
+
+            if (m_target is Dropdown)
+            {
+                SetUnityEvent(UIBindingEventKind.DropdownValueChanged, "OnDropdown", "m_dropDown", "Change");
             }
         }
 

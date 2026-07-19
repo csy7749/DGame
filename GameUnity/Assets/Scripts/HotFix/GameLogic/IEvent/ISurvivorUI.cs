@@ -5,7 +5,7 @@ namespace GameLogic
     [EventInterface(EEventGroup.GroupUI)]
     public interface ISurvivorUI
     {
-        void OnHudChanged(string title, string status);
+        void OnHudDataChanged(SurvivorHudData data);
 
         void OnResultChanged(string result);
     }

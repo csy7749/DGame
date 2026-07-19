@@ -6,10 +6,14 @@ using UnityEngine.SceneManagement;
 
 namespace DGame
 {
+    /// <summary>
+    /// 保存 UI 代码生成器的项目共享配置，是生成路径与命名规则的唯一来源。
+    /// </summary>
     [CreateAssetMenu(menuName = "DGame/UIScriptGeneratorSettings", fileName = "UIScriptGeneratorSettings")]
     public class UIScriptGeneratorSettings : EditorScriptableObjectSingleton<UIScriptGeneratorSettings>
     {
         [SerializeField] private GameObject uiRoot;
+        [SerializeField] private Font defaultUITextFont;
         [SerializeField] private bool useBindComponent;
         [SerializeField] private string genCodePath = "Assets/Scripts/HotFix/GameLogic/UI/Gen";
         [SerializeField] private string impCodePath = "Assets/Scripts/HotFix/GameLogic/UI";
@@ -23,6 +27,7 @@ namespace DGame
         };
         public List<UIGenType> UIGenTypes => uiGenTypes;
         public GameObject UIRoot => uiRoot;
+        public Font DefaultUITextFont => defaultUITextFont;
         public bool UseBindComponent => useBindComponent;
         public string GenCodePath => genCodePath;
         public string ImpCodePath => impCodePath;

@@ -94,8 +94,7 @@ namespace DGame
 
         public static bool GenerateCSharpScript(bool includeListener, bool isUniTask = false,
             bool isAutoGenerate = false, string savePath = null, string className = null,
-            string uiGenTypeName = null, bool isGenImp = false,
-            string impSavePath = null, string widgetTypeName = null, string dataTypeName = null)
+            string uiGenTypeName = null, string widgetTypeName = null, string dataTypeName = null)
         {
             var root = Selection.activeTransform;
             if (root == null)
@@ -240,10 +239,11 @@ namespace DGame
 
                 File.WriteAllText(filePath, strFile.ToString(), Encoding.UTF8);
                 File.SetAttributes(filePath, File.GetAttributes(filePath) | FileAttributes.ReadOnly);
-                if (isGenImp)
+                if (!GenerateImpCSharpScript(isUniTask, fileName, uiTypeName))
                 {
-                    GenerateImpCSharpScript(isUniTask, fileName, impSavePath, uiTypeName);
+                    return false;
                 }
+
                 AssetDatabase.Refresh();
             }
             else
@@ -299,7 +299,7 @@ namespace DGame
                 return;
             }
 
-            strVar.AppendLine($"\t\tprivate {componentName} {varName};");
+            strVar.AppendLine($"\t\tprotected {componentName} {varName};");
 
             if (rule.componentName == UIComponentName.GameObject)
             {
@@ -348,6 +348,13 @@ namespace DGame
                     strCallback.AppendLine($"\t\tprivate partial void {sliderFuncName}(float value);");
                     strCallback.AppendLine();
                     break;
+
+                case UIComponentName.Dropdown:
+                    var dropdownFuncName = GetDropdownFuncName(varName);
+                    strOnCreate.AppendLine($"\t\t\t{varName}.onValueChanged.AddListener({dropdownFuncName});");
+                    strCallback.AppendLine($"\t\tprivate partial void {dropdownFuncName}(int value);");
+                    strCallback.AppendLine();
+                    break;
             }
         }
 
@@ -355,8 +362,7 @@ namespace DGame
 
         #region GenerateImpCSharp
 
-        private static bool GenerateImpCSharpScript(bool isUniTask = false, string fileName = null,
-            string impSavePath = null, string uiTypeName = null)
+        private static bool GenerateImpCSharpScript(bool isUniTask, string fileName, string uiTypeName)
         {
             var root = Selection.activeTransform;
             if (root == null || string.IsNullOrEmpty(fileName))
@@ -405,23 +411,20 @@ namespace DGame
             m_textEditor.SelectAll();
             m_textEditor.Copy();
 
-            string path = impSavePath?.Replace("\\", "/");
-            if (string.IsNullOrEmpty(path))
+            string className = Path.GetFileNameWithoutExtension(fileName);
+            string filePath = GetLogicCodePath(className, uiTypeName);
+            if (!ValidateLogicFileLocation(className, filePath))
             {
                 return false;
             }
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            var filePath = Path.Combine(path, fileName).Replace("\\", "/");
 
             if (File.Exists(filePath))
             {
-                Debug.LogWarning("相关实现类脚本已生成，再次生成跳过");
-                return false;
+                Debug.Log($"[UI Logic Generator] 业务逻辑类已存在，跳过生成: {filePath}");
+                return true;
             }
 
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
             File.WriteAllText(filePath, strFile.ToString(), Encoding.UTF8);
             AssetDatabase.Refresh();
             return true;
@@ -502,6 +505,14 @@ namespace DGame
                 case UIComponentName.Slider:
                     var sliderFuncName = GetSliderFuncName(varName);
                     strCallback.AppendLine($"\t\tprivate partial void {sliderFuncName}(float value)");
+                    strCallback.AppendLine("\t\t{");
+                    strCallback.AppendLine("\t\t}");
+                    strCallback.AppendLine();
+                    break;
+
+                case UIComponentName.Dropdown:
+                    var dropdownFuncName = GetDropdownFuncName(varName);
+                    strCallback.AppendLine($"\t\tprivate partial void {dropdownFuncName}(int value)");
                     strCallback.AppendLine("\t\t{");
                     strCallback.AppendLine("\t\t}");
                     strCallback.AppendLine();

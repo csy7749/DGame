@@ -241,6 +241,14 @@ namespace DGame
                     strCallback.AppendLine("\t\t}");
                     strCallback.AppendLine();
                     break;
+                case UIComponentName.Dropdown:
+                    var dropdownFuncName = GetDropdownFuncName(varName);
+                    strOnCreate.AppendLine($"\t\t\t{varName}.onValueChanged.AddListener({dropdownFuncName});");
+                    strCallback.AppendLine($"\t\tprivate void {dropdownFuncName}(int value)");
+                    strCallback.AppendLine("\t\t{");
+                    strCallback.AppendLine("\t\t}");
+                    strCallback.AppendLine();
+                    break;
             }
         }
 
@@ -294,6 +302,27 @@ namespace DGame
                         $"OnSlider{varName.Replace(prefix + UIScriptGeneratorSettings.GetUIComponentWithoutPrefixName(UIComponentName.Slider), string.Empty)}Change";
                 }
             }
+            return varName;
+        }
+
+        private static object GetDropdownFuncName(string varName)
+        {
+            if (string.IsNullOrEmpty(varName))
+            {
+                return varName;
+            }
+
+            for (int i = 0; i < VARIABLE_NAME_REGEX.Length; i++)
+            {
+                string prefix = VARIABLE_NAME_REGEX[i];
+                if (varName.StartsWith(prefix))
+                {
+                    string componentName = UIScriptGeneratorSettings.GetUIComponentWithoutPrefixName(
+                        UIComponentName.Dropdown);
+                    return $"OnDropdown{varName.Replace(prefix + componentName, string.Empty)}Change";
+                }
+            }
+
             return varName;
         }
 

@@ -1,0 +1,413 @@
+{
+  "version": 3,
+  "targets": {
+    "net8.0": {
+      "DGame.Runtime/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "Obfuz.Runtime": "1.0.0",
+          "UniTask": "1.0.0",
+          "Unity.InputSystem": "1.0.0",
+          "Unity.TextMeshPro": "1.0.0",
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.UI": "1.0.0",
+          "YooAsset": "1.0.0",
+          "YooAsset.Editor": "1.0.0",
+          "YooAsset.RuntimeExtension": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/DGame.Runtime.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/DGame.Runtime.dll": {}
+        }
+      },
+      "GameBattle/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "DGame.Runtime": "1.0.0",
+          "GameProto": "1.0.0",
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.UI": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/GameBattle.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/GameBattle.dll": {}
+        }
+      },
+      "GameProto/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "DGame.Runtime": "1.0.0",
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.UI": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/GameProto.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/GameProto.dll": {}
+        }
+      },
+      "Obfuz.Runtime/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.UI": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Obfuz.Runtime.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Obfuz.Runtime.dll": {}
+        }
+      },
+      "UniTask/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.UI": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/UniTask.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/UniTask.dll": {}
+        }
+      },
+      "Unity.InputSystem/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.UI": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Unity.InputSystem.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Unity.InputSystem.dll": {}
+        }
+      },
+      "Unity.ScriptableBuildPipeline/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.UI": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Unity.ScriptableBuildPipeline.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Unity.ScriptableBuildPipeline.dll": {}
+        }
+      },
+      "Unity.ScriptableBuildPipeline.Editor/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "Unity.ScriptableBuildPipeline": "1.0.0",
+          "UnityEditor.TestRunner": "1.0.0",
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.TestRunner": "1.0.0",
+          "UnityEngine.UI": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Unity.ScriptableBuildPipeline.Editor.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Unity.ScriptableBuildPipeline.Editor.dll": {}
+        }
+      },
+      "Unity.TextMeshPro/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.UI": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/Unity.TextMeshPro.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/Unity.TextMeshPro.dll": {}
+        }
+      },
+      "UnityEditor.TestRunner/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "UnityEngine.TestRunner": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/UnityEditor.TestRunner.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/UnityEditor.TestRunner.dll": {}
+        }
+      },
+      "UnityEditor.UI/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "UnityEditor.TestRunner": "1.0.0",
+          "UnityEngine.TestRunner": "1.0.0",
+          "UnityEngine.UI": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/UnityEditor.UI.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/UnityEditor.UI.dll": {}
+        }
+      },
+      "UnityEngine.TestRunner/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "compile": {
+          "bin/placeholder/UnityEngine.TestRunner.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/UnityEngine.TestRunner.dll": {}
+        }
+      },
+      "UnityEngine.UI/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "compile": {
+          "bin/placeholder/UnityEngine.UI.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/UnityEngine.UI.dll": {}
+        }
+      },
+      "YooAsset/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.UI": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/YooAsset.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/YooAsset.dll": {}
+        }
+      },
+      "YooAsset.Editor/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "Unity.ScriptableBuildPipeline": "1.0.0",
+          "Unity.ScriptableBuildPipeline.Editor": "1.0.0",
+          "UnityEditor.TestRunner": "1.0.0",
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.TestRunner": "1.0.0",
+          "UnityEngine.UI": "1.0.0",
+          "YooAsset": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/YooAsset.Editor.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/YooAsset.Editor.dll": {}
+        }
+      },
+      "YooAsset.RuntimeExtension/1.0.0": {
+        "type": "project",
+        "framework": ".NETStandard,Version=v2.1",
+        "dependencies": {
+          "UnityEditor.UI": "1.0.0",
+          "UnityEngine.UI": "1.0.0",
+          "YooAsset": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/YooAsset.RuntimeExtension.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/YooAsset.RuntimeExtension.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "DGame.Runtime/1.0.0": {
+      "type": "project",
+      "path": "../../DGame.Runtime.csproj",
+      "msbuildProject": "../../DGame.Runtime.csproj"
+    },
+    "GameBattle/1.0.0": {
+      "type": "project",
+      "path": "../../GameBattle.csproj",
+      "msbuildProject": "../../GameBattle.csproj"
+    },
+    "GameProto/1.0.0": {
+      "type": "project",
+      "path": "../../GameProto.csproj",
+      "msbuildProject": "../../GameProto.csproj"
+    },
+    "Obfuz.Runtime/1.0.0": {
+      "type": "project",
+      "path": "../../Obfuz.Runtime.csproj",
+      "msbuildProject": "../../Obfuz.Runtime.csproj"
+    },
+    "UniTask/1.0.0": {
+      "type": "project",
+      "path": "../../UniTask.csproj",
+      "msbuildProject": "../../UniTask.csproj"
+    },
+    "Unity.InputSystem/1.0.0": {
+      "type": "project",
+      "path": "../../Unity.InputSystem.csproj",
+      "msbuildProject": "../../Unity.InputSystem.csproj"
+    },
+    "Unity.ScriptableBuildPipeline/1.0.0": {
+      "type": "project",
+      "path": "../../Unity.ScriptableBuildPipeline.csproj",
+      "msbuildProject": "../../Unity.ScriptableBuildPipeline.csproj"
+    },
+    "Unity.ScriptableBuildPipeline.Editor/1.0.0": {
+      "type": "project",
+      "path": "../../Unity.ScriptableBuildPipeline.Editor.csproj",
+      "msbuildProject": "../../Unity.ScriptableBuildPipeline.Editor.csproj"
+    },
+    "Unity.TextMeshPro/1.0.0": {
+      "type": "project",
+      "path": "../../Unity.TextMeshPro.csproj",
+      "msbuildProject": "../../Unity.TextMeshPro.csproj"
+    },
+    "UnityEditor.TestRunner/1.0.0": {
+      "type": "project",
+      "path": "../../UnityEditor.TestRunner.csproj",
+      "msbuildProject": "../../UnityEditor.TestRunner.csproj"
+    },
+    "UnityEditor.UI/1.0.0": {
+      "type": "project",
+      "path": "../../UnityEditor.UI.csproj",
+      "msbuildProject": "../../UnityEditor.UI.csproj"
+    },
+    "UnityEngine.TestRunner/1.0.0": {
+      "type": "project",
+      "path": "../../UnityEngine.TestRunner.csproj",
+      "msbuildProject": "../../UnityEngine.TestRunner.csproj"
+    },
+    "UnityEngine.UI/1.0.0": {
+      "type": "project",
+      "path": "../../UnityEngine.UI.csproj",
+      "msbuildProject": "../../UnityEngine.UI.csproj"
+    },
+    "YooAsset/1.0.0": {
+      "type": "project",
+      "path": "../../YooAsset.csproj",
+      "msbuildProject": "../../YooAsset.csproj"
+    },
+    "YooAsset.Editor/1.0.0": {
+      "type": "project",
+      "path": "../../YooAsset.Editor.csproj",
+      "msbuildProject": "../../YooAsset.Editor.csproj"
+    },
+    "YooAsset.RuntimeExtension/1.0.0": {
+      "type": "project",
+      "path": "../../YooAsset.RuntimeExtension.csproj",
+      "msbuildProject": "../../YooAsset.RuntimeExtension.csproj"
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net8.0": [
+      "GameBattle >= 1.0.0"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\95319\\.nuget\\packages\\": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Tools\\Demo2RulesRunner\\Demo2RulesRunner.csproj",
+      "projectName": "Demo2RulesRunner",
+      "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Tools\\Demo2RulesRunner\\Demo2RulesRunner.csproj",
+      "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+      "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Tools\\Demo2RulesRunner\\obj\\",
+      "projectStyle": "PackageReference",
+      "configFilePaths": [
+        "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+      ],
+      "originalTargetFrameworks": [
+        "net8.0"
+      ],
+      "sources": {
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "projectReferences": {
+            "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameBattle.csproj": {
+              "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameBattle.csproj"
+            }
+          }
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "10.0.100"
+    },
+    "frameworks": {
+      "net8.0": {
+        "targetAlias": "net8.0",
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "downloadDependencies": [
+          {
+            "name": "Microsoft.AspNetCore.App.Ref",
+            "version": "[8.0.23, 8.0.23]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Host.win-x64",
+            "version": "[8.0.23, 8.0.23]"
+          },
+          {
+            "name": "Microsoft.NETCore.App.Ref",
+            "version": "[8.0.23, 8.0.23]"
+          },
+          {
+            "name": "Microsoft.WindowsDesktop.App.Ref",
+            "version": "[8.0.23, 8.0.23]"
+          }
+        ],
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

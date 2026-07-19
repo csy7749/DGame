@@ -11,6 +11,7 @@ namespace GameLogic
         private const int BASE_LINE_COUNT = 6;
         private const int EVENT_LINE_COUNT = 2;
         private const int WIDGET_LINE_COUNT = 1;
+        private const float ELEMENT_PADDING = 6f;
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
@@ -18,14 +19,20 @@ namespace GameLogic
             SerializedProperty kind = property.FindPropertyRelative("m_kind");
             int lineCount = BASE_LINE_COUNT + (generateEvent.boolValue ? EVENT_LINE_COUNT : 0)
                 + (kind.enumValueIndex == (int)UIBindingKind.Widget ? WIDGET_LINE_COUNT : 0);
-            return lineCount * (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing);
+            float contentHeight = lineCount * (EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing);
+            return contentHeight + ELEMENT_PADDING * 2f;
         }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
             EditorGUI.BeginChangeCheck();
-            Rect line = new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight);
+            GUI.Box(position, GUIContent.none, EditorStyles.helpBox);
+            Rect line = new Rect(
+                position.x + ELEMENT_PADDING,
+                position.y + ELEMENT_PADDING,
+                position.width - ELEMENT_PADDING * 2f,
+                EditorGUIUtility.singleLineHeight);
             DrawReadOnlyProperty(ref line, property.FindPropertyRelative("m_bindingId"), "Binding ID");
             DrawProperty(ref line, property.FindPropertyRelative("m_fieldName"), "字段名");
             DrawReadOnlyProperty(ref line, property.FindPropertyRelative("m_target"), "目标组件");

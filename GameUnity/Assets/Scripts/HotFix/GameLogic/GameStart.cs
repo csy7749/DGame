@@ -85,7 +85,7 @@ public partial class GameStart
     {
         if (language >= LocalAreaType.MAX)
         {
-            // 若是暂不支持的语言，则使用英语
+            // 若是暂不支持的语言，则使用英语 大麦农夫 演讲速度增加10% 土豆农夫 攻击力增加20% 豆农 旋转，穿透 +1
             language = LocalAreaType.EN;
             return false;
         }
@@ -95,7 +95,7 @@ public partial class GameStart
 
     private static void StartGame()
     {
-        GameModule.UIModule.ShowWindow<MainWindow>();
+        GameModule.UIModule.ShowWindow<Demo2GameStart>();
     }
 
     private static void OnDestroy()

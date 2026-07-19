@@ -43,6 +43,12 @@
       },
       "hash": "6b956b92e07c13416f741b215265c6f7c9a57998"
     },
+    "com.farlocus.locus": {
+      "version": "file:com.farlocus.locus",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.tuyoogame.yooasset": {
       "version": "2.3.18",
       "depth": 0,

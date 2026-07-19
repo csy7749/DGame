@@ -91,215 +91,6 @@ MonoBehaviour:
   m_uiImageMirrorExtend:
     m_isUseImageMirror: 0
     m_mirrorType: 0
---- !u!1 &487537456303768253
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8198529585532200118}
-  - component: {fileID: 4062112534499746616}
-  - component: {fileID: 6839980636625869266}
-  - component: {fileID: 5054263850549766459}
-  - component: {fileID: 7643481283199710491}
-  m_Layer: 5
-  m_Name: m_itemTest
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &8198529585532200118
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 487537456303768253}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 7108665909362479670}
-  m_Father: {fileID: 8673328370496031014}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -443, y: -57}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &4062112534499746616
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 487537456303768253}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c214bba284f768498dab757b3245745, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_components:
-  - {fileID: 5928632913389760293}
-  m_useBindingManifest: 1
-  m_isWidgetRoot: 0
-  m_bindingEntries:
-  - m_bindingId: 2852e2a3199540df8574c28bd7668513
-    m_fieldName: m_textTest
-    m_expectedTypeName: GameLogic.UIText, GameLogic, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-    m_target: {fileID: 5928632913389760293}
-    m_kind: 0
-    m_generateUnityEvent: 0
-    m_eventKind: 0
-    m_eventHandlerName: 
-    m_widgetTypeName: 
-  m_manifestSignature: 
-  m_generatedSignature: 
-  genCodePath: Assets/Scripts/HotFix/GameLogic/UI/Gen
-  className: ItemTest
-  widgetTypeName: 
-  dataTypeName: 
-  impCodePath: Assets/Scripts/HotFix/GameLogic/UI
-  isGenImpClass: 0
-  uiType: UIWidget
---- !u!222 &6839980636625869266
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 487537456303768253}
-  m_CullTransparentMesh: 1
---- !u!114 &5054263850549766459
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 487537456303768253}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 90965ee72503b2f498c1c6c8e63e2231, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
-  m_uiImageMaskExtend:
-    m_isUseMaskImage: 0
-    m_fillPercent: 1
-    m_fill: 1
-    m_ringWidth: 5
-    m_segements: 20
-    m_rotation: 0
-    m_isUsePercentVert: 0
-    m_verticesDistances: []
-  m_uiImageRoundedCornersExtend:
-    m_isUseRoundedCorners: 0
-    m_radius: 20
-    m_triangleNum: 5
-  m_uiImageMirrorExtend:
-    m_isUseImageMirror: 0
-    m_mirrorType: 0
---- !u!114 &7643481283199710491
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 487537456303768253}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1c48fb8d01a66614ea9afc364d831be9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Navigation:
-    m_Mode: 3
-    m_WrapAround: 0
-    m_SelectOnUp: {fileID: 0}
-    m_SelectOnDown: {fileID: 0}
-    m_SelectOnLeft: {fileID: 0}
-    m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
-  m_Colors:
-    m_NormalColor: {r: 1, g: 1, b: 1, a: 1}
-    m_HighlightedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_PressedColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 1}
-    m_SelectedColor: {r: 0.9607843, g: 0.9607843, b: 0.9607843, a: 1}
-    m_DisabledColor: {r: 0.78431374, g: 0.78431374, b: 0.78431374, a: 0.5019608}
-    m_ColorMultiplier: 1
-    m_FadeDuration: 0.1
-  m_SpriteState:
-    m_HighlightedSprite: {fileID: 0}
-    m_PressedSprite: {fileID: 0}
-    m_SelectedSprite: {fileID: 0}
-    m_DisabledSprite: {fileID: 0}
-  m_AnimationTriggers:
-    m_NormalTrigger: Normal
-    m_HighlightedTrigger: Highlighted
-    m_PressedTrigger: Pressed
-    m_SelectedTrigger: Selected
-    m_DisabledTrigger: Disabled
-  m_Interactable: 1
-  m_TargetGraphic: {fileID: 5054263850549766459}
-  m_OnClick:
-    m_PersistentCalls:
-      m_Calls: []
-  m_buttonClickEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_uiButtonClickProtect:
-    m_isUseClickProtect: 0
-    m_protectTime: 0.2
-    m_isShowProtectText: 0
-    m_protectText: {fileID: 0}
-  m_uiButtonClickScale:
-    m_isUseClickScale: 1
-    m_clickScaleTime: 0.1
-    m_clickRecoverTime: 0.18
-    m_normalScale: {x: 1, y: 1, z: 1}
-    m_clickScale: {x: 0.95, y: 0.95, z: 0.95}
-    m_childList: []
-    m_isUseDoTween: 1
-    m_reboundEffect: 1
-  m_uiButtonLongPress:
-    m_isUseLongPress: 0
-    m_pressDuration: 0
-    m_isLoopLongPress: 0
-    m_interval: 0
-    m_onLongPressEvent:
-      m_PersistentCalls:
-        m_Calls: []
-  m_uiButtonDoubleClick:
-    m_isUseDoubleClick: 0
-    m_clickInterval: 0
-    m_onDoubleClickEvent:
-      m_PersistentCalls:
-        m_Calls: []
-    m_lastPointDownTime: 0
-  m_uiButtonClickSound:
-    m_isUseClickSound: 1
-    m_clickSoundID: 1000002
 --- !u!1 &1236388274042709705
 GameObject:
   m_ObjectHideFlags: 0
@@ -334,9 +125,9 @@ RectTransform:
   - {fileID: 5790773427158041877}
   m_Father: {fileID: 9151859656244041519}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 50, y: -213.34502}
   m_SizeDelta: {x: 334.07, y: 122.23}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2228026585746507546
@@ -1534,9 +1325,9 @@ RectTransform:
   - {fileID: 8187228433789272963}
   m_Father: {fileID: 9151859656244041519}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 50, y: -357.135}
   m_SizeDelta: {x: 334.07, y: 105.35}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7506622370802400370
@@ -2020,9 +1811,9 @@ RectTransform:
   - {fileID: 8236834851746092126}
   m_Father: {fileID: 9151859656244041519}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 50, y: -61.115}
   m_SizeDelta: {x: 334.07, y: 122.23}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5144818638127858273
@@ -2257,7 +2048,6 @@ RectTransform:
   - {fileID: 64408914078637408}
   - {fileID: 8601740762857129118}
   - {fileID: 9151859656244041519}
-  - {fileID: 8198529585532200118}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -2322,11 +2112,11 @@ MonoBehaviour:
   - {fileID: 688731296331243086}
   - {fileID: 7461168415525179889}
   - {fileID: 2180026708468872171}
-  - {fileID: 8198529585532200118}
+  - {fileID: 0}
   m_useBindingManifest: 1
   m_isWidgetRoot: 0
   m_bindingEntries:
-  - m_bindingId: 52528ec62935426faa572a0bfeb49f1b
+  - m_bindingId: cd6b262316084fe282b18ea5e22c44bd
     m_fieldName: m_textTitle
     m_expectedTypeName: GameLogic.UIText, GameLogic, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
@@ -2362,28 +2152,15 @@ MonoBehaviour:
       Culture=neutral, PublicKeyToken=null
     m_target: {fileID: 2180026708468872171}
     m_kind: 0
-    m_generateUnityEvent: 0
-    m_eventKind: 0
-    m_eventHandlerName: 
+    m_generateUnityEvent: 1
+    m_eventKind: 4
+    m_eventHandlerName: OnDropdownSelect
     m_widgetTypeName: 
-  - m_bindingId: d939a65766094befa6407580ad03d35d
-    m_fieldName: m_itemTest
-    m_expectedTypeName: GameLogic.ItemTest, GameLogic, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-    m_target: {fileID: 8198529585532200118}
-    m_kind: 2
-    m_generateUnityEvent: 0
-    m_eventKind: 0
-    m_eventHandlerName: 
-    m_widgetTypeName: ItemTest
-  m_manifestSignature: 
-  m_generatedSignature: 
-  genCodePath: Assets/Scripts/HotFix/GameLogic/UI/Gen
+  m_manifestSignature: 604233b140ab5d9637e528240b62756f
+  m_generatedSignature: 604233b140ab5d9637e528240b62756f
   className: MainWindow
   widgetTypeName: 
   dataTypeName: 
-  impCodePath: Assets/Scripts/HotFix/GameLogic/UI
-  isGenImpClass: 0
   uiType: UIWindow
 --- !u!1 &8898977438107111340
 GameObject:
@@ -2476,121 +2253,3 @@ MonoBehaviour:
   m_uiImageMirrorExtend:
     m_isUseImageMirror: 0
     m_mirrorType: 0
---- !u!1 &9117808884283070389
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 7108665909362479670}
-  - component: {fileID: 828069319007318029}
-  - component: {fileID: 5928632913389760293}
-  m_Layer: 0
-  m_Name: m_textTest
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &7108665909362479670
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9117808884283070389}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 8198529585532200118}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &828069319007318029
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9117808884283070389}
-  m_CullTransparentMesh: 1
---- !u!114 &5928632913389760293
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9117808884283070389}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a481e758e8c3c8a4c844cb42c122922d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 1}
-  m_RaycastTarget: 0
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 24
-    m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 10
-    m_MaxSize: 40
-    m_Alignment: 4
-    m_AlignByGeometry: 0
-    m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
-    m_LineSpacing: 1
-  m_Text: UIText
-  m_uiTextSpacingExtend:
-    m_isUseTextSpacing: 0
-    m_textSpacing: 1
-  m_uiTextVertexColorExtend:
-    m_isUseVertexColor: 0
-    m_colorFilterType: 1
-    m_vertexTopLeftColor: {r: 1, g: 1, b: 1, a: 1}
-    m_vertexTopRightColor: {r: 1, g: 1, b: 1, a: 1}
-    m_vertexBottomLeftColor: {r: 1, g: 1, b: 1, a: 1}
-    m_vertexBottomRightColor: {r: 1, g: 1, b: 1, a: 1}
-    m_vertexColorOffset: {x: 0, y: 0}
-  m_uiTextShadowExtend:
-    m_isUseTextShadow: 0
-    m_shadowTopLeftColor: {r: 0, g: 0, b: 0, a: 1}
-    m_shadowTopRightColor: {r: 0, g: 0, b: 0, a: 1}
-    m_shadowBottomLeftColor: {r: 0, g: 0, b: 0, a: 1}
-    m_shadowBottomRightColor: {r: 0, g: 0, b: 0, a: 1}
-    m_effectDistance: {x: 1, y: -1}
-  m_uiTextOutlineExtend:
-    m_isUseTextOutline: 0
-    m_outLineWidth: 1
-    m_outLineColor: {r: 0, g: 0, b: 0, a: 1}
-    m_camera: {fileID: 0}
-    m_alpha: 1
-  m_uiTextGradientColorExtend:
-    m_isUseGradientColor: 0
-    m_colorTop: {r: 1, g: 1, b: 1, a: 1}
-    m_colorBottom: {r: 1, g: 1, b: 1, a: 1}
-    m_colorLeft: {r: 1, g: 1, b: 1, a: 1}
-    m_colorRight: {r: 1, g: 1, b: 1, a: 1}
-    m_gradientOffsetVertical: 0
-    m_gradientOffsetHorizontal: 0
-    m_splitTextGradient: 0
-  m_uiTextCircleExtend:
-    m_useTextCircle: 0
-    m_radius: 100
-    m_spaceCoff: 1
-    m_angleOffset: 0
-  m_isUseBestFitFont: 0

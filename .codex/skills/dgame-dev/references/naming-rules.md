@@ -58,6 +58,12 @@ public int NodeCount => m_nodeDict.Count;   // 公开属性：PascalCase
 
 UI 脚本生成前缀以 `GameUnity/Assets/Editor/UIScriptGenerator/UIScriptGeneratorSettings.asset` 的 `scriptGenerateRulers` 为准。Transform 前缀是 `m_tf`，没有 `m_trans`。
 
+UI 自动代码路径与业务实现路径也以该项目配置为唯一来源。`UIBindComponent` 不保存单个 Prefab 的路径副本；在 `Project Settings > DGame > UI代码生成器设置` 修改路径后，所有 UI 生成任务立即使用新路径。
+
+`impCodePath` 是业务 UI 根目录。Window 逻辑类落在 `<impCodePath>/<WindowName>/<WindowName>.cs`；其他 Item、Widget 统一落在 `<impCodePath>/Item/<TypeName>.cs`。生成器不覆盖或自动移动已有逻辑类，旧目录会作为迁移错误暴露。
+
+通过 `GameObject/UI/UIText` 手动创建文本时，字体取自同一项目配置的 `defaultUITextFont`。该字段为空或无效时创建会明确失败，不使用 Unity 内置字体兜底。
+
 配置中共有 25 条规则，按源码列表顺序匹配：
 
 | 顺序 | 前缀 | `UIComponentName` | 生成字段类型 | 备注 |
@@ -135,6 +141,8 @@ UI 脚本生成前缀以 `GameUnity/Assets/Editor/UIScriptGenerator/UIScriptGene
 | `TMP_Dropdown` | `TMPro.TMP_Dropdown` | 需 `TextMeshPro` 编译符号和 `using TMPro;` |
 
 字段名由节点名去掉代码风格前缀后再加当前代码风格前缀生成，组件语义片段会保留。当前 `UIScriptGeneratorSettings.asset` 的 `codeStyle` 是 `MPrefix`，例如 `m_btnClose` 生成 `private Button m_btnClose;`，`m_dropDownLanguage` 生成 `private Dropdown m_dropDownLanguage;`。
+
+Manifest 继承式自动基类中的组件字段统一生成为 `protected`，例如 `protected Dropdown m_dropDownLanguage;`，供业务派生类直接设置选项和读取状态。BindingId 常量与 `UIBindComponent` 引用仍保持 `private`。
 
 ## 使用模式
 

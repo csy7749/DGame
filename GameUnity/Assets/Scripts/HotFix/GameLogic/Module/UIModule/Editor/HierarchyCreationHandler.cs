@@ -89,9 +89,14 @@ namespace GameLogic
                      && selectedObj.TryGetComponent<Text>(out Text txt)
                      && !selectedObj.TryGetComponent<UIText>(out _))
             {
+                if (!UITextDrawEditor.TryGetDefaultFont(out Font defaultFont))
+                {
+                    return;
+                }
+
                 m_lastProcessedInstanceId = instanceId;
                 DestroyImmediate(txt.gameObject);
-                UITextDrawEditor.CreateUIText();
+                UITextDrawEditor.CreateUIText(defaultFont);
             }
             else if (selectedObj.name.Contains("Scroll View"))
             {

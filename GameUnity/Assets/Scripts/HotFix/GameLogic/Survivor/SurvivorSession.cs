@@ -19,6 +19,7 @@ namespace GameLogic
         private float m_hudTimer;
         private bool m_isOpeningLevelUpWindow;
         private bool m_isShowingResult;
+        private bool m_isMusicPlaying;
 
         public SurvivorSession(SurvivorStartOptions startOptions)
         {
@@ -32,14 +33,14 @@ namespace GameLogic
             m_context = CreateContext(battleRoot, m_player);
             m_cancellationTokenSource = new CancellationTokenSource();
             await InitializeRoundAsync();
-            await GameModule.UIModule.ShowWindowAsyncAwait<SurvivorHUDWindow>();
+            await GameModule.UIModule.ShowWindowAsyncAwait<Demo2HUD>();
             SendHudChanged();
         }
 
         public async UniTask RestartAsync()
         {
-            GameModule.UIModule.CloseWindow<SurvivorResultWindow>();
-            GameModule.UIModule.CloseWindow<SurvivorLevelUpWindow>();
+            //GameModule.UIModule.CloseWindow<SurvivorResultWindow>();
+            GameModule.UIModule.CloseWindow<Demo2LevelUp>();
             CancelRoundOperations();
             DestroyRoundSystems();
             m_cancellationTokenSource = new CancellationTokenSource();
@@ -49,6 +50,7 @@ namespace GameLogic
 
         public UniTask DestroyAsync()
         {
+            StopMusic(true);
             CancelRoundOperations();
             if (m_context != null)
             {
@@ -57,9 +59,9 @@ namespace GameLogic
 
             DestroyRoundSystems();
             m_cancellationTokenSource = null;
-            GameModule.UIModule.CloseWindow<SurvivorHUDWindow>();
-            GameModule.UIModule.CloseWindow<SurvivorResultWindow>();
-            GameModule.UIModule.CloseWindow<SurvivorLevelUpWindow>();
+            // GameModule.UIModule.CloseWindow<SurvivorHUDWindow>();
+            // GameModule.UIModule.CloseWindow<SurvivorResultWindow>();
+            GameModule.UIModule.CloseWindow<Demo2LevelUp>();
             DestroyRuntimeRoot();
             m_context = null;
             m_player = null;
@@ -129,6 +131,7 @@ namespace GameLogic
 
             m_player.ApplyStartOptions(m_startOptions);
             m_player.ResetState();
+            InitializeGroundLoop(m_context.BattleRoot);
             m_context.Reset();
             m_isShowingResult = false;
             m_isOpeningLevelUpWindow = false;
@@ -137,6 +140,58 @@ namespace GameLogic
             m_weaponSystem = new SurvivorWeaponSystem(m_context, m_cancellationTokenSource.Token);
             await m_spawnSystem.InitializeAsync();
             await m_weaponSystem.InitializeAsync();
+            m_context.StartRound();
+            StartMusic();
+        }
+
+        private void StartMusic()
+        {
+            if (m_isMusicPlaying)
+            {
+                return;
+            }
+
+            m_isMusicPlaying = GameModule.AudioModule.Play(
+                DGame.AudioType.Music,
+                SurvivorConstants.MusicLocation,
+                isLoop: true,
+                isAsync: true,
+                isInPool: false) != null;
+        }
+
+        private void StopMusic(bool fadeout)
+        {
+            if (!m_isMusicPlaying)
+            {
+                return;
+            }
+
+            GameModule.AudioModule.Stop(DGame.AudioType.Music, fadeout);
+            m_isMusicPlaying = false;
+        }
+
+        private void InitializeGroundLoop(Transform battleRoot)
+        {
+            Transform groundRoot = battleRoot.Find(SurvivorConstants.GroundRootName);
+            if (groundRoot == null)
+            {
+                throw new InvalidOperationException("Survivor scene is missing Ground.");
+            }
+
+            if (groundRoot.childCount != SurvivorConstants.GroundTileCount)
+            {
+                throw new InvalidOperationException(
+                    $"Survivor Ground requires {SurvivorConstants.GroundTileCount} tilemaps.");
+            }
+
+            for (int i = 0; i < groundRoot.childCount; i++)
+            {
+                GameObject groundTile = groundRoot.GetChild(i).gameObject;
+                SurvivorGroundLoopController controller =
+                    groundTile.GetComponent<SurvivorGroundLoopController>()
+                    ?? groundTile.AddComponent<SurvivorGroundLoopController>();
+                controller.Initialize(m_player.transform, SurvivorConstants.GroundShiftDistance);
+            }
         }
 
         private SurvivorBattleContext CreateContext(Transform battleRoot, SurvivorPlayerController player)
@@ -237,8 +292,9 @@ namespace GameLogic
             }
 
             m_context.ApplyLevelUp(choice);
+            m_player.SetMoveSpeedMultiplier(m_context.MoveSpeedMultiplier);
             m_player.SetControlEnabled(true);
-            GameModule.UIModule.CloseWindow<SurvivorLevelUpWindow>();
+            GameModule.UIModule.CloseWindow<Demo2LevelUp>();
             SendHudChanged();
         }
 
@@ -287,11 +343,23 @@ namespace GameLogic
 
         private void SendHudChanged()
         {
-            string title = "Undead Survivor";
-            string status = m_context == null
-                ? "Demo2 scene ready"
-                : BuildHudStatus();
-            GameEvent.Get<ISurvivorUI>().OnHudChanged(title, status);
+            if (m_context == null)
+            {
+                throw new InvalidOperationException("Survivor HUD data requested without context.");
+            }
+
+            SurvivorHudData data = new SurvivorHudData(new SurvivorHudDataOptions
+            {
+                Level = m_context.Level,
+                KillCount = m_context.KillCount,
+                ElapsedTime = m_context.ElapsedTime,
+                BattleDuration = SurvivorConstants.BattleDurationSeconds,
+                Experience = m_context.Experience,
+                ExperienceToNextLevel = m_context.ExperienceToNextLevel,
+                Health = m_context.PlayerHealth,
+                MaxHealth = SurvivorConstants.PlayerMaxHealth,
+            });
+            GameEvent.Get<ISurvivorUI>().OnHudDataChanged(data);
         }
 
         private void TryFinishByTime()
@@ -319,9 +387,10 @@ namespace GameLogic
             SurvivorLevelUpWindowData data = new SurvivorLevelUpWindowData
             {
                 Level = m_context.Level,
+                Options = m_context.CreateLevelUpOptions(),
                 SelectCallback = ApplyLevelUp,
             };
-            await GameModule.UIModule.ShowWindowAsyncAwait<SurvivorLevelUpWindow>(data);
+            await GameModule.UIModule.ShowWindowAsyncAwait<Demo2LevelUp>(data);
             m_isOpeningLevelUpWindow = false;
             SendHudChanged();
         }
@@ -335,18 +404,12 @@ namespace GameLogic
 
             m_isShowingResult = true;
             m_player.SetControlEnabled(false);
+            StopMusic(true);
             DestroyRoundSystems(false);
-            GameModule.UIModule.CloseWindow<SurvivorLevelUpWindow>();
+            GameModule.UIModule.CloseWindow<Demo2LevelUp>();
             string result = BuildResultText();
-            await GameModule.UIModule.ShowWindowAsyncAwait<SurvivorResultWindow>(result);
+            //await GameModule.UIModule.ShowWindowAsyncAwait<SurvivorResultWindow>(result);
             GameEvent.Get<ISurvivorUI>().OnResultChanged(result);
-        }
-
-        private string BuildHudStatus()
-        {
-            return $"{m_startOptions.CharacterName} | Time {m_context.ElapsedTime:0.0}s | HP {m_context.PlayerHealth:0}"
-                + $" | Lv {m_context.Level} {m_context.Experience}/{m_context.ExperienceToNextLevel}"
-                + $" | Kills {m_context.KillCount} | Enemies {m_context.Enemies.Count}";
         }
 
         private string BuildResultText()

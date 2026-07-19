@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python 'D:\\UGit\\Git\\Framework\\DGame\\.codex\\hooks\\claude_popup.py'"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python 'D:\\UGit\\Git\\Framework\\DGame\\.codex\\hooks\\claude_popup.py'"
+          }
+        ]
+      }
+    ]
+  }
+}

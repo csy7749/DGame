@@ -7,25 +7,19 @@ namespace GameLogic
 {
     public partial class UIBindComponent
     {
-        [SerializeField, HideInInspector] private string genCodePath;
         [SerializeField, HideInInspector] private string className;
         [SerializeField, HideInInspector] private string widgetTypeName;
         [SerializeField, HideInInspector] private string dataTypeName;
-        [SerializeField, HideInInspector] private string impCodePath;
-        [SerializeField, HideInInspector] private bool isGenImpClass;
         [SerializeField, HideInInspector] private string uiType;
 
         public IReadOnlyList<UIBindingEntry> BindingEntries => m_bindingEntries;
         public string ManifestSignature => m_manifestSignature;
         public string GeneratedSignature => m_generatedSignature;
         public bool IsGeneratedSignatureCurrent => m_useBindingManifest && m_manifestSignature == m_generatedSignature;
-        public string GenCodePath => genCodePath;
         public string ClassName => className;
         public string UITypeName => uiType;
         public string WidgetTypeName => widgetTypeName;
         public string DataTypeName => dataTypeName;
-        public bool GenerateImplementationClass => isGenImpClass;
-        public string ImplementationCodePath => impCodePath;
 
         public void AddComponent(Component component)
         {
@@ -66,7 +60,7 @@ namespace GameLogic
 
         public bool RemoveBindingEntry(UIBindingEntry entry)
         {
-            if (entry == null || !m_bindingEntries.Remove(entry))
+            if (!m_bindingEntries.Remove(entry))
             {
                 return false;
             }
@@ -113,18 +107,6 @@ namespace GameLogic
             }
         }
 
-        public void SetCodePathsIfEmpty(string generatedPath, string implementationPath)
-        {
-            if (string.IsNullOrWhiteSpace(genCodePath))
-            {
-                genCodePath = generatedPath;
-            }
-
-            if (string.IsNullOrWhiteSpace(impCodePath))
-            {
-                impCodePath = implementationPath;
-            }
-        }
     }
 }
 

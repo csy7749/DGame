@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using GameLogic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace DGame
 {
@@ -22,7 +23,7 @@ namespace DGame
     public static class UIBindingManifestValidator
     {
         private const string FIELD_NAME_PATTERN = "^[A-Za-z_][A-Za-z0-9_]*$";
-        private const string GENERATOR_VERSION = "manifest-v2";
+        private const string GENERATOR_VERSION = "manifest-v3";
 
         public static List<UIBindingValidationError> Validate(UIBindComponent bindComponent)
         {
@@ -33,8 +34,14 @@ namespace DGame
                 return errors;
             }
 
+            ValidateProjectCodePaths(errors);
+            if (errors.Count > 0)
+            {
+                return errors;
+            }
+
             ValidateEntries(bindComponent, errors);
-            ValidateEventHandlers(bindComponent, errors);
+            ValidateLegacyPartialType(bindComponent, errors);
             return errors;
         }
 
@@ -81,6 +88,40 @@ namespace DGame
             ValidateIdentity(root, entry, ids, fields, errors);
             ValidateTarget(root, entry, errors);
             ValidateWidget(root, entry, errors);
+            ValidateEvent(root, entry, errors);
+        }
+
+        private static void ValidateEvent(UIBindComponent root, UIBindingEntry entry,
+            ICollection<UIBindingValidationError> errors)
+        {
+            if (!entry.GenerateUnityEvent)
+            {
+                return;
+            }
+
+            UIBindingEventKind expectedKind = GetExpectedEventKind(entry.Target);
+            if (expectedKind == UIBindingEventKind.None || entry.EventKind != expectedKind)
+            {
+                errors.Add(new UIBindingValidationError(CreateEntryMessage(root, entry,
+                    $"事件类型应为 {expectedKind}，当前为 {entry.EventKind}。")));
+            }
+
+            if (string.IsNullOrWhiteSpace(entry.EventHandlerName))
+            {
+                errors.Add(new UIBindingValidationError(CreateEntryMessage(root, entry, "事件处理器名称为空。")));
+            }
+        }
+
+        private static UIBindingEventKind GetExpectedEventKind(Component target)
+        {
+            return target switch
+            {
+                Button => UIBindingEventKind.Click,
+                Toggle => UIBindingEventKind.ToggleValueChanged,
+                Slider => UIBindingEventKind.SliderValueChanged,
+                Dropdown => UIBindingEventKind.DropdownValueChanged,
+                _ => UIBindingEventKind.None,
+            };
         }
 
         private static void ValidateIdentity(UIBindComponent root, UIBindingEntry entry, ISet<string> ids,
@@ -199,44 +240,43 @@ namespace DGame
             return null;
         }
 
-        private static void ValidateEventHandlers(UIBindComponent bindComponent, List<UIBindingValidationError> errors)
+        private static void ValidateLegacyPartialType(UIBindComponent bindComponent, List<UIBindingValidationError> errors)
         {
-            foreach (UIBindingEntry entry in bindComponent.BindingEntries)
-            {
-                ValidateEventHandler(bindComponent, entry, errors);
-            }
-        }
-
-        private static void ValidateEventHandler(UIBindComponent bindComponent, UIBindingEntry entry,
-            List<UIBindingValidationError> errors)
-        {
-            if (entry == null || !entry.GenerateUnityEvent)
+            string className = UIScriptGenerator.GetBindingClassName(bindComponent);
+            string expectedPath = UIScriptGenerator.GetLogicCodePath(className,
+                bindComponent.UITypeName);
+            string[] existingFiles = UIScriptGenerator.FindLogicCodeFiles(className);
+            if (existingFiles.Length == 0)
             {
                 return;
             }
 
-            if (entry.EventKind == UIBindingEventKind.None || string.IsNullOrWhiteSpace(entry.EventHandlerName))
+            if (existingFiles.Length != 1 || !string.Equals(existingFiles[0], expectedPath,
+                    StringComparison.OrdinalIgnoreCase))
             {
-                errors.Add(new UIBindingValidationError($"BindingId={entry.BindingId}: UnityEvent未配置事件类型或处理器。"));
+                errors.Add(new UIBindingValidationError(
+                    UIScriptGenerator.CreateLogicLocationError(className, expectedPath, existingFiles)));
                 return;
             }
 
-            if (!HasEventHandler(bindComponent, entry.EventHandlerName))
+            string source = File.ReadAllText(existingFiles[0]);
+            if (Regex.IsMatch(source, $@"\bpartial\s+class\s+{Regex.Escape(className)}\b"))
             {
-                errors.Add(new UIBindingValidationError($"BindingId={entry.BindingId}: 未找到业务处理器 {entry.EventHandlerName}。"));
+                errors.Add(new UIBindingValidationError($"UI={bindComponent.name}: 检测到旧 partial 业务类 {className}，请迁移为继承 {className}Auto 后再生成。"));
             }
         }
 
-        private static bool HasEventHandler(UIBindComponent bindComponent, string handlerName)
+        private static void ValidateProjectCodePaths(ICollection<UIBindingValidationError> errors)
         {
-            string path = Path.Combine(bindComponent.ImplementationCodePath, bindComponent.ClassName + ".cs");
-            if (!File.Exists(path))
+            if (string.IsNullOrWhiteSpace(UIScriptGeneratorSettings.GetGenCodePath()))
             {
-                return false;
+                errors.Add(new UIBindingValidationError("项目配置中的组件代码生成路径为空。"));
             }
 
-            string source = File.ReadAllText(path);
-            return Regex.IsMatch(source, $@"\b{Regex.Escape(handlerName)}\s*\(");
+            if (string.IsNullOrWhiteSpace(UIScriptGeneratorSettings.GetImpCodePath()))
+            {
+                errors.Add(new UIBindingValidationError("项目配置中的实现类代码路径为空。"));
+            }
         }
 
         private static string CreateEntryMessage(UIBindComponent root, UIBindingEntry entry, string reason)

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using GameLogic;
 using UnityEditor;
@@ -11,6 +12,8 @@ namespace DGame
 {
     public partial class UIScriptGenerator
     {
+        private const string ITEM_LOGIC_FOLDER_NAME = "Item";
+
         public static bool GenerateManifestCSharpScript(UIBindComponent bindComponent, bool isUniTask)
         {
             List<UIBindingValidationError> errors = UIBindingManifestValidator.Validate(bindComponent);
@@ -22,6 +25,11 @@ namespace DGame
 
             string signature = UIBindingManifestValidator.CalculateSignature(bindComponent);
             string source = BuildManifestSource(bindComponent, signature, isUniTask);
+            if (!TryGenerateManifestLogicClass(bindComponent))
+            {
+                return false;
+            }
+
             if (!TryWriteManifestSource(bindComponent, source))
             {
                 return false;
@@ -77,9 +85,11 @@ namespace DGame
             string className = string.IsNullOrWhiteSpace(bindComponent.ClassName) ? bindComponent.name : bindComponent.ClassName;
             string uiTypeName = GetUITypeName(bindComponent.UITypeName, className, bindComponent.WidgetTypeName,
                 bindComponent.DataTypeName);
-            builder.AppendLine($"\tpublic partial class {className} : {uiTypeName}").AppendLine("\t{");
+            builder.AppendLine($"\tpublic class {GetGeneratedClassName(className)} : {uiTypeName}").AppendLine("\t{");
             builder.AppendLine("\t\tprivate UIBindComponent m_bindComponent;").AppendLine();
         }
+
+        internal static string GetGeneratedClassName(string className) => $"{className}Auto";
 
         private static void AppendManifestConstants(StringBuilder builder, IReadOnlyList<UIBindingEntry> entries)
         {
@@ -95,7 +105,7 @@ namespace DGame
         {
             foreach (UIBindingEntry entry in entries)
             {
-                builder.AppendLine($"\t\tprivate {GetFieldTypeName(entry)} {entry.FieldName};");
+                builder.AppendLine($"\t\tprotected {GetFieldTypeName(entry)} {entry.FieldName};");
             }
 
             builder.AppendLine();
@@ -116,6 +126,30 @@ namespace DGame
             }
 
             builder.AppendLine("\t\t}").AppendLine();
+            AppendEventHandlers(builder, entries);
+        }
+
+        private static void AppendEventHandlers(StringBuilder builder, IReadOnlyList<UIBindingEntry> entries)
+        {
+            foreach (UIBindingEntry entry in entries)
+            {
+                if (!entry.GenerateUnityEvent)
+                {
+                    continue;
+                }
+
+                string parameters = entry.EventKind switch
+                {
+                    UIBindingEventKind.ToggleValueChanged => "bool isOn",
+                    UIBindingEventKind.SliderValueChanged => "float value",
+                    UIBindingEventKind.DropdownValueChanged => "int value",
+                    _ => string.Empty,
+                };
+                builder.AppendLine($"\t\tprotected virtual void {entry.EventHandlerName}({parameters})")
+                    .AppendLine("\t\t{")
+                    .AppendLine("\t\t}")
+                    .AppendLine();
+            }
         }
 
         private static string BuildBindingStatement(UIBindingEntry entry)
@@ -141,6 +175,7 @@ namespace DGame
                 UIBindingEventKind.Click => $"{entry.FieldName}.onClick.AddListener({entry.EventHandlerName});",
                 UIBindingEventKind.ToggleValueChanged => $"{entry.FieldName}.onValueChanged.AddListener({entry.EventHandlerName});",
                 UIBindingEventKind.SliderValueChanged => $"{entry.FieldName}.onValueChanged.AddListener({entry.EventHandlerName});",
+                UIBindingEventKind.DropdownValueChanged => $"{entry.FieldName}.onValueChanged.AddListener({entry.EventHandlerName});",
                 _ => string.Empty,
             };
             builder.AppendLine($"\t\t\t{statement}");
@@ -160,10 +195,17 @@ namespace DGame
         private static bool TryWriteManifestSource(UIBindComponent bindComponent, string source)
         {
             string className = string.IsNullOrWhiteSpace(bindComponent.ClassName) ? bindComponent.name : bindComponent.ClassName;
-            string filePath = Path.Combine(bindComponent.GenCodePath, className + "_Gen.g.cs");
+            string outputDirectory = UIScriptGeneratorSettings.GetGenCodePath();
+            if (string.IsNullOrWhiteSpace(outputDirectory))
+            {
+                Debug.LogError("[UI Binding Manifest] 项目配置中的组件代码生成路径为空。");
+                return false;
+            }
+
+            string filePath = Path.Combine(outputDirectory, className + "Auto_Gen.g.cs");
             try
             {
-                Directory.CreateDirectory(bindComponent.GenCodePath);
+                Directory.CreateDirectory(outputDirectory);
                 File.WriteAllText(filePath, source, Encoding.UTF8);
                 return true;
             }
@@ -173,6 +215,144 @@ namespace DGame
                 return false;
             }
         }
+
+        /// <summary>
+        /// 生成继承自动基类的业务逻辑骨架；已有文件只校验位置，不执行覆盖。
+        /// </summary>
+        internal static bool TryGenerateManifestLogicClass(UIBindComponent bindComponent)
+        {
+            string className = GetBindingClassName(bindComponent);
+            string logicPath = GetLogicCodePath(className, bindComponent.UITypeName);
+            if (!ValidateLogicFileLocation(className, logicPath))
+            {
+                return false;
+            }
+
+            if (File.Exists(logicPath))
+            {
+                return true;
+            }
+
+            string source = BuildManifestLogicSource(bindComponent, className);
+            Directory.CreateDirectory(Path.GetDirectoryName(logicPath));
+            File.WriteAllText(logicPath, source, Encoding.UTF8);
+            Debug.Log($"[UI Logic Generator] 已生成业务逻辑类: {logicPath}");
+            return true;
+        }
+
+        internal static string GetLogicCodePath(string className, string uiTypeName)
+        {
+            string root = UIScriptGeneratorSettings.GetImpCodePath();
+            if (string.IsNullOrWhiteSpace(root))
+            {
+                throw new InvalidOperationException("项目配置中的实现类代码路径为空。");
+            }
+
+            string directory = IsWindowType(uiTypeName)
+                ? Path.Combine(root, className)
+                : Path.Combine(root, ITEM_LOGIC_FOLDER_NAME);
+            return NormalizePath(Path.Combine(directory, className + ".cs"));
+        }
+
+        internal static string[] FindLogicCodeFiles(string className)
+        {
+            string root = UIScriptGeneratorSettings.GetImpCodePath();
+            if (string.IsNullOrWhiteSpace(root) || !Directory.Exists(root))
+            {
+                return Array.Empty<string>();
+            }
+
+            return Directory.GetFiles(root, className + ".cs", SearchOption.AllDirectories)
+                .Select(NormalizePath)
+                .OrderBy(path => path, StringComparer.Ordinal)
+                .ToArray();
+        }
+
+        internal static bool ValidateLogicFileLocation(string className, string expectedPath)
+        {
+            string[] existingFiles = FindLogicCodeFiles(className);
+            if (existingFiles.Length == 0)
+            {
+                return true;
+            }
+
+            if (existingFiles.Length == 1 && PathsEqual(existingFiles[0], expectedPath))
+            {
+                return true;
+            }
+
+            Debug.LogError(CreateLogicLocationError(className, expectedPath, existingFiles));
+            return false;
+        }
+
+        internal static string CreateLogicLocationError(string className, string expectedPath,
+            IReadOnlyList<string> existingFiles)
+        {
+            string locations = string.Join(", ", existingFiles);
+            return $"[UI Logic Generator] {className} 逻辑类目录不符合规则。当前: {locations}; 目标: {expectedPath}";
+        }
+
+        internal static string GetBindingClassName(UIBindComponent bindComponent)
+        {
+            return string.IsNullOrWhiteSpace(bindComponent.ClassName)
+                ? bindComponent.name
+                : bindComponent.ClassName;
+        }
+
+        private static string BuildManifestLogicSource(UIBindComponent bindComponent, string className)
+        {
+            var builder = new StringBuilder();
+            builder.AppendLine($"namespace {UIScriptGeneratorSettings.GetUINameSpace()}")
+                .AppendLine("{")
+                .AppendLine("\t/// <summary>")
+                .AppendLine($"\t/// {className} 的 UI 业务逻辑。")
+                .AppendLine("\t/// </summary>")
+                .AppendLine($"\tpublic class {className} : {GetGeneratedClassName(className)}")
+                .AppendLine("\t{");
+            AppendLogicEventHandlers(builder, bindComponent.BindingEntries);
+            builder.AppendLine("\t}").AppendLine("}");
+            return builder.ToString();
+        }
+
+        private static void AppendLogicEventHandlers(StringBuilder builder, IReadOnlyList<UIBindingEntry> entries)
+        {
+            foreach (UIBindingEntry entry in entries)
+            {
+                if (!entry.GenerateUnityEvent)
+                {
+                    continue;
+                }
+
+                string parameters = GetEventParameters(entry.EventKind);
+                builder.AppendLine($"\t\tprotected override void {entry.EventHandlerName}({parameters})")
+                    .AppendLine("\t\t{")
+                    .AppendLine("\t\t}")
+                    .AppendLine();
+            }
+        }
+
+        private static string GetEventParameters(UIBindingEventKind eventKind)
+        {
+            return eventKind switch
+            {
+                UIBindingEventKind.ToggleValueChanged => "bool isOn",
+                UIBindingEventKind.SliderValueChanged => "float value",
+                UIBindingEventKind.DropdownValueChanged => "int value",
+                _ => string.Empty,
+            };
+        }
+
+        private static bool IsWindowType(string uiTypeName)
+        {
+            return string.Equals(uiTypeName, nameof(UIWindow), StringComparison.Ordinal);
+        }
+
+        private static bool PathsEqual(string left, string right)
+        {
+            return string.Equals(NormalizePath(left), NormalizePath(right), StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string NormalizePath(string path) => path?.Replace('\\', '/');
 
         private static void SaveManifestPrefab(GameObject gameObject)
         {

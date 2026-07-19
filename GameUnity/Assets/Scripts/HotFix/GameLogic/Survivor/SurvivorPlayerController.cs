@@ -54,6 +54,14 @@ namespace GameLogic
             }
         }
 
+        /// <summary>
+        /// 更新升级后的移动速度倍率，使鞋子 Buff 立即作用于角色。
+        /// </summary>
+        public void SetMoveSpeedMultiplier(float multiplier)
+        {
+            m_moveSpeedMultiplier = multiplier;
+        }
+
         private void Update()
         {
             if (!m_isControlEnabled)

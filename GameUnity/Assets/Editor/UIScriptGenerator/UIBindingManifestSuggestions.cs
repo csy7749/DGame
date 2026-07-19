@@ -103,6 +103,55 @@ namespace DGame
                 && widgetRoot.ClassName == entry.WidgetTypeName;
         }
 
+        /// <summary>
+        /// 根据当前 Prefab 中显式的 Widget 根重建父级 Widget 条目，并清理所有空目标条目。
+        /// </summary>
+        public static bool RecollectManifestBindings(UIBindComponent owner)
+        {
+            if (owner == null || !owner.IsManifestBinding || PrefabStageUtility.GetPrefabStage(owner.gameObject) == null)
+            {
+                Debug.LogError("[UI Binding Manifest] 重新收集绑定只能在 Prefab Stage 的 Manifest 根节点上执行。");
+                return false;
+            }
+
+            Undo.RecordObject(owner, "重新收集 UI Binding Manifest");
+            RemoveStaleEntries(owner);
+            AddOwnedWidgetEntries(owner);
+            owner.InvalidateManifestSignature();
+            MarkBindingDirty(owner);
+            return true;
+        }
+
+        private static void RemoveStaleEntries(UIBindComponent owner)
+        {
+            var entries = new List<UIBindingEntry>(owner.BindingEntries);
+            foreach (UIBindingEntry entry in entries)
+            {
+                if (entry == null || entry.Target == null || entry.Kind == UIBindingKind.Widget)
+                {
+                    owner.RemoveBindingEntry(entry);
+                }
+            }
+        }
+
+        private static void AddOwnedWidgetEntries(UIBindComponent owner)
+        {
+            foreach (UIBindComponent widgetRoot in owner.GetComponentsInChildren<UIBindComponent>(true))
+            {
+                if (widgetRoot == owner || !widgetRoot.IsManifestBinding || !widgetRoot.IsWidgetRoot)
+                {
+                    continue;
+                }
+
+                UIBindingNodeOption option = GetNodeBindingOptions(widgetRoot.gameObject)
+                    .Find(candidate => candidate.Kind == UIBindingKind.Widget && candidate.Owner == owner);
+                if (option != null)
+                {
+                    AddNodeBinding(option);
+                }
+            }
+        }
+
         public static void RemoveNodeBinding(UIBindingNodeOption option)
         {
             UIBindingEntry entry = FindNodeBinding(option);
@@ -255,8 +304,6 @@ namespace DGame
             widgetRoot.SetWidgetRoot(true);
             widgetRoot.SetClassNameIfEmpty(widgetTypeName);
             widgetRoot.SetUITypeIfEmpty(nameof(UIWidget));
-            widgetRoot.SetCodePathsIfEmpty(UIScriptGeneratorSettings.GetGenCodePath(),
-                UIScriptGeneratorSettings.GetImpCodePath());
             MarkBindingDirty(widgetRoot);
         }
 
@@ -320,7 +367,7 @@ namespace DGame
         private static bool IsWidgetCandidate(GameObject node)
         {
             UIBindComponent binding = node.GetComponent<UIBindComponent>();
-            if (binding != null && binding.IsWidgetRoot)
+            if (binding != null && (binding.IsWidgetRoot || binding.UITypeName == nameof(UIWidget)))
             {
                 return true;
             }
@@ -506,6 +553,7 @@ namespace DGame
         private static void MarkBindingDirty(UIBindComponent binding)
         {
             EditorUtility.SetDirty(binding);
+            EditorApplication.RepaintHierarchyWindow();
             PrefabStage stage = PrefabStageUtility.GetPrefabStage(binding.gameObject);
             if (stage != null)
             {

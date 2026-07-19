@@ -1,0 +1,1108 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Tools\\Demo2RulesRunner\\Demo2RulesRunner.csproj": {}
+  },
+  "projects": {
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\DGame.Runtime.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\DGame.Runtime.csproj",
+        "projectName": "DGame.Runtime",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\DGame.Runtime.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\DGame.Runtime\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Obfuz.Runtime.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Obfuz.Runtime.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UniTask.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UniTask.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.InputSystem.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.InputSystem.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.TextMeshPro.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.TextMeshPro.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.Editor.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.Editor.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.RuntimeExtension.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.RuntimeExtension.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameBattle.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameBattle.csproj",
+        "projectName": "GameBattle",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameBattle.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\GameBattle\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\DGame.Runtime.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\DGame.Runtime.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameProto.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameProto.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameProto.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameProto.csproj",
+        "projectName": "GameProto",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameProto.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\GameProto\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\DGame.Runtime.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\DGame.Runtime.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Obfuz.Runtime.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Obfuz.Runtime.csproj",
+        "projectName": "Obfuz.Runtime",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Obfuz.Runtime.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\Obfuz.Runtime\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Tools\\Demo2RulesRunner\\Demo2RulesRunner.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Tools\\Demo2RulesRunner\\Demo2RulesRunner.csproj",
+        "projectName": "Demo2RulesRunner",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Tools\\Demo2RulesRunner\\Demo2RulesRunner.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Tools\\Demo2RulesRunner\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameBattle.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\GameBattle.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.23, 8.0.23]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Host.win-x64",
+              "version": "[8.0.23, 8.0.23]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.23, 8.0.23]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.23, 8.0.23]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UniTask.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UniTask.csproj",
+        "projectName": "UniTask",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UniTask.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\UniTask\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.InputSystem.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.InputSystem.csproj",
+        "projectName": "Unity.InputSystem",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.InputSystem.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\Unity.InputSystem\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.csproj",
+        "projectName": "Unity.ScriptableBuildPipeline",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\Unity.ScriptableBuildPipeline\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.Editor.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.Editor.csproj",
+        "projectName": "Unity.ScriptableBuildPipeline.Editor",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.Editor.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\Unity.ScriptableBuildPipeline.Editor\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.TestRunner.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.TestRunner.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.TextMeshPro.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.TextMeshPro.csproj",
+        "projectName": "Unity.TextMeshPro",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.TextMeshPro.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\Unity.TextMeshPro\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.TestRunner.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.TestRunner.csproj",
+        "projectName": "UnityEditor.TestRunner",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.TestRunner.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\UnityEditor.TestRunner\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj",
+        "projectName": "UnityEditor.UI",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\UnityEditor.UI\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.TestRunner.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.TestRunner.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj",
+        "projectName": "UnityEngine.TestRunner",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\UnityEngine.TestRunner\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj",
+        "projectName": "UnityEngine.UI",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\UnityEngine.UI\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.csproj",
+        "projectName": "YooAsset",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\YooAsset\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.Editor.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.Editor.csproj",
+        "projectName": "YooAsset.Editor",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.Editor.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\YooAsset.Editor\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.Editor.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Unity.ScriptableBuildPipeline.Editor.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.TestRunner.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.TestRunner.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.TestRunner.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.RuntimeExtension.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.RuntimeExtension.csproj",
+        "projectName": "YooAsset.RuntimeExtension",
+        "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.RuntimeExtension.csproj",
+        "packagesPath": "C:\\Users\\95319\\.nuget\\packages\\",
+        "outputPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\Temp\\obj\\\\YooAsset.RuntimeExtension\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\95319\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "netstandard2.1"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netstandard2.1": {
+            "targetAlias": "netstandard2.1",
+            "projectReferences": {
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEditor.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\UnityEngine.UI.csproj"
+              },
+              "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.csproj": {
+                "projectPath": "D:\\UGit\\Git\\Framework\\DGame\\GameUnity\\YooAsset.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        },
+        "SdkAnalysisLevel": "10.0.100"
+      },
+      "frameworks": {
+        "netstandard2.1": {
+          "targetAlias": "netstandard2.1",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.102\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

@@ -117,6 +117,18 @@ public static class DGameUIGeneratorSettingsProvider
 
                 EditorGUILayout.Space(5);
 
+                // 手动创建 UIText 时必须使用项目字体，避免新节点依赖 Unity 内置字体。
+                EditorGUILayout.LabelField("UI默认资源", EditorStyles.boldLabel);
+                var defaultUITextFontProperty = serializedObject.FindProperty("defaultUITextFont");
+                EditorGUILayout.PropertyField(defaultUITextFontProperty,
+                    new GUIContent("UIText默认字体", "通过 GameObject/UI/UIText 创建时使用的字体"));
+                if (defaultUITextFontProperty.objectReferenceValue == null)
+                {
+                    EditorGUILayout.HelpBox("UIText默认字体不能为空，手动创建将被阻止。", MessageType.Error);
+                }
+
+                EditorGUILayout.Space(5);
+
                 // 组件绑定设置
                 EditorGUILayout.LabelField("组件绑定设置", EditorStyles.boldLabel);
                 // var useBindComponentProperty = serializedObject.FindProperty("useBindComponent");
@@ -161,8 +173,8 @@ public static class DGameUIGeneratorSettingsProvider
                         genCodePathProperty.stringValue);
                     var impCodePathProperty = serializedObject.FindProperty("impCodePath");
                     impCodePathProperty.stringValue = DrawEnhancedFolderField(
-                        "实现类代码文件生成路径",
-                        "实现类代码将生成到此目录",
+                        "业务逻辑代码根路径",
+                        "Window 和 Item 逻辑目录将从此根路径派生",
                         impCodePathProperty.stringValue);
 
                     EditorGUILayout.Space(10);
@@ -314,7 +326,7 @@ public static class DGameUIGeneratorSettingsProvider
 
                 EditorGUILayout.BeginHorizontal();
                 {
-                    EditorGUILayout.LabelField("实现类代码路径:", GUILayout.Width(80));
+                    EditorGUILayout.LabelField("业务逻辑根路径:", GUILayout.Width(100));
                     string impCodePath = string.IsNullOrEmpty(uiScriptGeneratorSettings.ImpCodePath) ?
                         "未设置" : uiScriptGeneratorSettings.ImpCodePath;
                     EditorGUILayout.LabelField(impCodePath, EditorStyles.miniLabel);

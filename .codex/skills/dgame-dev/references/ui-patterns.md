@@ -20,6 +20,15 @@ m_goEmpty = FindChild("m_goEmpty").gameObject;
 
 窗口用属性覆写设置层级；节点绑定和按钮 `onClick.AddListener` 通常由 `*_Gen.g.cs` 自动生成，业务写在 `partial` 类里。
 
+当前 Manifest 继承式生成的文件落位规则：
+
+- 自动基类统一生成到 `GameUnity/Assets/Scripts/HotFix/GameLogic/UI/Gen`。
+- `UIWindow` 业务类生成到 `UI/<WindowName>/<WindowName>.cs`。
+- 其他 Widget、Item 业务类统一生成到 `UI/Item/<TypeName>.cs`，不为每个 Item 创建独立目录。
+- 自动代码生成时会同时确保业务类存在；已有业务文件不覆盖，旧目录文件会触发明确的迁移错误。
+- 自动基类中的组件绑定字段使用 `protected`，业务派生类可在 `BindMemberProperty`、`OnCreate`、`OnRefresh` 等生命周期中直接读写。
+- Button、Toggle、Slider、Dropdown 支持在 Binding Manifest Inspector 中配置 UnityEvent；Dropdown 回调签名为 `void Handler(int value)`。
+
 ```csharp
 public partial class BagWindow : UIWindow
 {
