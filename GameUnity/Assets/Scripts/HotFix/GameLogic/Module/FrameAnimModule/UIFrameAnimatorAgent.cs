@@ -1,4 +1,6 @@
-﻿using Cysharp.Threading.Tasks;
+﻿using System;
+using System.Threading;
+using Cysharp.Threading.Tasks;
 using DGame;
 using GameProto;
 using UnityEngine;
@@ -44,42 +46,136 @@ namespace GameLogic
     {
         #region 字段
 
+        /// <summary>
+        /// 基础帧间隔，默认一秒八帧。
+        /// </summary>
         private const float FRAME_INTERVAL = 0.125f; // 1秒8帧
-        private const float FRAME_TIMER_INTERVAL = FRAME_INTERVAL * 0.25f * 0.5f; // 提高八倍采样率
+
+        /// <summary>
+        /// 普通模型基础播放速度。
+        /// </summary>
         private const float NORMAL_BASE_SPEED = 1.5f; // 1秒12帧
+
+        /// <summary>
+        /// 精英模型基础播放速度。
+        /// </summary>
         private const float ELITE_BASE_SPEED = 1.5f; // 1秒12帧
 
-        private GameTimer m_gameTimer;
+        /// <summary>
+        /// 当前使用的帧动画资源池。
+        /// </summary>
         private FrameSpritePool m_frameSpritePool;
+
+        /// <summary>
+        /// UI显示用的图片组件。
+        /// </summary>
         private Image m_image;
+
+        /// <summary>
+        /// 是否已经完成资源初始化。
+        /// </summary>
         private bool m_isInit;
+
+        /// <summary>
+        /// 当前播放的UI帧动画状态。
+        /// </summary>
         private UIFrameAnimState m_curFrameAnimName = UIFrameAnimState.Idle;
+
+        /// <summary>
+        /// 初始化完成前缓存的目标UI帧动画状态。
+        /// </summary>
         private UIFrameAnimState m_changeFrameAnimName = UIFrameAnimState.Idle;
         // private UIFrameAnimState m_deathFrameAnimName = UIFrameAnimState.Death;
+
+        /// <summary>
+        /// 各状态对应的帧动画片段缓存。
+        /// </summary>
         private FrameClip[] m_animClips = new FrameClip[(int)UIFrameAnimState.Max];
+
+        /// <summary>
+        /// 当前帧动画配置资源地址。
+        /// </summary>
         private string m_curCfgLocation;
+
+        /// <summary>
+        /// 是否已经绑定显示用的图片组件。
+        /// </summary>
         private bool m_isBindDisplayImage;
+
+        /// <summary>
+        /// 死亡动画播放速度。
+        /// </summary>
         private float m_deathSpeed = 1.0f;
+
+        /// <summary>
+        /// UI模型显示缩放。
+        /// </summary>
         private Vector3 m_uiModelScale;
+
+        /// <summary>
+        /// 是否已经设置首帧。
+        /// </summary>
         private bool m_isSetFirstFrame;
+
+        /// <summary>
+        /// 是否使用非缩放时间驱动。
+        /// </summary>
         private bool m_isUnscaledTime;
+
+        /// <summary>
+        /// 上一次推进动画帧时的时间戳。
+        /// </summary>
         private float m_preFrameTime;
 
+        /// <summary>
+        /// 动画速度缩放系数。
+        /// </summary>
         private float m_speedScale = 1.0f;
+
+        /// <summary>
+        /// 当前基础播放速度。
+        /// </summary>
         private float m_curBaseSpeed;
+
+        /// <summary>
+        /// 是否已经释放或销毁。
+        /// </summary>
         private bool m_isDestroy;
+
+        /// <summary>
+        /// 是否已经请求开始播放。
+        /// </summary>
+        private bool m_isStarted;
+
+        /// <summary>
+        /// 当前代理在调度列表中的索引；-1表示未注册。
+        /// </summary>
+        internal int UpdateIndex { get; set; } = -1;
+
+        /// <summary>
+        /// 当前代理是否由非缩放时间调度。
+        /// </summary>
+        internal bool IsUnscaledTime => m_isUnscaledTime;
 
         /// <summary>
         /// 是否有效（未销毁、已初始化、已绑定Image）
         /// </summary>
         public bool IsValid => !m_isDestroy && m_isInit && m_image != null;
 
+        private int m_initVersion;
+        private CancellationTokenSource m_initCts;
+
         #endregion
 
         /// <summary>
         /// 创建帧动画代理实例
         /// </summary>
-        public static UIFrameAnimatorAgent Create() => MemoryObject.Spawn<UIFrameAnimatorAgent>();
+        public static UIFrameAnimatorAgent Create()
+        {
+            var agent = MemoryObject.Spawn<UIFrameAnimatorAgent>();
+            agent.m_isDestroy = false;
+            return agent;
+        }
 
         /// <summary>
         /// 初始化帧动画代理，异步加载帧动画资源
@@ -87,19 +183,38 @@ namespace GameLogic
         /// <param name="modelConfig">模型配置</param>
         public async UniTask Init(ModelConfig modelConfig)
         {
+            m_initCts?.Cancel();
+            m_initCts?.Dispose();
+            m_initCts = new CancellationTokenSource();
+            int version = ++m_initVersion;
+            var ct = m_initCts.Token;
+
             if (modelConfig == null || string.IsNullOrEmpty(modelConfig.FrameCfgLocation))
             {
                 DLogger.Error($"请检查模型配置表，模型配置表为空");
                 return;
             }
             m_curCfgLocation = modelConfig.FrameCfgLocation;
-            m_frameSpritePool = await FrameSpriteMgr.Instance.GetFrameSpritePool(m_curCfgLocation);
-            if (m_frameSpritePool == null)
+            try
             {
-                DLogger.Error($"没有找到帧动画配置文件: {m_curCfgLocation}");
+                var frameSpritePool = await FrameSpriteMgr.Instance.GetFrameSpritePool(m_curCfgLocation, ct);
+                if (ct.IsCancellationRequested || version != m_initVersion || m_isDestroy)
+                {
+                    return;
+                }
+
+                if (frameSpritePool == null)
+                {
+                    DLogger.Error($"没有找到帧动画配置文件: {m_curCfgLocation}");
+                    return;
+                }
+
+                m_frameSpritePool = frameSpritePool;
+            }
+            catch (OperationCanceledException)
+            {
                 return;
             }
-
             m_uiModelScale = modelConfig.UIScale > 0 ? new Vector3(modelConfig.UIScale, modelConfig.UIScale, modelConfig.UIScale) : Vector3.one;
             m_deathSpeed = modelConfig.DeathFrameSpeed > 0 ? modelConfig.DeathFrameSpeed : 1;
             m_curBaseSpeed = NORMAL_BASE_SPEED;
@@ -130,7 +245,28 @@ namespace GameLogic
         /// <param name="isUnscaledTime">true=使用UnscaledTime，false=使用普通Time</param>
         public void SetUnscaledTime(bool isUnscaledTime)
         {
+            if (m_isUnscaledTime == isUnscaledTime)
+            {
+                return;
+            }
+
+            bool isRegistered = UpdateIndex >= 0;
+            if (isRegistered && FrameSpriteMgr.IsValid)
+            {
+                FrameSpriteMgr.Instance.UnregisterAnimator(this);
+            }
+
             m_isUnscaledTime = isUnscaledTime;
+
+            if (m_isStarted && IsValid)
+            {
+                m_preFrameTime = isUnscaledTime ? GameTime.UnscaledTime : GameTime.Time;
+            }
+
+            if (isRegistered && FrameSpriteMgr.IsValid)
+            {
+                FrameSpriteMgr.Instance.RegisterAnimator(this);
+            }
         }
 
         /// <summary>
@@ -148,6 +284,9 @@ namespace GameLogic
             SetFirstFrame();
         }
 
+        /// <summary>
+        /// 在初始化和绑定图片组件都满足后设置首帧图片。
+        /// </summary>
         private void SetFirstFrame()
         {
             if (!m_isInit)
@@ -159,12 +298,12 @@ namespace GameLogic
                 return;
             }
 
-            if (m_isSetFirstFrame)
+            if (m_isSetFirstFrame || m_image == null)
             {
                 return;
             }
 
-            m_isSetFirstFrame = true;
+            
             m_curFrameAnimName = m_changeFrameAnimName;
             var curClip = m_animClips[(int)m_curFrameAnimName];
 
@@ -173,10 +312,16 @@ namespace GameLogic
                 DLogger.Warning($"没找到动画Clip: {m_curFrameAnimName}");
                 return;
             }
-
+            SetImageSize();
             SetSprite(curClip.GetNext());
+            m_preFrameTime = m_isUnscaledTime ? GameTime.UnscaledTime : GameTime.Time;
+            m_isSetFirstFrame = true;
         }
 
+        /// <summary>
+        /// 设置当前帧图片到UI图片组件。
+        /// </summary>
+        /// <param name="sprite">待显示的帧图片。</param>
         private void SetSprite(Sprite sprite)
         {
             if (m_isDestroy || !m_isInit || m_image == null || sprite == null)
@@ -197,52 +342,51 @@ namespace GameLogic
                 return;
             }
 
-            if (m_isUnscaledTime)
-            {
-                if (GameTimer.IsNull(m_gameTimer))
-                {
-                    m_gameTimer = GameModule.GameTimerModule.CreateUnscaledLoopGameTimer(FRAME_TIMER_INTERVAL, Update);
-                }
-            }
-            else
-            {
-                if (GameTimer.IsNull(m_gameTimer))
-                {
-                    m_gameTimer = GameModule.GameTimerModule.CreateLoopGameTimer(FRAME_TIMER_INTERVAL, Update);
-                }
-            }
+            m_isStarted = true;
+            FrameSpriteMgr.Instance.RegisterAnimator(this);
+            m_preFrameTime = m_isUnscaledTime ? GameTime.UnscaledTime : GameTime.Time;
         }
 
-        private void Update(object[] args)
+        /// <summary>
+        /// 调度器驱动的UI帧动画更新。
+        /// </summary>
+        /// <param name="currentTime">当前时间域下的时间戳。</param>
+        /// <returns>true表示仍需继续调度；false表示已无效或播放结束。</returns>
+        internal bool Tick(float currentTime)
         {
             if (!IsValid)
             {
-                return;
+                return false;
             }
 
             var curClip = m_animClips[(int)m_curFrameAnimName];
 
             if (curClip == null)
             {
-                return;
+                return false;
             }
 
             if (curClip.IsStop())
             {
-                return;
+                return false;
             }
 
-            float gameTime = m_isUnscaledTime ? GameTime.UnscaledTime : GameTime.Time;
-            var deltaTime = gameTime - m_preFrameTime;
+            var deltaTime = currentTime - m_preFrameTime;
 
             if (deltaTime * GetSpeed() > FRAME_INTERVAL)
             {
                 SetSprite(curClip.GetNext());
                 SetImageSize();
-                m_preFrameTime = gameTime;
+                m_preFrameTime = currentTime;
             }
+
+            return true;
         }
 
+        /// <summary>
+        /// 设置或还原图片组件所在节点的UI模型缩放。
+        /// </summary>
+        /// <param name="revert">是否还原为默认缩放。</param>
         private void SetImageSize(bool revert = false)
         {
             if (m_image == null)
@@ -290,9 +434,50 @@ namespace GameLogic
                 m_curFrameAnimName = animName;
                 var oldClip = m_animClips[(int)oldAnimName];
                 oldClip?.Leave();
+
+                if (m_isStarted)
+                {
+                    FrameSpriteMgr.Instance.RegisterAnimator(this);
+                }
             }
         }
+        
+        /// <summary>
+        /// 重播动画
+        /// </summary>
+        /// <param name="animName"></param>
+        public void ReplayAnim(UIFrameAnimState animName)
+        {
+            if (!IsValid)
+            {
+                m_changeFrameAnimName = animName;
+                return;
+            }
+            
+            if (animName != m_curFrameAnimName)
+            {
+                var oldClip = m_animClips[(int)m_curFrameAnimName];
+                oldClip?.Leave();
+                m_curFrameAnimName = animName;
+            }
+            
+            var clip = m_animClips[(int)m_curFrameAnimName];
+            if (clip == null)
+            {
+                return;
+            }
 
+            clip.Leave();
+            SetSprite(clip.GetNext());
+            SetImageSize();
+            m_preFrameTime = m_isUnscaledTime ? GameTime.UnscaledTime : GameTime.Time;
+
+            if (m_isStarted)
+            {
+                FrameSpriteMgr.Instance.RegisterAnimator(this);
+            }
+        }
+        
         /// <summary>
         /// 判断指定动画是否循环播放
         /// </summary>
@@ -325,9 +510,17 @@ namespace GameLogic
         /// </summary>
         public override void OnRelease()
         {
-            GameModule.GameTimerModule.DestroyGameTimer(m_gameTimer);
+            m_initVersion++;
+            m_initCts?.Cancel();
+            m_initCts?.Dispose();
+            m_initCts = null;
+            if (FrameSpriteMgr.IsValid)
+            {
+                FrameSpriteMgr.Instance.UnregisterAnimator(this);
+            }
             m_isInit = false;
             m_isDestroy = true;
+            m_isStarted = false;
             m_frameSpritePool = null;
             SetImageSize(true);
             if (m_image != null)

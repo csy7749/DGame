@@ -8,9 +8,24 @@ namespace GameLogic
     /// </summary>
     public sealed class FrameClip
     {
+        /// <summary>
+        /// 当前片段持有的帧图片列表。
+        /// </summary>
         private List<Sprite> m_sprites;
+
+        /// <summary>
+        /// 当前即将播放的帧索引。
+        /// </summary>
         private int m_curIndex;
+
+        /// <summary>
+        /// 缓存的帧图片数量。
+        /// </summary>
         private int m_cacheCount;
+
+        /// <summary>
+        /// 当前片段是否循环播放。
+        /// </summary>
         private bool m_isLoop;
 
         /// <summary>
@@ -55,7 +70,7 @@ namespace GameLogic
         /// </summary>
         /// <returns>true表示已经播放结束。</returns>
         public bool IsStop()
-            => !m_isLoop && m_curIndex >= m_cacheCount;
+            => m_cacheCount <= 0 || !m_isLoop && m_curIndex >= m_cacheCount;
 
         /// <summary>
         /// 随机设置初始帧索引。
